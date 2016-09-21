@@ -116,24 +116,29 @@ var SpectrumView = Backbone.View.extend({
         this.model.moveLabels = selected;
 		
 		var peaks = this.graph.points;
+        console.log ("peaks", peaks);
 
 		if (selected){
-			for(p = 0; p < peaks.length; p++){
-				if(peaks[p].labels){
-					for(l = 0; l < peaks[p].labels.length; l++){
-						peaks[p].labels[l].call(peaks[p].labelDrag);
-						peaks[p].labels[l].style("cursor", "pointer");
-					}			
+			for(var p = 0; p < peaks.length; p++){
+				if(peaks[p].labels.length){ // MJG added .length
+					//for(l = 0; l < peaks[p].labels.length; l++){ // MJG
+						peaks[p].labels/*[l]*/
+                            .call(peaks[p].labelDrag)
+				            .style("cursor", "pointer")
+                        ;
+					//}			
 				}
 			}
 		}
 		else{
-			for(p = 0; p < peaks.length; p++){
-				if(peaks[p].labels){
-					for(l = 0; l < peaks[p].labels.length; l++){
-						peaks[p].labels[l].on(".drag", null);
-						peaks[p].labels[l].style("cursor", "default");
-					}
+			for(var p = 0; p < peaks.length; p++){
+				if(peaks[p].labels.length){ // MJG added .length
+					//for(l = 0; l < peaks[p].labels.length; l++){ // MJG
+						peaks[p].labels/*[l]*/
+                            .on(".drag", null)
+				            .style("cursor", "default")
+                        ;
+					//}
 				}
 			}			
 		}

@@ -56,48 +56,71 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 	var self = this;
 
 	//svg elements
-	this.g = this.FragKey.g.append('g');
-	var group = this.g[0][0];
-	group.onmouseover = function(evt) {
-		if(!self.FragKey.changeMod && !self.FragKey.changeCL){
-			if (evt.ctrlKey){
-				self.fragBar.style("cursor", "copy");
-				if(self.yTail){
-					self.yTail.style("cursor", "copy");
-					self.yHighlight.style("cursor", "copy");
-				}
-				if(self.bTail){
-					self.bTail.style("cursor", "copy");
-					self.bHighlight.style("cursor", "copy");
-				}
-			}
-			else{
-				self.fragBar.style("cursor", "pointer");
-				if(self.yTail){
-					self.yTail.style("cursor", "pointer");
-					self.yHighlight.style("cursor", "pointer");
-				}
-				if(self.bTail){
-					self.bTail.style("cursor", "pointer");
-					self.bHighlight.style("cursor", "pointer");
-				}
-			}
-		}
-		startHighlight();
-	};
-	group.onmouseout = function(evt) {
-		endHighlight();
+//~ <<<<<<< HEAD
+	//~ this.g = this.FragKey.g.append('g');
+	//~ var group = this.g[0][0];
+	//~ group.onmouseover = function(evt) {
+		//~ if(!self.FragKey.changeMod && !self.FragKey.changeCL){
+			//~ if (evt.ctrlKey){
+				//~ self.fragBar.style("cursor", "copy");
+				//~ if(self.yTail){
+					//~ self.yTail.style("cursor", "copy");
+					//~ self.yHighlight.style("cursor", "copy");
+				//~ }
+				//~ if(self.bTail){
+					//~ self.bTail.style("cursor", "copy");
+					//~ self.bHighlight.style("cursor", "copy");
+				//~ }
+			//~ }
+			//~ else{
+				//~ self.fragBar.style("cursor", "pointer");
+				//~ if(self.yTail){
+					//~ self.yTail.style("cursor", "pointer");
+					//~ self.yHighlight.style("cursor", "pointer");
+				//~ }
+				//~ if(self.bTail){
+					//~ self.bTail.style("cursor", "pointer");
+					//~ self.bHighlight.style("cursor", "pointer");
+				//~ }
+			//~ }
+		//~ }
+		//~ startHighlight();
+	//~ };
+	//~ group.onmouseout = function(evt) {
+		//~ endHighlight();
+//~ 
+	//~ };
+	//~ group.ontouchstart = function(evt) {
+		//~ startHighlight();
+	//~ };
+	//~ group.ontouchend = function(evt) {
+		//~ endHighlight();
+	//~ };
+	//~ group.onclick = function(evt) {
+		//~ self.FragKey.model.updateStickyHighlight(self.fragments, evt.ctrlKey);
+	//~ };
+//~ =======
+	this.g = this.FragKey.highlights.append('g');
 
-	};
-	group.ontouchstart = function(evt) {
-		startHighlight();
-	};
-	group.ontouchend = function(evt) {
-		endHighlight();
-	};
-	group.onclick = function(evt) {
-		self.FragKey.model.updateStickyHighlight(self.fragments, evt.ctrlKey);
-	};
+	var group = this.g
+	   .on("mouseover", function() {
+            startHighlight();
+        })
+        .on("mouseout", function() {
+            endHighlight();
+        })
+	   .on("touchstart", function() {
+		  startHighlight();
+	   })
+	   .on("touchend", function() {
+            endHighlight();
+        })
+	   .on("click", function() {
+           var evt = d3.event;
+            self.FragKey.model.updateStickyHighlight(self.fragments, evt.ctrlKey);
+        })
+    ;
+//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
 
 	function startHighlight(){
 		if (!self.FragKey.changeCL && !self.FragKey.changeMod)
@@ -119,9 +142,13 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 			.attr("stroke", this.FragKey.model.highlightColour)
 			.attr("stroke-width", this.FragKey.model.highlightWidth)
 			.attr("opacity", 0)						
-			.attr("peptide", this.peptide)
-			.style("cursor", "pointer")
-			.attr("fragKeyIndex", index);
+//~ <<<<<<< HEAD
+			//~ .attr("peptide", this.peptide)
+			//~ .style("cursor", "pointer")
+			//~ .attr("fragKeyIndex", index);
+//~ =======
+;
+//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
 		
 					
 		this.bTail = this.g.append("line")
@@ -129,9 +156,12 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 			.attr("y1", y)
 			.attr("x2", this.x- tailX)
 			.attr("y2", y + tailY)
-			.attr("peptide", this.peptide)
-			.attr("fragKeyIndex", index)
-			.style("cursor", "pointer")
+//~ <<<<<<< HEAD
+			//~ .attr("peptide", this.peptide)
+			//~ .attr("fragKeyIndex", index)
+			//~ .style("cursor", "pointer")
+//~ =======
+//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
 			.attr("class", "fragBar");
 
 
@@ -208,9 +238,13 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 			.attr("stroke", this.FragKey.model.highlightColour)
 			.attr("stroke-width", this.FragKey.model.highlightWidth)
 			.attr("opacity", 0)
-			.attr("peptide", this.peptide)
-			.style("cursor", "pointer")
-			.attr("fragKeyIndex", index);
+//~ <<<<<<< HEAD
+			//~ .attr("peptide", this.peptide)
+			//~ .style("cursor", "pointer")
+			//~ .attr("fragKeyIndex", index);
+//~ =======
+;
+//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
 		
 		
 		this.yTail = this.g.append("line")
@@ -218,9 +252,12 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 			.attr("y1", y - barHeight)
 			.attr("x2", this.x + tailX)
 			.attr("y2", y - barHeight - tailY)
-			.attr("peptide", this.peptide)
-			.attr("fragKeyIndex", index)
-			.style("cursor", "pointer")
+//~ <<<<<<< HEAD
+			//~ .attr("peptide", this.peptide)
+			//~ .attr("fragKeyIndex", index)
+			//~ .style("cursor", "pointer")
+//~ =======
+//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
 			.attr("class", "fragBar");
 
 		var ion = "";
@@ -287,9 +324,12 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 		.attr("y1", y)
 		.attr("x2", this.x)
 		.attr("y2", y - barHeight)
-		.attr("peptide", this.peptide)
-		.attr("fragKeyIndex", index)
-		.style("cursor", "pointer")
+//~ <<<<<<< HEAD
+		//~ .attr("peptide", this.peptide)
+		//~ .attr("fragKeyIndex", index)
+		//~ .style("cursor", "pointer")
+//~ =======
+//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
 		.attr("class", "fragBar");
 
 	//if all fragments are lossy 	

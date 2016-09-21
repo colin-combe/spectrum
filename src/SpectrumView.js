@@ -43,8 +43,8 @@ var SpectrumView = Backbone.View.extend({
 	.style("fill", "white")
 	.attr("pointer-events", "all");
 	this.innerSVG = this.g.append("g")
-	.attr("top", 0)
-	.attr("left", 0)
+	//.attr("top", 0)
+	//.attr("left", 0) // MG - g elements shouldnt have these attributes
 	.attr("class", "line");
 	
 	this.dragZoomHighlight = this.innerSVG.append("rect").attr("y", 0).attr("fill","#addd8e");	
@@ -137,7 +137,7 @@ var SpectrumView = Backbone.View.extend({
 		var cx = self.g.node().parentNode.parentNode.clientWidth;
 		var cy = self.g.node().parentNode.parentNode.clientHeight;
 		
-		self.g.attr("width", cx).attr("height", cy);
+		//self.g.attr("width", cx).attr("height", cy);    // MG - g's shouldn't have width/height
 		var width = cx - self.margin.left - self.margin.right;
 		var height = cy - self.margin.top  - self.margin.bottom;
 		self.x.domain([this.model.xmin, this.model.xmax])
@@ -168,9 +168,9 @@ var SpectrumView = Backbone.View.extend({
 			self.plot.attr("width", width)
 			.attr("height", height)
 
-			self.innerSVG.attr("width", width)
-			.attr("height", height)
-			.attr("viewBox", "0 0 "+width+" "+height);
+			//self.innerSVG.attr("width", width)
+			//.attr("height", height)
+			//.attr("viewBox", "0 0 "+width+" "+height); // MG - innerSVG is g, shouldn't have these attributes
 
 			self.xaxisRect.attr("width",width).attr("y", height).attr("height", self.margin.bottom);
 			self.dragZoomHighlight.attr("height", height);

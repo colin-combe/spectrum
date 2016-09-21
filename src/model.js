@@ -36,10 +36,16 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		$("#moveLabels").prop("checked", false);			
 		this.sticky = Array();
 		this.highlights = Array();
+//~ <<<<<<< HEAD
 		this.JSONdata = this.get("JSONdata");
 		this.match = this.get("match");
 		this.randId = this.get("randId");
 		//console.log(this.JSONdata);
+//~ =======
+		//~ this.JSONdata = json;
+		//~ //console.log(this.JSONdata);
+		//~ this.peptides = this.JSONdata.Peptides;
+//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
 		this.pepStrs = [];
 		this.pepStrsMods = [];
 		this.peptides = this.JSONdata.Peptides;
