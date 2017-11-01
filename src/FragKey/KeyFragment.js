@@ -56,112 +56,117 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 	var self = this;
 
 	//svg elements
-//~ <<<<<<< HEAD
-	//~ this.g = this.FragKey.g.append('g');
-	//~ var group = this.g[0][0];
-	//~ group.onmouseover = function(evt) {
-		//~ if(!self.FragKey.changeMod && !self.FragKey.changeCL){
-			//~ if (evt.ctrlKey){
-				//~ self.fragBar.style("cursor", "copy");
-				//~ if(self.yTail){
-					//~ self.yTail.style("cursor", "copy");
-					//~ self.yHighlight.style("cursor", "copy");
-				//~ }
-				//~ if(self.bTail){
-					//~ self.bTail.style("cursor", "copy");
-					//~ self.bHighlight.style("cursor", "copy");
-				//~ }
-			//~ }
-			//~ else{
-				//~ self.fragBar.style("cursor", "pointer");
-				//~ if(self.yTail){
-					//~ self.yTail.style("cursor", "pointer");
-					//~ self.yHighlight.style("cursor", "pointer");
-				//~ }
-				//~ if(self.bTail){
-					//~ self.bTail.style("cursor", "pointer");
-					//~ self.bHighlight.style("cursor", "pointer");
-				//~ }
-			//~ }
-		//~ }
-		//~ startHighlight();
-	//~ };
-	//~ group.onmouseout = function(evt) {
-		//~ endHighlight();
-//~ 
-	//~ };
-	//~ group.ontouchstart = function(evt) {
-		//~ startHighlight();
-	//~ };
-	//~ group.ontouchend = function(evt) {
-		//~ endHighlight();
-	//~ };
-	//~ group.onclick = function(evt) {
-		//~ self.FragKey.model.updateStickyHighlight(self.fragments, evt.ctrlKey);
-	//~ };
-//~ =======
-	this.g = this.FragKey.highlights.append('g');
+	this.g = this.FragKey.g.append('g');
+/*	var group = this.g
+		.on("mouseover", function() {
+			var evt = d3.event;
+			if(!self.FragKey.changeMod && !self.FragKey.changeCL){
+				if (evt.ctrlKey){
+					self.fragBar.style("cursor", "copy");
+					if(self.yTail){
+						self.yTail.style("cursor", "copy");
+						self.yHighlight.style("cursor", "copy");
+					}
+					if(self.bTail){
+						self.bTail.style("cursor", "copy");
+						self.bHighlight.style("cursor", "copy");
+					}
+				}
+				else{
+					self.fragBar.style("cursor", "pointer");
+					if(self.yTail){
+						self.yTail.style("cursor", "pointer");
+						self.yHighlight.style("cursor", "pointer");
+					}
+					if(self.bTail){
+						self.bTail.style("cursor", "pointer");
+						self.bHighlight.style("cursor", "pointer");
+					}
+				}
+			}
+			//startHighlight();
+		})
+		.on("mouseout", function() {
+			endHighlight();
+		})
+		.on("touchstart", function() {
+			startHighlight();
+		})
+		.on("touchend", function() {
+			endHighlight();
+		})
+		.on("click", function() {
+			var evt = d3.event;
+			self.FragKey.model.updateStickyHighlight(self.fragments, evt.ctrlKey);
+		})
+	;*/
 
-	var group = this.g
-	   .on("mouseover", function() {
-            startHighlight();
-        })
-        .on("mouseout", function() {
-            endHighlight();
-        })
-	   .on("touchstart", function() {
-		  startHighlight();
-	   })
-	   .on("touchend", function() {
-            endHighlight();
-        })
-	   .on("click", function() {
-           var evt = d3.event;
-            self.FragKey.model.updateStickyHighlight(self.fragments, evt.ctrlKey);
-        })
-    ;
-//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
+	function startHighlight(fragments){
 
-	function startHighlight(){
 		if (!self.FragKey.changeCL && !self.FragKey.changeMod)
-			self.FragKey.model.addHighlight(self.fragments);	
+			self.FragKey.model.addHighlight(fragments);	
 	}
-	function endHighlight(){
+	function endHighlight(fragments){
 		if (!self.FragKey.changeCL && !self.FragKey.changeMod)
-			self.FragKey.model.clearHighlight(self.fragments);	
+			self.FragKey.model.clearHighlight(fragments);	
 	}
 	// # bions; either normal or lossy; have different colors
 	if (fragments.b.length != 0){ // really a, b, or c , see get_fragment_annotation()
 	
-		var highlightPath = "M" + this.x+ "," + (y - barHeight) 
-							+" L" + this.x+ "," +  y 
-							+ " L" + (this.x- tailX) + "," + (y + tailY);
-			
-		this.bHighlight = this.g.append("path")
+		if(fragments.y.length == 0)	//highlight full length of the fragbar
+			var highlightPath = "M" + this.x+ "," + (y - barHeight) 
+								+" L" + this.x+ "," +  y 
+								+ " L" + (this.x- tailX) + "," + (y + tailY);
+
+		else ////highlight half length of the fragbar
+			var highlightPath = "M" + this.x+ "," + (y - barHeight/2) 
+								+" L" + this.x+ "," +  y 
+								+ " L" + (this.x- tailX) + "," + (y + tailY);
+		
+		this.bgroup = this.g.append("g")
+			.on("mouseover", function() {
+				var evt = d3.event;
+				if(!self.FragKey.changeMod && !self.FragKey.changeCL){
+					if (evt.ctrlKey){
+						self.fragBar.style("cursor", "copy");
+						self.bTail.style("cursor", "copy");
+						self.bHighlight.style("cursor", "copy");
+					}
+					else{
+						self.fragBar.style("cursor", "pointer");
+						self.bTail.style("cursor", "pointer");
+						self.bHighlight.style("cursor", "pointer");
+					}
+				}
+				startHighlight(self.b);
+			})
+			.on("mouseout", function() {
+				endHighlight(self.b);
+			})
+			.on("touchstart", function() {
+				startHighlight(self.b);
+			})
+			.on("touchend", function() {
+				endHighlight(self.b);
+			})
+			.on("click", function() {
+				var evt = d3.event;
+				self.FragKey.model.updateStickyHighlight(self.b, evt.ctrlKey);
+			});
+
+		this.bHighlight = this.bgroup.append("path")
 			.attr("d", highlightPath)
 			.attr("stroke", this.FragKey.model.highlightColour)
 			.attr("stroke-width", this.FragKey.model.highlightWidth)
-			.attr("opacity", 0)						
-//~ <<<<<<< HEAD
-			//~ .attr("peptide", this.peptide)
-			//~ .style("cursor", "pointer")
-			//~ .attr("fragKeyIndex", index);
-//~ =======
-;
-//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
-		
-					
-		this.bTail = this.g.append("line")
+			.attr("opacity", 0)				
+			.style("cursor", "pointer");
+				
+		this.bTail = this.bgroup.append("line")
 			.attr("x1", this.x)
 			.attr("y1", y)
 			.attr("x2", this.x- tailX)
 			.attr("y2", y + tailY)
-//~ <<<<<<< HEAD
-			//~ .attr("peptide", this.peptide)
-			//~ .attr("fragKeyIndex", index)
-			//~ .style("cursor", "pointer")
-//~ =======
-//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
+			.style("cursor", "pointer")
 			.attr("class", "fragBar");
 
 
@@ -219,45 +224,70 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 				blossy = false;
 		};
 		if (blossy){
-			this.bTail.attr("stroke", this.FragKey.model.lossFragBarColour);
+			this.bTail.attr("stroke", this.FragKey.model.peakColour);
 		}
 		else {
 			this.bTail.attr("stroke", "black");
-		}
-			
+		}		
 	}
 
 	// # yions; either normal or lossy; have different colors
 	if (fragments.y.length != 0){
-		var highlightPath = "M" + this.x + "," + y 
-							+" L" + this.x + "," +  (y - barHeight) 
-							+ " L" + (this.x + tailX) + "," + (y  - barHeight - tailY);
-			
-		this.yHighlight = this.g.append("path")
+		if(fragments.b.length == 0)	//highlight full length of the fragbar
+			var highlightPath = "M" + this.x + "," + y 
+								+" L" + this.x + "," +  (y - barHeight) 
+								+ " L" + (this.x + tailX) + "," + (y  - barHeight - tailY);
+		else
+			var highlightPath = "M" + this.x + "," + (y - barHeight/2) 
+								+" L" + this.x + "," +  (y - barHeight) 
+								+ " L" + (this.x + tailX) + "," + (y  - barHeight - tailY);
+	
+		this.ygroup = this.g.append("g")
+			.on("mouseover", function() {
+				var evt = d3.event;
+				if(!self.FragKey.changeMod && !self.FragKey.changeCL){
+					if (evt.ctrlKey){
+						self.fragBar.style("cursor", "copy");
+						self.yTail.style("cursor", "copy");
+						self.yHighlight.style("cursor", "copy");
+					}
+					else{
+						self.fragBar.style("cursor", "pointer");
+						self.yTail.style("cursor", "pointer");
+						self.yHighlight.style("cursor", "pointer");
+					}
+				}
+				startHighlight(self.y);
+			})
+			.on("mouseout", function() {
+				endHighlight(self.y);
+			})
+			.on("touchstart", function() {
+				startHighlight(self.y);
+			})
+			.on("touchend", function() {
+				endHighlight(self.y);
+			})
+			.on("click", function() {
+				var evt = d3.event;
+				self.FragKey.model.updateStickyHighlight(self.y, evt.ctrlKey);
+			});
+
+
+		this.yHighlight = this.ygroup.append("path")
 			.attr("d", highlightPath)
 			.attr("stroke", this.FragKey.model.highlightColour)
 			.attr("stroke-width", this.FragKey.model.highlightWidth)
 			.attr("opacity", 0)
-//~ <<<<<<< HEAD
-			//~ .attr("peptide", this.peptide)
-			//~ .style("cursor", "pointer")
-			//~ .attr("fragKeyIndex", index);
-//~ =======
-;
-//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
+			.style("cursor", "pointer")
 		
 		
-		this.yTail = this.g.append("line")
+		this.yTail = this.ygroup.append("line")
 			.attr("x1", this.x)
 			.attr("y1", y - barHeight)
 			.attr("x2", this.x + tailX)
 			.attr("y2", y - barHeight - tailY)
-//~ <<<<<<< HEAD
-			//~ .attr("peptide", this.peptide)
-			//~ .attr("fragKeyIndex", index)
-			//~ .style("cursor", "pointer")
-//~ =======
-//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
+			.style("cursor", "pointer")
 			.attr("class", "fragBar");
 
 		var ion = "";
@@ -312,7 +342,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 				ylossy = false;
 		};
 		if (ylossy){
-			this.yTail.attr("stroke", this.FragKey.model.lossFragBarColour);
+			this.yTail.attr("stroke", this.FragKey.model.peakColour);
 		}
 		else {
 			this.yTail.attr("stroke", "black");
@@ -324,21 +354,19 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 		.attr("y1", y)
 		.attr("x2", this.x)
 		.attr("y2", y - barHeight)
-//~ <<<<<<< HEAD
-		//~ .attr("peptide", this.peptide)
-		//~ .attr("fragKeyIndex", index)
-		//~ .style("cursor", "pointer")
-//~ =======
-//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
+		.style("cursor", "pointer")
+		.style("pointer-events", "none")
 		.attr("class", "fragBar");
 
 	//if all fragments are lossy 	
 	if ((fragments.y.length == 0 || ylossy) && (fragments.b.length == 0 || blossy)){
-		this.fragBar.attr("stroke", this.FragKey.model.lossFragBarColour);
+		this.fragBar.attr("stroke", this.FragKey.model.peakColour);
 	}
 	else {
 		this.fragBar.attr("stroke", "black");
 	}
+
+
 			
 }
 

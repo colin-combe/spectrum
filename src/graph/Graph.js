@@ -24,7 +24,7 @@
 Graph = function(targetSvg, model, options) {
 	this.x = d3.scale.linear();
 	this.y = d3.scale.linear();
-	this.y1 = d3.scale.linear();
+	this.y_right = d3.scale.linear();
 	this.model = model;
 
 	this.margin = {
@@ -33,7 +33,11 @@ Graph = function(targetSvg, model, options) {
 		"bottom": options.xlabel ? 50 : 20,
 		"left":   options.ylabelLeft ? 65 : 30
 	};
-	this.g =  targetSvg.append("g").attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+	this.g =  targetSvg.append("g")
+				.attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
+				.attr("class", "spectrum")
+				.attr("id", "spectrumGraph");
+
 	
 	this.xaxisSVG = this.g.append("g")
 		.attr("class", "x axis");
@@ -46,18 +50,15 @@ Graph = function(targetSvg, model, options) {
 			user-select: none;*/
 	//brush
 	this.brush = d3.svg.brush()
-		.x(this.x)
-		.on("brushstart", brushstart)
-		.on("brush", brushmove)
-		.on("brushend", brushend);
-	this.xaxisRect = //this.g.append("rect")
-                    this.g.append("g")   // MJG
-					//.attr("height", "25")
-                    .attr("class", "x brush")
+		.x(this.x);
+		// .on("brushstart", brushstart)
+		// .on("brush", brushmove)
+		// .on("brushend", brushend);
+	this.xaxisRect = this.g.append("rect")
+					.attr("height", "25")
 					.attr("opacity", 0)
-					//.attr("pointer-events", "all")
-					//.style("cursor", "crosshair")
-    ;
+					.attr("pointer-events", "visible")
+					.style("cursor", "crosshair");
 	this.xaxisRect.call(this.brush);	
 	//~ this	
 		
@@ -65,25 +66,18 @@ Graph = function(targetSvg, model, options) {
 		.attr("class", "y axis");
 	this.yAxisRightSVG = this.g.append("g")
 		.attr("class", "y axis");
-    this.plot = this.g.append("rect") 
+	this.plot = this.g.append("rect")
 		.style("fill", "white")
-		.attr("pointer-events", "all")
-    ;
+		.attr("pointer-events", "visible");
 
 	this.measureBackground = this.g.append("rect")
+		.attr("width", "0")
 		.style("fill", "white")
 		.style("cursor", "crosshair")
-		.attr("pointer-events", "all");
+		.attr("pointer-events", "visible");
 
-    this.mainBrush = this.g.append("g") // MJG
-        .attr("class", "x brush")
-        .attr("opacity", 0)
-    ;
-//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
 	this.innerSVG = this.g.append("g")
-		//.attr("top", 0)
-		//.attr("left", 0)    // MG - g elements shouldnt have these attributes
-		.attr("class", "line");
+		.attr("class", "innerSpectrum");
 	this.dragZoomHighlight = this.innerSVG.append("rect").attr("y", 0).attr("width", 0).attr("fill","#addd8e");	
 	
 	this.plot.on("click", function(){
@@ -91,24 +85,27 @@ Graph = function(targetSvg, model, options) {
 	}.bind(this));
 
 	//Tooltip
-	this.tooltip = CLMSUI.compositeModelInst.get("tooltipModel");
+	if (CLMSUI.compositeModelInst !== undefined)
+		this.tooltip = CLMSUI.compositeModelInst.get("tooltipModel");		
+	else{
+		target = this.g.node().parentNode.parentNode; //this would get you #spectrumPanel
+		this.tooltip = d3.select(target).append("span")
+			.style("font-size", "small")
+			.style("padding", "0 5px")
+			.style("border-radius", "6px")		
+			.attr("class", "tooltip")
+			.style("background-color", "black")
+			.style("color", "#ccc")
+			.style("pointer-events", "none")
+			.style("position", "absolute")				
+			.style("opacity", 0)
+			.style("z-index", 1);
+	}
 
-	//target = this.g.node().parentNode.parentNode; //this would get you #spectrumPanel
-	// this.tip = d3.select(target).append("div")
-	// 	.attr("class", "specViewer_tooltip")
-	// 	.style("background-color", "#f0f0f0")
-	//     .style("border", "1px solid black")
-	//     .style("color", "black")
-	//     .style("border-radius", "6px")
-	//     .style("position", "absolute")
-	//     .style("padding", "3px")               
-	//     .style("opacity", 0)
-	//     .style("font-size", "0.7em")
-	//     .style("pointer-events", "none")
-	//     .style("line-height", "100%");
+
 
 	//MeasuringTool
-	this.measuringTool = this.innerSVG.append("g")
+	this.measuringTool = this.innerSVG.append("g").attr("class", "measuringTool");
 	this.measuringToolVLineStart = this.measuringTool.append("line")
 		.attr("stroke-width", 1)
 		.attr("stroke", "Black");
@@ -120,7 +117,7 @@ Graph = function(targetSvg, model, options) {
 		.attr("y2", 50)
 		.attr("stroke-width", 1)
 		.attr("stroke", "Red");
-	this.measureDistance = this.innerSVG.append("text")
+	this.measureDistance = this.measuringTool.append("text")
 		.attr("text-anchor", "middle")
 		.attr("pointer-events", "none")
 	this.measureInfo =  d3.select("div#measureTooltip")
@@ -129,10 +126,10 @@ Graph = function(targetSvg, model, options) {
 	//------------------------------------
 
 
-	this.highlights = this.innerSVG.append("g");
-	this.peaks = this.innerSVG.append("g");
-	this.lossyAnnotations = this.innerSVG.append("g");
-	this.annotations = this.innerSVG.append("g");
+	this.highlights = this.innerSVG.append("g").attr("class", "peakHighlights");
+	this.peaks = this.innerSVG.append("g").attr("class", "peaks");
+	this.lossyAnnotations = this.innerSVG.append("g").attr("class", "lossyAnnotations");
+	this.annotations = this.innerSVG.append("g").attr("class", "annotations");
 	
 	
 	// add Chart Title
@@ -145,55 +142,29 @@ Graph = function(targetSvg, model, options) {
 	}
 	// add the x-axis label
 	if (options.xlabel) {
-	this.xlabel = this.g.append("text")
-		.attr("class", "aWWWAAAAAxis")
-		.text(options.xlabel)
-		.attr("dy","2.4em")
-		.style("text-anchor","middle").style("pointer-events","none");
+		this.xlabel = this.g.append("text")
+			.attr("class", "aWWWAAAAAxis")
+			.text(options.xlabel)
+			.attr("dy","2.4em")
+			.style("text-anchor","middle").style("pointer-events","none");
 	}
 	// add y-axis label
 	if (options.ylabelLeft) {
-	this.ylabelLeft = this.g.append("g").append("text")
-		.attr("class", "axis")
-		.text(options.ylabelLeft)
-		.style("text-anchor","middle").style("pointer-events","none");
+		this.ylabelLeft = this.g.append("g").append("text")
+			.attr("class", "axis")
+			.text(options.ylabelLeft)
+			.style("text-anchor","middle").style("pointer-events","none");
 	}
 	// add 2nd y-axis label
 	if (options.ylabelRight) {
-	this.ylabelRight = this.g.append("g").append("text")
-		.attr("class", "axis")
-		.text(options.ylabelRight)
-		.style("text-anchor","middle").style("pointer-events","none");
+		this.ylabelRight = this.g.append("g").append("text")
+			.attr("class", "axis")
+			.text(options.ylabelRight)
+			.style("text-anchor","middle").style("pointer-events","none");
 	}
+
+	this.zoom = d3.behavior.zoom().x(this.x).on("zoom", this.redraw());
 	
-	var self = this;
-
-	function brushstart() {
-//~ <<<<<<< HEAD
-		//~ self.dragZoomHighlight.attr("width",0);
-		//~ self.dragZoomHighlight.attr("display","inline");
-//~ =======
-		//brushmove();
-		self.dragZoomHighlight
-            .attr("width",0)
-            .attr("display","inline")
-        ;
-//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
-	}
-
-	function brushmove() {
-	  var s = self.brush.extent();
-	  var width = self.x(s[1] - s[0]) - self.x(0);
-	  self.dragZoomHighlight.attr("x",self.x(s[0])).attr("width", width);
-	}
-
-	function brushend() {
-	  self.dragZoomHighlight.attr("display","none");
-	  var s = self.brush.extent();
-	  self.x.domain(s);
-	  self.brush.x(self.x);
-	  self.resize(s[0], s[1], self.model.ymin, self.model.ymax);
-	}
 };
 
 Graph.prototype.setData = function(){
@@ -202,33 +173,29 @@ Graph.prototype.setData = function(){
 	this.pep1 = this.model.pep1;
 	this.pep2 = this.model.pep2;
     if (this.model.JSONdata) {
-    	var test = "";
         for (var i = 0; i < this.model.JSONdata.peaks.length; i++){
         		var peak = this.model.JSONdata.peaks[i];
-				test += peak.mz + "\t" + peak.intensity + "\r\n";
             this.points.push(new Peak(i, this));
         }
-        console.log(test);
-        this.model.points = this.points;
-        //Isotope cluster
-    /*	this.cluster = new Array();
 
-        var peakCount = this.points.length;
-        for (var p = 0; p < peakCount; p++) {
-            var peak = this.points[p];
-            if (peak.fragments.length > 0){
-                this.cluster.push(new IsotopeCluster(p, this));
-            }
-        }*/
-        //console.log(this.cluster);
+        this.model.points = this.points;
         this.updatePeakColors();
     }
-
-	this.resize(this.model.xminPrimary, this.model.xmaxPrimary, this.model.ymin, this.model.ymaxPrimary);
+    if(this.model.lockZoom){
+    	this.resize(this.model.xmin, this.model.xmax, this.model.ymin, this.model.ymax);
+		this.disableZoom();
+	}
+    else{
+		this.resize(this.model.xminPrimary, this.model.xmaxPrimary, this.model.ymin, this.model.ymaxPrimary);
+		this.enableZoom();
+	}
 }
 
 Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 	var self = this;
+	//reset measureTool
+	if(this.model.measureMode)
+		this.measureClear();	
 	//see https://gist.github.com/mbostock/3019563
 	var cx = self.g.node().parentNode.parentNode.clientWidth;
 	//somewhere around here I think we need to subtract the height of the FragKey?
@@ -236,18 +203,18 @@ Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 	var fragKeyHeight = 100;//can tidy this up somehow 
 	var cy = self.g.node().parentNode.parentNode.clientHeight;// - fragKeyHeight;
 	
-	//self.g.attr("width", cx).attr("height", cy); // MG - g elements shouldn't have these attributes
+	//self.g.attr("width", cx).attr("height", cy);
 	var width = cx - self.margin.left - self.margin.right;
 	var height = cy - self.margin.top  - self.margin.bottom;
 	self.x.domain([xmin, xmax])
 		.range([0, width]);
 	// y-scale (inverted domain)
-	self.y.domain([0, ymax*0.95]).nice()
+	self.y.domain([0, ymax]).nice()
 		.range([height, 0]).nice();
-	self.y1.domain([0, ymax]).nice()
+	self.y_right.domain([0, ymax]).nice()
 		.range([height, 0]).nice();
 	//y0 = d3.scale.linear().range([height, 0]);
-	//self.y1 = d3.scale.linear().range([height, 0]);
+	//self.y_right = d3.scale.linear().range([height, 0]);
 
 	var yTicks = height / 40;
 	var xTicks = width / 100;
@@ -255,14 +222,14 @@ Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 	this.yTicks = yTicks;
 	
 	self.yAxisLeft = d3.svg.axis().scale(self.y).ticks(yTicks).orient("left").tickFormat(d3.format("s"));
-	self.yAxisRight = d3.svg.axis().scale(self.y1).ticks(yTicks).orient("right").tickFormat(d3.format("s")); 
+	self.yAxisRight = d3.svg.axis().scale(self.y_right).ticks(yTicks).orient("right").tickFormat(d3.format("s")); 
 
 	self.yAxisLeftSVG.call(self.yAxisLeft);
 	self.yAxisRightSVG
-        .attr("transform", "translate(" + width + " ,0)")
-        .call(self.yAxisRight)
-    ;
-	
+		.attr("transform", "translate(" + width + " ,0)")
+		.call(self.yAxisRight)
+	;
+	self.xaxisRect.attr("width", width);
 
 	self.xAxis = d3.svg.axis().scale(self.x).ticks(xTicks).orient("bottom");
 		
@@ -277,31 +244,12 @@ Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 		
 	self.plot.attr("width", width)
 		.attr("height", height);
-
-	//self.innerSVG.attr("width", width)
-	//		.attr("height", height)
-	//		.attr("viewBox", "0 0 "+width+" "+height); // MG - g element shouldn't have these attributes
 	
-	//self.xaxisRect.attr("width",width).attr("y", height).attr("height", self.margin.bottom);
-    self.xaxisRect
-        .call(this.brush)
-        .selectAll("rect")
-            .attr("y", height)
-            .attr("height", self.margin.bottom)
-    ;
-    self.xaxisRect.selectAll("rect.extent").style("pointer-events", "none");
-    
-    if (this.measureBrush) {
-        this.mainBrush.call(this.measureBrush);
-    }
-    this.mainBrush.selectAll("rect")    // MJG
-        .attr("height", height)
-    ;
-    this.mainBrush.selectAll("rect.extent").style("pointer-events", "none");
-    
+	self.xaxisRect.attr("width",width).attr("y", height).attr("height", self.margin.bottom);
 	self.dragZoomHighlight.attr("height", height);
-				
-	self.zoom = d3.behavior.zoom().x(self.x).on("zoom", self.redraw());
+	
+	self.zoom = d3.behavior.zoom().x(self.x).on("zoom", self.redraw());			
+	self.zoom.scaleExtent([0, self.model.xmaxPrimary]);
 	self.plot.call(self.zoom);
 	//self.innerSVG.call(self.zoom);
 
@@ -310,15 +258,15 @@ Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 	}
 	this.xlabel.attr("x", width/2).attr("y", height);
 	this.ylabelLeft.attr("transform","translate(" + -50 + " " + height/2+") rotate(-90)");
-	var test = width+45;
-	this.ylabelRight.attr("transform","translate(" + test + " " + height/2+") rotate(-90)");
+	this.ylabelRight.attr("transform","translate(" + (width+45) + " " + height/2+") rotate(-90)");
 
 	
 	self.redraw()();
 }
 
-//~ <<<<<<< HEAD
 Graph.prototype.disableZoom = function(){
+
+	this.plot.attr("pointer-events", "none");
 	this.xaxisRect.style("cursor", "default");
 	this.brush.on("brushstart", null)
 		.on("brush", null)
@@ -326,30 +274,48 @@ Graph.prototype.disableZoom = function(){
 	this.plot.call(this.zoom)
 		.on("zoom", null);
 }
-//~ =======
-Graph.prototype.disablePanning = function(){
-    this.plot.style("pointer-events", "none");
-    /*
-		this.plot.call(this.zoom)
-			.on("mousedown.zoom", null)
-			.on("touchstart.zoom", null)
-			.on("touchmove.zoom", null)
-			.on("touchend.zoom", null);
-            */
-//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
+
+Graph.prototype.enableZoom = function(){
+	this.plot.attr("pointer-events", "visible");
+	this.plot.call(this.zoom);
+	this.xaxisRect.style("cursor", "crosshair");
+	this.brush.on("brushstart", brushstart)
+		.on("brush", brushmove)
+		.on("brushend", brushend);
+	var self = this;
+	function brushstart() {
+		self.dragZoomHighlight
+			.attr("width",0)
+			.attr("display","inline")
+		;
+	}
+
+	function brushmove() {
+	  var s = self.brush.extent();
+	  //var width = self.x(s[1] - s[0]) - self.x(0);
+	  var width = self.x(s[1]) - self.x(s[0]);
+	  self.dragZoomHighlight.attr("x",self.x(s[0])).attr("width", width);
+	}
+
+	function brushend() {
+	  self.dragZoomHighlight.attr("display","none");
+	  var s = self.brush.extent();
+	  self.x.domain(s);
+	  self.brush.x(self.x);
+	  self.model.xmin = s[0];
+	  self.model.xmax = s[1]; //--
+	  self.resize(self.model.xmin, self.model.xmax, self.model.ymin, self.model.ymax);
+	}		
 }
 
 Graph.prototype.measure = function(on){
 	if (on === true){
-//~ <<<<<<< HEAD
-//~ =======
-        this.plot.style("pointer-events", "none");
-		//this.disablePanning();  // MJG
-//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
 		var self = this;
-		self.measureBackground
-		.attr("width", self.plot[0][0].getAttribute("width"))
-		.attr("height", self.plot[0][0].getAttribute("height"))
+    	self.measureBackground 
+      		.attr("width", self.plot[0][0].getAttribute("width")) 
+      		.attr("height", self.plot[0][0].getAttribute("height"));
+
+		self.peaks.style("pointer-events", "none");		//disable peak highlighting
 
 		self.disableZoom();
 
@@ -402,18 +368,32 @@ Graph.prototype.measure = function(on){
 			var peakCount = self.points.length;
 			for (var p = 0; p < peakCount; p++) {
 				var peak = self.points[p];
-				if (_.intersection(self.model.highlights, peak.fragments).length != 0 && Math.abs(peak.x - mouseX)  < highlighttrigger){
-					var endPeak = peak;
-					break;
-				}
-				if (mouseX - triggerdistance < peak.x < mouseX + triggerdistance && Math.abs(peak.x - mouseX)  < distance){
-					var endPeak = peak
-					distance = Math.abs(peak.x - mouseX);
+				if (peak != self.measureStartPeak){
+					if (_.intersection(self.model.highlights, peak.fragments).length != 0 && Math.abs(peak.x - mouseX)  < highlighttrigger){
+						var endPeak = peak;
+						break;
+					}
+					if (mouseX - triggerdistance < peak.x < mouseX + triggerdistance && Math.abs(peak.x - mouseX)  < distance){
+						var endPeak = peak
+						distance = Math.abs(peak.x - mouseX);
+					}
 				}
 			}
 			
 			//draw vertical end Line
 			if(endPeak){
+				//check if distance matches the mass of an aminoAcid
+				if(endPeak.x > self.measureStartPeak.x){
+					var delta = endPeak.x - self.measureStartPeak.x;
+					var matchPeak = endPeak.x;
+				}
+				else{
+					var delta = self.measureStartPeak.x - endPeak.x;
+					var matchPeak = self.measureStartPeak.x;
+				}
+				endPeak.matchedAA = self.model.matchMassToAA(delta, matchPeak);
+
+				//set end of the measuringTool to endPeak
 				self.measuringToolVLineEnd
 					.attr("x1", self.x(endPeak.x))
 					.attr("x2", self.x(endPeak.x))
@@ -452,29 +432,30 @@ Graph.prototype.measure = function(on){
 			else
 				var labelX = measureEndX + deltaX/2;
 
-			self.measureDistance.text(distance.toFixed(2)+" Th");		
+			self.measureDistance.text(distance.toFixed(self.model.showDecimals)+" Th");		
 			//var PeakInfo = distance.toFixed(2)+" Th<br/>"
 			var PeakInfo = ""
 			if(self.measureStartPeak.fragments.length > 0)
-					PeakInfo += "From: <span style='color:"+ self.measureStartPeak.colour +"'>" + self.measureStartPeak.fragments[0].name +"</span> (" + self.measureStartPeak.x + " m/z)";
+					PeakInfo += "From: <span style='color:"+ self.measureStartPeak.colour +"'>" + self.measureStartPeak.fragments[0].name +"</span> (" + self.measureStartPeak.x.toFixed(self.model.showDecimals) + " m/z)";
 			else if (self.measureStartPeak.isotopes.length > 0)
-					PeakInfo += "From: <span style='color:"+ self.measureStartPeak.colour +"'>" + self.measureStartPeak.isotopes[0].name + "+" + self.measureStartPeak.isotopenumbers[0]+ "</span> (" + self.measureStartPeak.x + " m/z)";
+					PeakInfo += "From: <span style='color:"+ self.measureStartPeak.colour +"'>" + self.measureStartPeak.isotopes[0].name + "+" + self.measureStartPeak.isotopenumbers[0]+ "</span> (" + self.measureStartPeak.x.toFixed(self.model.showDecimals) + " m/z)";
 			else
-				PeakInfo += "From: Peak (" + self.measureStartPeak.x + " m/z)"; 
+				PeakInfo += "From: Peak (" + self.measureStartPeak.x.toFixed(self.model.showDecimals) + " m/z)"; 
 			if(endPeak){
 				if(endPeak.fragments.length > 0)
-						PeakInfo += "<br/>To: <span style='color:"+ endPeak.colour +"'>" + endPeak.fragments[0].name +"</span> (" + endPeak.x + " m/z)";
+						PeakInfo += "<br/>To: <span style='color:"+ endPeak.colour +"'>" + endPeak.fragments[0].name +"</span> (" + endPeak.x.toFixed(self.model.showDecimals) + " m/z)";
 				else if(endPeak.isotopes.length > 0)
-						PeakInfo += "<br/>To: <span style='color:"+ endPeak.colour +"'>" + endPeak.isotopes[0].name + "+" + endPeak.isotopenumbers[0]+ "</span> (" + endPeak.x + " m/z)";
-				else{
-					PeakInfo += "<br/>To: Peak (" + endPeak.x + " m/z)";
-					} 
+						PeakInfo += "<br/>To: <span style='color:"+ endPeak.colour +"'>" + endPeak.isotopes[0].name + "+" + endPeak.isotopenumbers[0]+ "</span> (" + endPeak.x.toFixed(self.model.showDecimals) + " m/z)";
+				else
+					PeakInfo += "<br/>To: Peak (" + endPeak.x.toFixed(self.model.showDecimals) + " m/z)";
+				if (endPeak.matchedAA.length > 0)
+					PeakInfo += "<br/>possible match: " + endPeak.matchedAA + " ";
 			} else {
                 PeakInfo += "<br/>";
             }
 			PeakInfo += "<br/><br/><p style='font-size:0.8em'>";
 			for(i=1; i<7; i++){
-			PeakInfo += "z = "+i+": "+(distance*i).toFixed(2)+" Da</br>";	
+			PeakInfo += "z = "+i+": "+(distance*i).toFixed(self.model.showDecimals)+" Da</br>";	
 			}
 			PeakInfo += "</p>";
 			
@@ -509,7 +490,6 @@ Graph.prototype.measure = function(on){
                 return {top: svgBCR.top - pBCR.top, left: svgBCR.left - pBCR.left};
             }
             
-            
             var svgNode = self.g.node().parentNode;
             var rectBounds = this.getBoundingClientRect();
             var svgBounds = svgNode.getBoundingClientRect();
@@ -537,78 +517,23 @@ Graph.prototype.measure = function(on){
 			.x(this.x)
 			.on("brushstart", measureStart)
 			.on("brush", measureMove)
-//~ <<<<<<< HEAD
-//~ 
-		//~ this.measureBackground.call(this.measureBrush);
-//~ 
-	//~ }
-	//~ else{
-		//~ this.measureClear();
-		//~ this.plot.call(this.zoom);
-		//~ this.xaxisRect.style("cursor", "crosshair");
-		//~ this.brush.on("brushstart", brushstart)
-			//~ .on("brush", brushmove)
-			//~ .on("brushend", brushend);
-		//~ var self = this;
-		//~ function brushstart() {
-			//~ self.dragZoomHighlight.attr("width",0);
-			//~ self.dragZoomHighlight.attr("display","inline");
-		//~ }
-//~ 
-		//~ function brushmove() {
-		  //~ var s = self.brush.extent();
-		  //~ var width = self.x(s[1] - s[0]) - self.x(0);
-		  //~ self.dragZoomHighlight.attr("x",self.x(s[0])).attr("width", width);
-		//~ }
-//~ 
-		//~ function brushend() {
-		  //~ self.dragZoomHighlight.attr("display","none");
-		  //~ var s = self.brush.extent();
-		  //~ self.x.domain(s);
-		  //~ self.brush.x(self.x);
-		  //~ self.resize(s[0], s[1], self.model.ymin, self.model.ymax);
-		//~ }
-//~ =======
-        ;
-        var cy = this.g.node().parentNode.parentNode.clientHeight;// - fragKeyHeight;
-        var height = cy - this.margin.top  - this.margin.bottom;
-        this.mainBrush  // MJG
-            .call(this.measureBrush)
-            .style ("display", "inline")
-            .selectAll("rect")
-            .attr("height", height)
-        ;
 
-		//this.plot.call(this.measureBrush);
-		//this.innerSVG.call(this.measureBrush);
+		this.measureBackground.call(this.measureBrush);
+
 	}
 	else{
 		this.measureClear();
-        this.plot.style("pointer-events","all");    // MJG
-		//this.plot.call(this.zoom);
-		//this.innerSVG.call(this.zoom);
-        /*
-		this.measureBrush = d3.svg.brush()
-			.on("brushstart", null)
-			.on("brush", null)
-			.on("brushend", null);
-        this.plot.call(this.measureBrush);
-        this.mainBrush.call(this.measureBrush); // MJG
-        */
-        this.mainBrush.style("display", "none"); // MJG
-/*		this.plot.on("click", function(){
-			this.model.clearStickyHighlights();
-		}.bind(this));*/
-		//this.innerSVG.call(this.measureBrush);
-//~ >>>>>>> 0cc3f394d29c8480b9a4aab10b25d0cb9dccd2f1
+		this.peaks.style("pointer-events", "visible");
+		this.measureBackground.attr("height", 0);
+		this.enableZoom();
 	}
 }
 
 Graph.prototype.measureClear = function(){
-	this.measureBackground.attr("height", 0);
 	this.measuringTool.attr("display","none");
 	this.measureDistance.attr("display","none");
-	this.measureInfo.style("display","none");	
+	this.measureInfo.style("display","none");
+	
 }
 
 Graph.prototype.redraw = function(){
@@ -619,8 +544,7 @@ Graph.prototype.redraw = function(){
 		//get highest intensity from peaks in x range
 		//adjust y scale to new highest intensity
 
-
-		self.measureClear();
+		//self.measureClear();
 		if (self.points) {
 			var ymax = 0
 			var xDomain = self.x.domain();
@@ -629,9 +553,8 @@ Graph.prototype.redraw = function(){
 			  	ymax = self.points[i].y;
 			}
 			//console.log(ymax);
-			//self.y.domain([0, ymax/0.9]).nice();
-			self.y.domain([0, ymax/0.95]).nice();
-			self.y1.domain([0, (ymax/(self.model.ymaxPrimary*0.95))*100]).nice();
+			self.y.domain([0, ymax/0.95]);
+			self.y_right.domain([0, (ymax/(self.model.ymaxPrimary*0.95))*100]);
 			self.yAxisLeftSVG.call(self.yAxisLeft);
 			self.yAxisRightSVG.call(self.yAxisRight);
 			for (var i = 0; i < self.points.length; i++){
@@ -649,6 +572,8 @@ Graph.prototype.redraw = function(){
 }
 
 Graph.prototype.clear = function(){
+	this.model.measureMode = false;
+	this.measure(false);
 	this.points= [];
 	this.highlights.selectAll("*").remove();
 	this.peaks.selectAll("*").remove();
@@ -675,12 +600,23 @@ Graph.prototype.updatePeakColors = function(){
 		}
 	}
 	else{
-		for (var p = 0; p < peakCount; p++) {
-			if (_.intersection(this.model.highlights, this.points[p].fragments).length == 0)
-				this.points[p].line.attr("stroke", this.model.lossFragBarColour);
+		var self = this; 
+		//var curPeaks = this.points.filter(function(peak){ if (peak.x > self.x.domain()[0] && peak.x < self.x.domain()[1]) return peak; })
+		var highlightClusterIds = [].concat.apply([], this.model.highlights.map(function(h){ return h.clusterIds;}));
+		this.points.forEach(function(p){
+			if (_.intersection(self.model.highlights, p.fragments).length > 0 || _.intersection(highlightClusterIds, p.clusterIds).length > 0)
+				p.line.attr("stroke", p.colour);
 			else
-				this.points[p].line.attr("stroke", this.points[p].colour);
-		}
+				p.line.attr("stroke", self.model.peakColour);
+						
+		});
+
+		// for (var p = 0; p < peakCount; p++) {
+		// 	if (_.intersection(this.model.highlights, this.points[p].fragments).length == 0)
+		// 		this.points[p].line.attr("stroke", this.model.peakColour);
+		// 	else
+		// 		this.points[p].line.attr("stroke", this.points[p].colour);
+		// }
 	}
 }
 
@@ -712,6 +648,28 @@ Graph.prototype.updateColors = function(){
 		for (var p = 0; p < peakCount; p++) {
 			this.points[p].updateColor();
 		}
+}
+
+Graph.prototype.updateHighlightColors = function(){
+	var peakCount = this.points.length;
+		for (var p = 0; p < peakCount; p++) {
+			if(this.points[p].highlightLine !== undefined){
+				this.points[p].highlightLine.attr("stroke", this.model.highlightColour);
+				this.points[p].labelHighlights.attr("stroke", this.model.highlightColour);
+			}
+		}
+}
+
+Graph.prototype.show = function(){
+	this.g.attr("visibility", "visible");
+	this.enableZoom();
+}
+
+Graph.prototype.hide = function(){
+	this.g.attr("visibility", "hidden");
+	this.disableZoom();
+	//this.xaxisRect.attr("pointer-events", "none");
+	//this.g.style("pointer-events", "none");
 }
 /*
 
