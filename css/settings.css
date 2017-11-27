@@ -1,0 +1,158 @@
+
+#settings-appearance{
+    border-left: 1px solid white;
+}
+
+/*#lock{
+    margin-left: -11px;
+    margin-right: -3px;
+}*/
+
+#settingsWrapper{
+    display: none;
+    z-index: 2;
+    right: 5%;
+    top: 10%;
+    width: 800px;
+    height: auto;
+    min-width: 700px;
+    /* overflow-y: auto; */
+}
+
+#settingsWrapper .form-control{
+  display: inline-block;
+  background-color: #fff;
+}
+
+#settingsWrapper .flex-column{
+   display: -webkit-flex;
+   display: flex;
+   -webkit-flex-direction: column;
+   flex-direction: column;
+}
+
+#settingsWrapper .flex-row{
+   display: -webkit-flex;
+   display: flex;
+   -webkit-flex-direction: row;
+   flex-direction: row;
+   -webkit-justify-content: flex-start;
+   justify-content: flex-start;
+}
+
+#settingsWrapper .settings-bottom{
+  /* margin-top:10px; */
+  text-align: center;
+  font-size: 1.5em;
+}
+
+.settings_menu{
+    font-size: 1.5em;
+}
+
+#settings_main{
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    line-height: 3.48;
+    /* display: flex; */
+    /* flex-direction: column; */
+    overflow-y: auto;
+}
+
+.resetMod{
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAFaUlEQVRoQ+1YaWwUZRh+3plp60pJC4GIZUEgsXigRgvqD0BqW2oLpYWkaLiCoYjUNlgx9fphDcSDCBVbSitVCRCRJYQA5ehFEfihUjRqUFoTqhzVKpRyuWW7O6+Z0iHDdnZnZncIEJhkszPf937P8b3fNUO4xS+6xfXjjoEbncE7Gbg9MjBzixNeKsWmaVl2G76+QyjbJQqSmA+mJQCi5a+n2c5nO6DawxEztibIjAoACWqZb+NU2/lsB0S2K1qSopaAOB+AqB0y3q+ybOezFTBy1tYsMJUAcOqNdY/HE4vN08/ZOQ9sMeCYucUpQyoFIdNAnJuBzQK4snND1gE7jIRnINslRkVF5RFhqTJJLQpqInCFu9PzKTZP91lsezU8LAN3z95eAcJLoZL3tKv6j6NewPrUS6HghGUA2S6xj8ORx4SlZD0DGr3ciAiefKkys82qifAM9LA5cnY5Ra9cCrDRHAh2emwBkH5hbcZRKyZsMaAS9p27IwtEJRRgFTIURmg+Lw0ahc9GdxnG9gTYakDBHJjrir7cGb2E0HsfAKga4NRg4ghY3PHFpBU3zIBKHJNTlSAyVbBmJz77+STql7M7HSyvAjAsgMhzXRFS/MXy1H/MmLA9A9eQZrvE/jHRyo7cfRZqr0zv5oudt/M+gUjZB4boi6TK9sq0+TfeQI+C/jm7nERUemZN2tXT6ID5O+MZdDjA/iFD9A09U55xysjE9c2AAfvABbvfB+MtvTBmIeP0mtSqm9qAc96e/h4Jf+plgcFv/1uR9sFNbUARd8+CPXtBSNQRurGt/LkZthiIW1gzhYE0EF8dcsTU1il5l7eXpJ83IglWf+/C6jIAC3Vijvy1OnWUEbapORCXW90BIKYXGFNe6+qJypIY8jU4t/odRvdh0P/qbC1LdRgBmzIw+JWakwAG9zaADafKJs42IglW78ytWQ/CLJ2YUydXTdR9r9DGmjIwJL/2ezDG6JD8dqI05aFwDAzJq/0VwIO9MAiHTpSkPGmEbcrA0PzaTQCm64DJDocjtmnZ2AtGRHr1IwsP9nW73crwFHTqXcdLUp43wjVlYFh+/Vwm/lIPjIk/Ob4ypcCISK9+2KLaYjC9qtuW6cU/SpLWGuGaMhC/uGFAl9f3t/9Leg84AzShZWXSfiMybf3wRfXjAd4H6J6wfRGSOKh5eeJpI0xTBhSQEQX1O8CYrAtI1CJBTm4uTj5mRKjUxxfUjfBCqAPzcH08VB0rTsowg2XawPBFdY+KgvBjgPGqcF0i8Ou/FyeVByO+v6D+ZQZ9DKBPgDjZJ8uPt6xM/tlWA1d6bu86Jhgtm/uJaTsL8qFIt/CD0s7jkJ8gWRjDxFMAjA8mjBjrm4ufnWNGvBJjOgNK8CNvHuh3ucv3LcDx5ghIvhLHeqvMtRDdSqg5ShKf/uXDcWfN4Vs0oIA+8FpdPAvidwTEmiUJMG+uKWagg3ziU0dXjGu2gmspAyrwyMKG0QLTNgBxVsgCTFiluFUGZzYtS2y0iheSAYVkZOHBOAG+bQSMtkJKvRkbvSxmNi0b22oFR40N2YACMKGoQTrtpvkAvaucjAMK0GdpA/N7Axy8Zl9RojcU8ZYncSCSh4saosVOaQ6DpwJ4BoSIALHK55JviGmr7y7vuiNFiRdDFW5LBvTIE96ojfFIkY8RUxwRdc8RZm5l4tZIr+enwx+l3Hxfp8PtxXDahzUHwiG2q+1tbUAxr/60C4KZTuGeDCj/evemE2SGTBWpHAe0ov2fAxnSivEXqxpQ/5Wjh7ZM+xxkHwzs11+8VrR6r1emNaPc+wtVnrXi1Hv/Mm15SAb8G6kZ0+ttf9Ha4WXU8yEPpf8BwRqnQJnMMukAAAAASUVORK5CYII=);
+    height: 16px;
+    width: 16px;
+    visibility: hidden;
+    color: #446EB0;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.settingsDataLeft{
+    /* margin-bottom: 30px; */
+    /* width: 40%; */
+    display: inline;
+    margin-right: 4%;
+    float: left;
+}
+
+.settingsDataRight{
+    /* width: 56%; */
+}
+.modificationTable_wrapper{
+  width: 100%
+}
+#settingsCustomCfg-input{
+  height: 400px;
+  width: 100%;
+  /* margin: 0px 20% 0px 6px; */
+}
+
+#settings {
+    position: absolute;
+    top: 20%;
+    left: 20%;
+}
+
+#ionSelection {
+    background-color: #FFF;
+    /* color: #333; */
+}
+
+#settings_main .label{
+    font-size: 0.9em;
+    cursor: pointer;
+    /* padding: 5px 15px; */
+    /* margin: 10px 0px; */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 300;
+    outline: 0;
+    display: block;
+    white-space: nowrap;
+}
+
+#settings_main .invisible {
+    visibility: hidden;
+    display: none;
+}
+
+#settings_main .userModified{
+    background-color: #a0bbde !important;
+    font-weight: bold !important;
+}
+
+#settings_main .flex-container{
+    display: flex;
+    flex-direction: row;
+}
+
+#settings_main .flex-grow{
+    flex-grow: 1;
+    margin-left: 5px;
+}
+
+#settings_main .flex-grow input{
+    margin-bottom: 1%;
+    width: 100%;
+}
+
+#settings_main #ionList input{
+    width: unset;
+}
+
+.settings-bottom{
+  text-align: center;
+  margin-top: 10px;
+  bottom: 0px;
+  position: absolute;
+  width: 95%;
+}
+
+#settingsPeaklist{
+  height: 180px;
+  /* width: 220px; */
+  white-space: nowrap;
+}

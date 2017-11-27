@@ -94,10 +94,12 @@ function Peak (id, graph){
 					self.highlightLine.style("cursor", "pointer");
 				}
 				showTooltip(evt.pageX, evt.pageY);
-				startHighlight();
+                if (self.graph.lastLink !== self) {
+                    startHighlight();
+                    self.graph.lastLink = self;
+                }
 			})
 			.on("mouseout", function() {
-
 				hideTooltip();
 				endHighlight();
 			})
@@ -416,8 +418,11 @@ Peak.prototype.highlight = function(show, fragments){
 		        .attr("display", "inline");
 		   ;
 		    this.labels.filter(ffunc).attr("display", "inline");
-		}		
-		this.graph.peaks.node().appendChild(this.g.node());
+		}	
+        var m = new Map();
+        if (m.entries) {    // test for ie11, cos in ie11 moving nodes around breaks event handlers
+		  this.graph.peaks.node().appendChild(this.g.node());
+        }
 		this.line.attr("stroke", this.colour);
 	} else {
 		this.highlightLine.attr("opacity",0);

@@ -3,16 +3,17 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 	defaults: function() {
     return {
       baseDir:  '',
+			xiAnnotatorBaseURL: 'http://xi3.bio.ed.ac.uk/xiAnnotator/',
       JSONdata: false,
     };
   },
 
 	initialize: function(){
 		var self = this;
+		this.xiAnnotatorBaseURL = this.get('xiAnnotatorBaseURL');
 		this.baseDir = this.get('baseDir');
 		this.getKnownModifications();
-		//this.sticky = Array();
-		//this.highlights = Array();
+
 		this.showDecimals = 2;
 		this.moveLabels = false;
 		this.measureMode = false;
@@ -61,7 +62,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		}
 
 		$("#measuringTool").prop("checked", false);
-		$("#moveLabels").prop("checked", false);			
+		$("#moveLabels").prop("checked", false);
 		this.sticky = Array();
 		this.highlights = Array();
 		this.JSONdata = this.get("JSONdata");
@@ -70,8 +71,11 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		//console.log(this.JSONdata);
 		this.annotationData = this.JSONdata.annotation;
 
+		//overwrite xiKnownModifications with data from input
+		this.updateKnownModifications();
+
 		if (this.annotationData !== undefined){
-			this.MSnTolerance = { 
+			this.MSnTolerance = {
 				"value": parseFloat(this.annotationData.fragementTolerance.split(" ")[0]),
 				"unit": this.annotationData.fragementTolerance.split(" ")[1]
 			};
@@ -80,6 +84,10 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		this.pepStrs = [];
 		this.pepStrsMods = [];
 		this.peptides = this.JSONdata.Peptides;
+		if(this.peptides.length == 1)
+			this.isLinear = true;
+		else
+			this.isLinear = false;
 		for(i=0; i < this.peptides.length; i++){
 			this.pepStrs[i] = "";
 			this.pepStrsMods[i] = "";
@@ -108,11 +116,6 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		this.highlightWidth = 10;
 
 		this.calcPrecursorMass();
-
-		//change this to SettignsView related call
-		if (window.modTable !== undefined)
-			modTable.ajax.url( this.baseDir + "php/convertModsToJSON.php?peps="+encodeURIComponent(this.pepStrsMods.join(";"))).load();
-		this.trigger("changed:data");
 
 		if (this.JSONdata.peaks !== undefined)
 			this.setGraphData();
@@ -222,21 +225,21 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 	changeColorScheme: function(scheme){
 		switch(scheme) {
-			case "RdBu": 
+			case "RdBu":
 				this.cmap = colorbrewer.RdBu[8];
 				break;
-			case "BrBG": 
+			case "BrBG":
 				this.cmap = colorbrewer.BrBG[8];
 				break;
-			case "PiYG": 
+			case "PiYG":
 				this.cmap = colorbrewer.PiYG[8];
 				break;
-			case "PRGn": 
+			case "PRGn":
 				this.cmap = colorbrewer.PRGn[8];
 				break;
-			case "PuOr": 
+			case "PuOr":
 				this.cmap = colorbrewer.PuOr[8];
-				break;			
+				break;
 		}
 		this.p1color = this.cmap[0];
 		this.p1color_cluster = this.cmap[2];
@@ -254,7 +257,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 	changeLinkPos: function(newLinkSites){
 
-		if(this.get("JSONrequest") !== undefined){ 
+		if(this.get("JSONrequest") !== undefined){
 			json_req = this.get("JSONrequest");
 			for (var i = 0; i < newLinkSites.length; i++) {
 				json_req.LinkSite[i].linkSite = newLinkSites[i]-1;
@@ -271,17 +274,17 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 			//if the newlinkpos are the original ones delete oldLinkPos
 			else if (this.match.oldLinkPos[0] == newLinkSites[0] && this.match.oldLinkPos[1] == newLinkSites[1])
 				newmatch.oldLinkPos = undefined;
-			CLMSUI.loadSpectra(newmatch, this.randId, this);			
+			CLMSUI.loadSpectra(newmatch, this.randId, this);
 		}
 		else{
 			for (var i = 0; i < newLinkSites.length; i++) {
 				if (this.JSONdata.LinkSite[i] === undefined){
-					this.JSONdata.LinkSite[i] = {id: 0, linkSite: newLinkSites[i], peptideId: i}		
+					this.JSONdata.LinkSite[i] = {id: 0, linkSite: newLinkSites[i], peptideId: i}
 				}
 				else
 					this.JSONdata.LinkSite[i].linkSite = newLinkSites[i];
 			}
-			this.setData();	
+			this.setData();
 		}
 
 	},
@@ -289,7 +292,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 	changeMod: function(oldPos, newPos, oldPepIndex, newPepIndex){
 
-		if(this.get("JSONrequest") !== undefined){ 
+		if(this.get("JSONrequest") !== undefined){
 			json_req = this.get("JSONrequest");
 			//standalone
 			var myNew = json_req.Peptides[newPepIndex].sequence[newPos];
@@ -309,7 +312,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 			//CLMSUI integrated
 			this.JSONdata.Peptides[newPepIndex].sequence[newPos].Modification = this.JSONdata.Peptides[oldPepIndex].sequence[oldPos].Modification;
 			this.JSONdata.Peptides[oldPepIndex].sequence[oldPos].Modification = "";
-				
+
 			var pepSeq1 = "";
 			for (var i = 0; i < this.JSONdata.Peptides[0].sequence.length; i++) {
 				pepSeq1 += this.JSONdata.Peptides[0].sequence[i].aminoAcid;
@@ -320,7 +323,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 			for (var i = 0; i < this.JSONdata.Peptides[1].sequence.length; i++) {
 				pepSeq2 += this.JSONdata.Peptides[1].sequence[i].aminoAcid;
 				pepSeq2 += this.JSONdata.Peptides[1].sequence[i].Modification;
-			};		
+			};
 
 			var newmatch = $.extend(true, {}, this.match);	//clone object
 
@@ -333,7 +336,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 			//Preview
 			this.JSONdata.Peptides[newPepIndex].sequence[newPos].Modification = this.JSONdata.Peptides[oldPepIndex].sequence[oldPos].Modification;
 			this.JSONdata.Peptides[oldPepIndex].sequence[oldPos].Modification = "";
-			this.setData();	
+			this.setData();
 		}
 
 
@@ -392,7 +395,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		if (this.annotationData !== undefined)
 			if (this.annotationData.precursorMZ !== undefined && this.annotationData.precursorMZ !== -1)
 				return
-		
+
 
 		//if(this.knownModifications === undefined)
 		//	this.getKnownModifications();
@@ -419,7 +422,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		mA[aastr.indexOf("Y")] = 163.06333;
 		mA[aastr.indexOf("V")] = 99.06841;
 
-		var massArr = new Array();		
+		var massArr = new Array();
 		var h2o = 18.010565;
 
 		for (var i = 0; i < this.peptides.length; i++) {
@@ -430,13 +433,13 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 			massArr[i] = h2o;
 			for (var j = 0; j < this.peptides[i].sequence.length; j++) {
 				var AA = this.peptides[i].sequence[j].aminoAcid;
-				massArr[i] += mA[aastr.indexOf(AA.charAt(i))];	
+				massArr[i] += mA[aastr.indexOf(AA.charAt(i))];
 				//mod
 				var mod = this.peptides[i].sequence[j].Modification;
 				for (var k = 0; k < this.knownModifications['modifications'].length; k++) {
 					if (this.knownModifications['modifications'][k].id == mod)
 						massArr[i] += this.knownModifications['modifications'][k].mass;
-				}		
+				}
 			}
 		}
 
@@ -480,12 +483,47 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		});
 	},
 
-	updateUserModifications: function(mod, saveToCookie=true){
+
+	updateKnownModifications: function(){
+		var self = this;
+		if(this.annotationData.modifications){
+			this.annotationData.modifications.forEach(function(annotation_mod){
+				var overlap = self.knownModifications["modifications"].filter(function(km){ return annotation_mod.id == km.id;});
+				if (overlap.length > 0){
+					overlap.forEach(function(overlap_mod){
+						overlap_mod.mass = annotation_mod.massDifference;
+						if(overlap_mod.aminoAcids.indexOf(annotation_mod.aminoacid) == -1)
+							overlap_mod.aminoAcids.push(annotation_mod.aminoacid);
+// 						overlap_mod.aminoAcids = annotation_mod.aminoAcids;
+					});
+				}
+				else{
+					//what is mass in the modification array corresponds to massDifference from xiAnnotator
+					var new_mod = new Object;
+					new_mod['mass'] = annotation_mod['massDifference'];
+					new_mod['aminoAcids'] = [annotation_mod['aminoacid']];
+					new_mod['id'] = annotation_mod['id'];
+					self.knownModifications["modifications"].push(new_mod);
+				}
+
+			})
+		}
+	},
+
+	updateUserModifications: function(mod, saveToCookie){
+        
+        if (saveToCookie === undefined) {
+            saveToCookie = true;
+        }
 
 		var userMod = this.userModifications.filter(function(m){ return mod.id == m.id;});
 		if (userMod.length > 0){
-			userMod[0].mass = mod.mass;
-			userMod[0].aminoAcids = mod.aminoAcids;
+			userMod.forEach(function(overlap_mod){
+				overlap_mod.mass = mod.mass;
+				overlap_mod.aminoAcids = mod.aminoAcids;
+			});
+// 			userMod[0].mass = mod.mass;
+// 			userMod[0].aminoAcids = mod.aminoAcids;
 		}
 		else
 			this.userModifications.push(mod);
@@ -498,7 +536,12 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		Cookies.set('customMods', cookie);
 	},
 
-	delUserModification: function(modId, saveToCookie=true){
+	delUserModification: function(modId, saveToCookie){
+        
+        if (saveToCookie === undefined) {
+            saveToCookie = true;
+        }
+        
 		var userModIndex = this.userModifications.findIndex(function(m){ return modId == m.id;});
 		if (userModIndex != -1){
 			this.userModifications.splice(userModIndex, 1);
