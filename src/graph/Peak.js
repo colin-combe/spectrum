@@ -70,7 +70,7 @@ function Peak (id, graph){
 	this.linegroup = this.g.append('g');
 
 	if (this.fragments.length > 0) {
-		this.highlightLine = this.linegroup.append('line')
+		this.highlightLine = this.graph.highlights.append('line')
 								.attr("stroke", this.graph.model.highlightColour)
 								.attr("stroke-width", this.graph.model.highlightWidth)
 								.attr("opacity","0")
@@ -435,6 +435,9 @@ Peak.prototype.highlight = function(show, fragments){
 Peak.prototype.update = function(){
 
 	this.g.attr("transform", "translate("+this.graph.x(this.x)+",0)");
+	if (this.highlightLine) {
+		this.highlightLine.attr("transform", "translate("+this.graph.x(this.x)+",0)");
+	}
 	var xDomain = this.graph.x.domain();
 	if (this.x > xDomain[0] && this.x < xDomain[1]){
 		//reset label lines
