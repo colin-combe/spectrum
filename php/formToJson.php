@@ -81,7 +81,21 @@ foreach ($_POST['ions'] as $iontype) {
 
 $cl = array('modMass' => $clModMass);
 
-$annotation = array('fragmentTolerance' => $tol, 'modifications' => $modifications, 'ions' => $ions, 'cross-linker' => $cl, 'precursorCharge' => $preCharge);
+// if ($tolUnit == "Da"){
+//   $customCfg = ["LOWRESOLUTION:true"];
+// }
+// else {
+//   $customCfg = ["LOWRESOLUTION:false"];
+// }
+
+$annotation = array(
+  'fragmentTolerance' => $tol,
+  'modifications' => $modifications,
+  'ions' => $ions,
+  'cross-linker' => $cl,
+  'precursorCharge' => $preCharge,
+  // 'custom' => $customCfg
+);
 
 //final array
 $postData = array('Peptides' => $peptides, 'LinkSite' => $linkSites, 'peaks' => $peaks, 'annotation' => $annotation);

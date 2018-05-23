@@ -38,6 +38,7 @@ function downloadSpectrumSVG(){
 }
 					
 function download(content, contentType, fileName) {
+	
 	var b64svg = window.btoa(content);
 	var path = "./php/download.php";
 	var method = method || "post"; // Set method to post by default if not specified.
