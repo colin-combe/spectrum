@@ -22,7 +22,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 	this.FragKey = FragKey;
 	this.peptideId = peptideId;
 	this.peptide = FragKey.model.peptides[peptideId];
-	
+
 	this.fragments = [];
 	this.b = [];
 	this.y = [];
@@ -43,8 +43,8 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 		var color = this.FragKey.model.p2color;
 
 
-
-	var xStep = 22;
+	var xStep = FragKey.xStep;
+	// var xStep = 23;
 
 	this.x = (xStep * (index+offset)) + (xStep / 2);
 	if (this.peptideId == 0)
@@ -104,25 +104,25 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 	function startHighlight(fragments){
 
 		if (!self.FragKey.changeCL && !self.FragKey.changeMod)
-			self.FragKey.model.addHighlight(fragments);	
+			self.FragKey.model.addHighlight(fragments);
 	}
 	function endHighlight(fragments){
 		if (!self.FragKey.changeCL && !self.FragKey.changeMod)
-			self.FragKey.model.clearHighlight(fragments);	
+			self.FragKey.model.clearHighlight(fragments);
 	}
 	// # bions; either normal or lossy; have different colors
 	if (fragments.b.length != 0){ // really a, b, or c , see get_fragment_annotation()
-	
+
 		if(fragments.y.length == 0)	//highlight full length of the fragbar
-			var highlightPath = "M" + this.x+ "," + (y - barHeight) 
-								+" L" + this.x+ "," +  y 
+			var highlightPath = "M" + this.x+ "," + (y - barHeight)
+								+" L" + this.x+ "," +  y
 								+ " L" + (this.x- tailX) + "," + (y + tailY);
 
 		else ////highlight half length of the fragbar
-			var highlightPath = "M" + this.x+ "," + (y - barHeight/2) 
-								+" L" + this.x+ "," +  y 
+			var highlightPath = "M" + this.x+ "," + (y - barHeight/2)
+								+" L" + this.x+ "," +  y
 								+ " L" + (this.x- tailX) + "," + (y + tailY);
-		
+
 		this.bgroup = this.g.append("g")
 			.on("mouseover", function() {
 				var evt = d3.event;
@@ -158,9 +158,9 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 			.attr("d", highlightPath)
 			.attr("stroke", this.FragKey.model.highlightColour)
 			.attr("stroke-width", this.FragKey.model.highlightWidth)
-			.attr("opacity", 0)				
+			.attr("opacity", 0)
 			.style("cursor", "pointer");
-				
+
 		this.bTail = this.bgroup.append("line")
 			.attr("x1", this.x)
 			.attr("y1", y)
@@ -173,7 +173,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 		var ion = "";
 		for (var i = 0; i < fragments.b.length; i++) {
 			if(fragments.b[i].type.indexOf("AIon") != -1)
-				ion = "a"+this.bfrag_index;		
+				ion = "a"+this.bfrag_index;
 			else if(fragments.b[i].type.indexOf("BIon") != -1)
 				ion = "b"+this.bfrag_index;
 			else if(fragments.b[i].type.indexOf("CIon") != -1)
@@ -184,19 +184,19 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 //Idea for multiple texts, could be to crowded
 /*		this.bTexts = []	//Array of d3 selections
 		bions = []
-		for (var i = 0; i < fragments.b.length; i++) {		
+		for (var i = 0; i < fragments.b.length; i++) {
 			if(fragments.b[i].type.indexOf("AIon") != -1 && bions.indexOf("a"+this.bfrag_index) == -1)
-				bions.push("a"+this.bfrag_index);		
+				bions.push("a"+this.bfrag_index);
 			if(fragments.b[i].type.indexOf("BIon") != -1 && bions.indexOf("b"+this.bfrag_index) == -1)
-				bions.push("b"+this.bfrag_index);		
+				bions.push("b"+this.bfrag_index);
 			if(fragments.b[i].type.indexOf("CIon") != -1 && bions.indexOf("c"+this.bfrag_index) == -1)
-				bions.push("c"+this.bfrag_index);		
+				bions.push("c"+this.bfrag_index);
 		}
 
 		for (var i = 0; i < bions.length; i++) {
 			bText = this.g.append("text")
 			.attr("x", this.x - 7)
-			.attr("y", y + 15)			
+			.attr("y", y + 15)
 			.style("font-size", "0.6em")
 			.style("fill", color)
 			.style("cursor", "default")
@@ -209,13 +209,13 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 		this.bText = this.g.append("text")
 			.attr("x", this.x - 7)
-			.attr("y", y + 15)			
+			.attr("y", y + 15)
 			.style("font-size", "0.6em")
 			.style("fill", color)
 			.style("cursor", "default")
 			//.attr("text-anchor", "middle")
 			.text(ion)
-			.attr("opacity", 0);	
+			.attr("opacity", 0);
 
 		//check if only lossy fragments
 		var blossy = true;
@@ -228,20 +228,20 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 		}
 		else {
 			this.bTail.attr("stroke", "black");
-		}		
+		}
 	}
 
 	// # yions; either normal or lossy; have different colors
 	if (fragments.y.length != 0){
 		if(fragments.b.length == 0)	//highlight full length of the fragbar
-			var highlightPath = "M" + this.x + "," + y 
-								+" L" + this.x + "," +  (y - barHeight) 
+			var highlightPath = "M" + this.x + "," + y
+								+" L" + this.x + "," +  (y - barHeight)
 								+ " L" + (this.x + tailX) + "," + (y  - barHeight - tailY);
 		else
-			var highlightPath = "M" + this.x + "," + (y - barHeight/2) 
-								+" L" + this.x + "," +  (y - barHeight) 
+			var highlightPath = "M" + this.x + "," + (y - barHeight/2)
+								+" L" + this.x + "," +  (y - barHeight)
 								+ " L" + (this.x + tailX) + "," + (y  - barHeight - tailY);
-	
+
 		this.ygroup = this.g.append("g")
 			.on("mouseover", function() {
 				var evt = d3.event;
@@ -280,8 +280,8 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 			.attr("stroke-width", this.FragKey.model.highlightWidth)
 			.attr("opacity", 0)
 			.style("cursor", "pointer")
-		
-		
+
+
 		this.yTail = this.ygroup.append("line")
 			.attr("x1", this.x)
 			.attr("y1", y - barHeight)
@@ -291,31 +291,31 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 			.attr("class", "fragBar");
 
 		var ion = "";
-		for (var i = 0; i < fragments.y.length; i++) {		
+		for (var i = 0; i < fragments.y.length; i++) {
 			if(fragments.y[i].type.indexOf("XIon") != -1)
-				ion = "x"+this.yfrag_index;		
+				ion = "x"+this.yfrag_index;
 			else if(fragments.y[i].type.indexOf("YIon") != -1)
 				ion = "y"+this.yfrag_index;
 			else if(fragments.y[i].type.indexOf("ZIon") != -1)
 				ion = "z"+this.yfrag_index;
 		}
-		
+
 //Idea for multiple texts, could be to crowded
 /*		this.yTexts = []	//Array of d3 selections
 		yions = []
-		for (var i = 0; i < fragments.y.length; i++) {		
+		for (var i = 0; i < fragments.y.length; i++) {
 			if(fragments.y[i].type.indexOf("XIon") != -1 && yions.indexOf("x"+this.yfrag_index) == -1)
-				yions.push("x"+this.yfrag_index);		
+				yions.push("x"+this.yfrag_index);
 			if(fragments.y[i].type.indexOf("YIon") != -1 && yions.indexOf("y"+this.yfrag_index) == -1)
-				yions.push("y"+this.yfrag_index);		
+				yions.push("y"+this.yfrag_index);
 			if(fragments.y[i].type.indexOf("ZIon") != -1 && yions.indexOf("z"+this.yfrag_index) == -1)
-				yions.push("z"+this.yfrag_index);		
+				yions.push("z"+this.yfrag_index);
 		}
 
 		for (var i = 0; i < yions.length; i++) {
 			yText = this.g.append("text")
 			.attr("x", this.x - 2)
-			.attr("y", y - barHeight - 7)			
+			.attr("y", y - barHeight - 7)
 			.style("font-size", "0.6em")
 			.style("fill", color)
 			.style("cursor", "default")
@@ -327,7 +327,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 		this.yText = this.g.append("text")
 			.attr("x", this.x - 2)
-			.attr("y", y - barHeight - 7)			
+			.attr("y", y - barHeight - 10)
 			.style("font-size", "0.6em")
 			.style("fill", color)
 			.style("cursor", "default")
@@ -358,7 +358,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 		.style("pointer-events", "none")
 		.attr("class", "fragBar");
 
-	//if all fragments are lossy 	
+	//if all fragments are lossy
 	if ((fragments.y.length == 0 || ylossy) && (fragments.b.length == 0 || blossy)){
 		this.fragBar.attr("stroke", this.FragKey.model.peakColour);
 	}
@@ -367,7 +367,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 	}
 
 
-			
+
 }
 
 KeyFragment.prototype.highlight = function(show, fragments){
@@ -380,7 +380,7 @@ KeyFragment.prototype.highlight = function(show, fragments){
 				if (fragments[f].type.indexOf("BIon") != -1)
 					this.bText.text("b" + this.bfrag_index)
 				if (fragments[f].type.indexOf("CIon") != -1)
-					this.bText.text("c" + this.bfrag_index)	
+					this.bText.text("c" + this.bfrag_index)
 				//if (fragments[f].type.indexOf("AIon") != -1 || fragments[f].type.indexOf("BIon") != -1 || fragments[f].type.indexOf("CIon") != -1)
 				this.bText.attr("opacity", 1);
 			}
@@ -391,7 +391,7 @@ KeyFragment.prototype.highlight = function(show, fragments){
 				if (fragments[f].type.indexOf("YIon") != -1)
 					this.yText.text("y" + this.yfrag_index)
 				if (fragments[f].type.indexOf("ZIon") != -1)
-					this.yText.text("z" + this.yfrag_index)	
+					this.yText.text("z" + this.yfrag_index)
 				//if (fragments[f].type.indexOf("XIon") != -1 || fragments[f].type.indexOf("YIon") != -1 || fragments[f].type.indexOf("ZIon") != -1)
 				this.yText.attr("opacity", 1);
 			}
@@ -403,9 +403,9 @@ KeyFragment.prototype.highlight = function(show, fragments){
 			this.yText.attr("opacity", 0);
 		}
 		if (this.bHighlight){
-			this.bHighlight.attr("opacity", 0);	
+			this.bHighlight.attr("opacity", 0);
 			this.bText.attr("opacity", 0);
-		}	
+		}
 	}
 }
 

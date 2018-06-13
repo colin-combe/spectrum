@@ -1,3 +1,24 @@
+//		a spectrum viewer
+//
+//      Copyright  2015 Rappsilber Laboratory, Edinburgh University
+//
+// 		Licensed under the Apache License, Version 2.0 (the "License");
+// 		you may not use this file except in compliance with the License.
+// 		You may obtain a copy of the License at
+//
+// 		http://www.apache.org/licenses/LICENSE-2.0
+//
+//   	Unless required by applicable law or agreed to in writing, software
+//   	distributed under the License is distributed on an "AS IS" BASIS,
+//   	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   	See the License for the specific language governing permissions and
+//   	limitations under the License.
+//
+//		authors: Lars Kolbowski
+//
+//
+//		PepInputView.js
+
 var PepInputView = Backbone.View.extend({
 
   events: {
@@ -17,7 +38,15 @@ var PepInputView = Backbone.View.extend({
 
     for (var i = 0; i < pepStrs.length; i++) {
 
-      var pep_noMods = pepStrs[i].replace(/([^#0-9])([().a-z0-9]+)/g, '$1');
+      if(pepStrs[i] != ''){
+        var firstChar = pepStrs[i][0];
+        if (firstChar == firstChar.toLowerCase()){
+          alert('peptide sequence must start with an amino acid.');
+          return;
+        }
+      }
+
+      var pep_noMods = pepStrs[i].replace(/([^#0-9])([^A-Z#]+)/g, '$1');
 
       //linkSite
       var cl_re = /#([0-9]+)?/g;
@@ -37,7 +66,7 @@ var PepInputView = Backbone.View.extend({
       //add in mods
       var pep_noCL = pepStrs[i].replace(cl_re, "");
       var modifications = [];
-      var mod_re = /([().a-z0-9]+)/g;
+      var mod_re = /([^A-Z#]+)/g;
       var offset = 1;
       while ((match = mod_re.exec(pep_noCL)) != null) {
         peptide['sequence'][match.index-offset].Modification = match[1];
@@ -46,8 +75,6 @@ var PepInputView = Backbone.View.extend({
 
       peptides.push(peptide);
     }
-
-
 
     //update model with input data
 
@@ -60,7 +87,7 @@ var PepInputView = Backbone.View.extend({
       this.model.set({JSONdata: {'Peptides': peptides, 'LinkSite': linkSites} });
 
     //ToDo: this should be handled inside the model
-    this.model.calcPrecursorMass();
+    // this.model.calcPrecursorMass();
 
   },
 

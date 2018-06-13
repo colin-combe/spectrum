@@ -3,35 +3,42 @@
     border-left: 1px solid white;
 }
 
-/*#lock{
-    margin-left: -11px;
-    margin-right: -3px;
-}*/
-
 #settingsWrapper{
     display: none;
     z-index: 2;
     right: 5%;
     top: 10%;
-    width: 800px;
-    height: auto;
-    min-width: 700px;
+    width: 550px;
+    height: 500px;
+    min-width: 500px;
+    min-height: 490px;
     /* overflow-y: auto; */
+    font-size: 10pt;
+    border: 1px solid #333;
 }
 
-#settingsWrapper .form-control{
+#settings_main .form-control{
   display: inline-block;
   background-color: #fff;
+  /* flex-grow: 1; */
 }
 
-#settingsWrapper .flex-column{
+#settings_main .settings-tab{
+  flex-grow: 1;
+}
+
+#settings_main #settingsForm{
+  flex-grow: 1;
+}
+
+#settings_main .flex-column{
    display: -webkit-flex;
    display: flex;
    -webkit-flex-direction: column;
    flex-direction: column;
 }
 
-#settingsWrapper .flex-row{
+#settings_main .flex-row{
    display: -webkit-flex;
    display: flex;
    -webkit-flex-direction: row;
@@ -40,24 +47,80 @@
    justify-content: flex-start;
 }
 
-#settingsWrapper .settings-bottom{
-  /* margin-top:10px; */
+#settings_main .flex-grow {
+    flex-grow: 1;
+    margin-left: 5px;
+}
+
+#settings_main .flex-grow input{
+    width: 100%;
+}
+
+#settings_main .midDataDiv{
+  flex-grow: 1;
+}
+
+#settings_main .label {
+    font-size: 0.9em;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 300;
+    outline: 0;
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 5px 0px;
+    line-height: 3.5em;
+}
+
+#settings_main .settings-bottom{
+  margin-bottom: 20px;
   text-align: center;
   font-size: 1.5em;
 }
 
 .settings_menu{
     font-size: 1.5em;
+    margin: -6px 0px;
+    /* border-top: 1px solid #ccc; */
+}
+
+.settings_menu .btn{
+  margin: 0px -5px 0px 0px;
+  padding-left: 18px;
+  /* border-left: 1px solid white; */
+  border-right: 1px solid white;
+  border-top: 1px solid white;
+  border-radius: 2px 10px 0 0;
+  /* background: rgba(192,206,224,1); */
+}
+.settings_menu .active{
+  background: rgba(192,206,224,1);
+}
+.settings_menu .active:hover {
+    color: #fff;
 }
 
 #settings_main{
     padding-top: 10px;
     padding-left: 10px;
     padding-right: 10px;
-    line-height: 3.48;
-    /* display: flex; */
-    /* flex-direction: column; */
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
+    height: 100%;
+}
+
+#settings_main .label .form-control{
+  height: 2.5em;
+}
+
+#settings_main #settingsPeaklist{
+  height:100%;
+}
+
+.pointer{
+  cursor: pointer;
 }
 
 .resetMod{
@@ -71,21 +134,28 @@
 }
 
 .settingsDataLeft{
-    /* margin-bottom: 30px; */
-    /* width: 40%; */
     display: inline;
-    margin-right: 4%;
-    float: left;
+    margin-right: 2%;
+    flex-grow: 5;
+    flex-basis: 340px;
 }
 
 .settingsDataRight{
-    /* width: 56%; */
+    flex-grow: 1;
 }
-.modificationTable_wrapper{
-  width: 100%
+#modificationTable_wrapper{
+  width: 100%;
+  height: auto;
 }
+
+#modificationTable_wrapperOuter{
+  width: 100%;
+  height: auto;
+  margin-top: 15px;
+}
+
 #settingsCustomCfg-input{
-  height: 400px;
+  height: 440px;
   width: 100%;
   /* margin: 0px 20% 0px 6px; */
 }
@@ -98,20 +168,7 @@
 
 #ionSelection {
     background-color: #FFF;
-    /* color: #333; */
-}
-
-#settings_main .label{
-    font-size: 0.9em;
-    cursor: pointer;
-    /* padding: 5px 15px; */
-    /* margin: 10px 0px; */
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 300;
-    outline: 0;
-    display: block;
-    white-space: nowrap;
+    color: #333;
 }
 
 #settings_main .invisible {
@@ -124,21 +181,6 @@
     font-weight: bold !important;
 }
 
-#settings_main .flex-container{
-    display: flex;
-    flex-direction: row;
-}
-
-#settings_main .flex-grow{
-    flex-grow: 1;
-    margin-left: 5px;
-}
-
-#settings_main .flex-grow input{
-    margin-bottom: 1%;
-    width: 100%;
-}
-
 #settings_main #ionList input{
     width: unset;
 }
@@ -146,13 +188,28 @@
 .settings-bottom{
   text-align: center;
   margin-top: 10px;
-  bottom: 0px;
-  position: absolute;
+  bottom: 10px;
+  /* position: absolute; */
   width: 95%;
 }
 
 #settingsPeaklist{
-  height: 180px;
-  /* width: 220px; */
+  height: 170px;
+  min-height: 140px;
+  min-width: 220px;
   white-space: nowrap;
+  line-height: 1.4em;
+  padding-left: 10px;
+  padding-top: 8px;
+}
+
+#customCfgHelp{
+  display: none;
+  height: 500px;
+  margin-bottom: 1em;
+  white-space: nowrap;
+}
+
+#toggleCustomCfgHelp{
+  margin: 0.2em 0em;
 }

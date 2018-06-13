@@ -1,13 +1,13 @@
-.mulitSelect_dropdown {
-    display:inline-block;
+.multiSelect_dropdown {
+    display: inline-block!important;
 }
 
-.mulitSelect_dropdown-content {
+.multiSelect_dropdown-content {
     display: none;
     position: absolute;
-    background-color: #091d42;
+    background-color: rgb(9, 29, 66);
     font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
-    font-size: 0.8em;
+    font-size: 0.9em;
     color: #fff;
     min-width: 160px;
     border: 1px solid #fff;
@@ -15,36 +15,40 @@
     z-index: 5000;
     margin-top: -6px;
 }
-.mulitSelect_dropdown-content li{
+.multiSelect_dropdown-content li{
     line-height: 1.2;
 }
-.mulitSelect_dropdown:hover .mulitSelect_dropdown-content {
+.multiSelect_dropdown:hover .multiSelect_dropdown-content {
     display: block;
 }
 
-.mulitSelect_dropdown .menuTitle:hover {
+.multiSelect_dropdown .menuTitle:hover {
     color: #091D42;
     background: #fff;
 }
 
-.mulitSelect_dropdown DIV UL {
+.multiSelect_dropdown DIV UL {
     list-style-type: none;
     padding: 0 5px;
     margin: 2px;
 }
 
-.mulitSelect_dropdown label {
+.multiSelect_dropdown label {
     cursor: pointer;
     display: block;
+    line-height: 1em!important;
+    padding: 0px!important;
+    font-size: 0.8em;
+    margin: 0px!important;
 }
 
-.mulitSelect_dropdown DIV LI:hover {
+.multiSelect_dropdown DIV LI:hover {
     color: #091D42;
     background: #fff;
     cursor: pointer;
 }
 
-.mulitSelect_dropdown DIV HR {
+.multiSelect_dropdown DIV HR {
     border: none;
     border-top: 1px dotted white;
     margin: 0;

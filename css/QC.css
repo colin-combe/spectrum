@@ -1,0 +1,107 @@
+
+.subViewHeader{
+  color: #ffffff;
+  padding-left: 0.5em;
+  border-top: 1px solid black;
+  border-bottom: 1px solid white;
+  background: rgb(9, 29, 66);
+}
+
+.subViewHeader .btn{
+  padding: 0px 6px;
+  font-size: smaller;
+}
+
+.errSVG {
+    width: 100%;
+    flex-grow: 1;
+}
+
+.subViewContent {
+	flex-direction: row;
+	display:  flex;
+	height: calc(100% - 20px);
+	width: 100%;
+}
+
+#subViewContent-left {
+    flex-grow:  1;
+    display:  flex;
+}
+
+#subViewContent-right {
+    flex-grow:  1;
+    /* position: relative; */
+    display:  flex;
+}
+
+
+.subViewHeader .fa{
+  margin: 2px 3px;
+}
+
+.subViewHeader .minMax{
+  position: absolute;
+  right: 5px;
+}
+
+.subViewHeader .dockRight{
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+
+.subViewHeader .dockBottom{
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.subViewHeader .dockLeft{
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}
+
+#QCdiv{
+	position: relative;
+}
+
+.subViewHeader .rightControls{
+  order;
+  float: right;
+  margin-right: 20px;
+}
+
+
+.right{
+  order: 1;
+  border-left: 1px solid;
+}
+
+.right .subViewContent-plot{
+  /* margin-top: 1em; */
+  flex-grow: 1;
+  display: flex;
+}
+
+.left{
+  order: -2;
+  border-right: 1px solid;
+}
+
+.left .subViewContent-plot{
+  margin-top: 1em;
+}
+
+.rightControls{
+  order;
+  float: right;
+  margin-right: 20px;
+}

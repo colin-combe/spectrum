@@ -1,8 +1,8 @@
 <?php
 $pepsStr = urldecode($_GET["peps"]);
 
-$pepsStr_noCL = preg_replace( '/#[0-9]?/' , '' , $pepsStr);	
-preg_match_all('/[a-z0-9_\.()]+/', $pepsStr_noCL, $matches, PREG_OFFSET_CAPTURE);
+$pepsStr_noCL = preg_replace( '/#[0-9]?/' , '' , $pepsStr);
+preg_match_all('/[^A-Z;]+/', $pepsStr_noCL, $matches, PREG_OFFSET_CAPTURE);
 
 $modifications = array();
 $aminoAcids = array();
@@ -25,30 +25,6 @@ foreach ($matches[0] as $matchgroup) {
 	}
 	$i++;
 }
-
-
-// //known modifications
-
-// $json = file_get_contents('http://129.215.14.63/xiAnnotator/annotate/knownModifications');
-// $obj = json_decode($json);
-// $knownModifications = $obj->modifications;
-
-
-// $modificationsJSON = array();
-// $i = 0;
-// foreach ($modifications as $mod) {
-// 	$mass = 0;
-// 	foreach($knownModifications as $kmod) {
-// 	    if ($mod == $kmod->id) {
-// 	        $mass = $kmod->mass;
-// 	        $aminoAcids = $kmod->aminoAcids;
-// 	        break;
-// 	    }
-// 	}
-
-// 	array_push($modificationsJSON, array('DT_RowId' => "mod_".$i, 'id' => $mod, 'mass' => $mass, 'aminoAcid' => $aminoAcids[$i]));
-// 	$i++;
-// }
 
 $modificationsJSON = array();
 $i = 0;
