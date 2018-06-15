@@ -244,13 +244,20 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 			}
 		}
 		else{
+			var clearHighlights = []
 			if(this.sticky.length != 0){
-				var oldsticky = this.sticky;
-				this.sticky = Array();
-				this.clearHighlight(oldsticky);
+
+				
+				for(f = 0; f < this.sticky.length; f++){
+					if (fragments.indexOf(this.sticky[f]) == -1)
+						clearHighlights.push(this.sticky[f]);
+				}
+				this.sticky = [];
 			}
 			for(f = 0; f < fragments.length; f++)
 				this.sticky.push(fragments[f]);
+
+			this.clearHighlight(clearHighlights);
 		}
 	},
 

@@ -65,10 +65,11 @@ function Peak (id, graph){
 	};
 
 	//svg elements
-	this.linegroup = this.graph.peaksSVG.append('g');
+	this.lineLabelGroup = this.graph.peaksSVG.append('g');
+	this.lineGroup = this.lineLabelGroup.append('g');
 
 	if (this.fragments.length > 0) {
-		this.highlightLine = this.linegroup.append('line')
+		this.highlightLine = this.lineGroup.append('line')
 								.attr("stroke", this.graph.model.highlightColour)
 								.attr("stroke-width", this.graph.model.highlightWidth)
 								.attr("opacity","0")
@@ -81,7 +82,7 @@ function Peak (id, graph){
 		var self = this;
 
 
-		this.linegroup
+		this.lineGroup
 			.on("mouseover", function() {
 				var evt = d3.event;
 				if (evt.ctrlKey){
@@ -277,8 +278,8 @@ function Peak (id, graph){
 
 			if (peakFrags.length > 0) {
 				var group = partition.group;
-				var labelgroup = self.linegroup.selectAll("g.label").data (peakFrags, makeIdentityID);
-				var labelLines = self.linegroup.selectAll("line.labelLine").data (peakFrags, makeIdentityID);
+				var labelgroup = self.lineLabelGroup.selectAll("g.label").data (peakFrags, makeIdentityID);
+				var labelLines = self.lineLabelGroup.selectAll("line.labelLine").data (peakFrags, makeIdentityID);
 
 				labelLines.enter()
 					.append("line")
@@ -363,15 +364,15 @@ function Peak (id, graph){
 		}, this);
 
 		var fset = d3.set (this.fragments.map (function (frag) { return frag.id; }));
-		this.labelgroups = self.linegroup.selectAll("g.label").filter (function(d) { return fset.has(d.id); });
+		this.labelgroups = self.lineLabelGroup.selectAll("g.label").filter (function(d) { return fset.has(d.id); });
 		this.labels = this.labelgroups.selectAll("text.peakAnnot");
 		this.labelHighlights = this.labelgroups.selectAll("text.peakAnnotHighlight");
-		this.labelLines = self.linegroup.selectAll("line.labelLine").filter (function(d) { return fset.has(d.id); });
+		this.labelLines = self.lineLabelGroup.selectAll("line.labelLine").filter (function(d) { return fset.has(d.id); });
 		this.highlight(false);
 
 	}
 
-	this.line = this.linegroup.append('line')
+	this.line = this.lineGroup.append('line')
 					.attr("stroke-width","1")
 					.attr("x1", 0)
 					.attr("x2", 0);
@@ -427,7 +428,7 @@ Peak.prototype.highlight = function(show, fragments){
 			;
 			this.labels.filter(ffunc).attr("display", "inline");
 		}
-		// this.graph.peaksSVG.node().appendChild(this.linegroup.node());
+		// this.graph.peaksSVG.node().appendChild(this.lineLabelGroup.node());
 		this.line.attr("stroke", this.colour);
 	} else {
 		this.highlightLine.attr("opacity",0);
@@ -439,7 +440,7 @@ Peak.prototype.highlight = function(show, fragments){
 
 Peak.prototype.update = function(){
 
-	this.linegroup.attr("transform", "translate("+this.graph.x(this.x)+",0)");
+	this.lineLabelGroup.attr("transform", "translate("+this.graph.x(this.x)+",0)");
 	var xDomain = this.graph.x.domain();
 	if (this.x > xDomain[0] && this.x < xDomain[1]){
 		//reset label lines
@@ -455,9 +456,9 @@ Peak.prototype.update = function(){
 		this.updateX(xDomain);
 		this.updateY();
 		//show peaks
-		this.linegroup.attr("display","inline");
+		this.lineLabelGroup.attr("display","inline");
 	} else {
-		this.linegroup.attr("display","none");
+		this.lineLabelGroup.attr("display","none");
 	}
 }
 
