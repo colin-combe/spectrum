@@ -9,9 +9,9 @@ var SpectrumView = Backbone.View.extend({
 		'click #clearHighlights' : 'clearHighlights',
 		'click #measuringTool': 'measuringTool',
 		'click #moveLabels': 'moveLabels',
-		'click #downloadSVG': 'downloadSVG',
+		'click #xispec_dl_spectrum_SVG': 'downloadSVG',
 		'click #toggleSettings' : 'toggleSettings',
-		'click #revertAnnotation' : 'revertAnnotation',
+		'click #xispec_revertAnnotation' : 'revertAnnotation',
 		'click #toggleSpecList' : 'toggleSpecList',
 	  },
 
@@ -28,6 +28,7 @@ var SpectrumView = Backbone.View.extend({
 		this.listenTo(this.model, "changed:Zoom", this.updateRange);
 		this.listenTo(window, 'resize', _.debounce(this.resize));
 		this.listenTo(CLMSUI.vent, 'resize:spectrum', this.resize);
+		this.listenTo(CLMSUI.vent, 'clearSpectrumHighlights', this.clearHighlights);
 		this.listenTo(this.model, 'changed:ColorScheme', this.updateColors);
 		this.listenTo(this.model, 'changed:HighlightColor', this.updateHighlightColors);
 		this.listenTo(this.model, 'changed:Highlights', this.updateHighlights);
@@ -44,7 +45,7 @@ var SpectrumView = Backbone.View.extend({
 		$(this.el).css('background-color', '#fff');
 		this.graph.clear();
 		this.lockZoom();
-		if (this.model.JSONdata)
+		if (this.model.get("JSONdata"))
 			this.graph.setData();
 		// this.hideSpinner();
 	},
@@ -100,7 +101,6 @@ var SpectrumView = Backbone.View.extend({
 			this.model.lockZoom = false;
 			this.graph.enableZoom();
 		}
-
 	},
 
 	// toggleView: function(){
@@ -222,11 +222,11 @@ var SpectrumView = Backbone.View.extend({
 		var svgStrings = CLMSUI.svgUtils.capture (svgArr);
 		var svgXML = CLMSUI.svgUtils.makeXMLStr (new XMLSerializer(), svgStrings[0]);
 
-		var charge = this.model.JSONdata.annotation.precursorCharge;
+		var charge = this.model.get("JSONdata").annotation.precursorCharge;
 		var pepStrs = this.model.pepStrsMods;
-		var linkSites = Array(this.model.JSONdata.LinkSite.length);
+		var linkSites = Array(this.model.get("JSONdata").LinkSite.length);
 
-		this.model.JSONdata.LinkSite.forEach(function(ls){
+		this.model.get("JSONdata").LinkSite.forEach(function(ls){
 			linkSites[ls.peptideId] = ls.linkSite;
 		});
 
@@ -279,13 +279,13 @@ var SpectrumView = Backbone.View.extend({
 	enableRevertAnnotation: function(){
 		if(this.model.get('database') || !this.model.get('standalone')){
 			$(this.el).css('background-color', 'rgb(210, 224, 255)');
-			$('#revertAnnotation').addClass('btn-1a');
-			$('#revertAnnotation').removeClass('disabled');
+			$('#xispec_revertAnnotation').addClass('xispec_btn-1a');
+			$('#xispec_revertAnnotation').removeClass('disabled');
 		}
 	},
 
 	disableRevertAnnotation: function(){
-		$('#revertAnnotation').removeClass('btn-1a');
-		$('#revertAnnotation').addClass('disabled');
+		$('#xispec_revertAnnotation').removeClass('xispec_btn-1a');
+		$('#xispec_revertAnnotation').addClass('disabled');
 	},
 });

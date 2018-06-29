@@ -57,6 +57,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 	//svg elements
 	this.g = this.FragKey.g.append('g');
+  
 /*	var group = this.g
 		.on("mouseover", function() {
 			var evt = d3.event;
@@ -167,7 +168,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 			.attr("x2", this.x- tailX)
 			.attr("y2", y + tailY)
 			.style("cursor", "pointer")
-			.attr("class", "fragBar");
+			.attr("class", "xispec_fragBar");
 
 
 		var ion = "";
@@ -281,14 +282,13 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 			.attr("opacity", 0)
 			.style("cursor", "pointer")
 
-
 		this.yTail = this.ygroup.append("line")
 			.attr("x1", this.x)
 			.attr("y1", y - barHeight)
 			.attr("x2", this.x + tailX)
 			.attr("y2", y - barHeight - tailY)
 			.style("cursor", "pointer")
-			.attr("class", "fragBar");
+			.attr("class", "xispec_fragBar");
 
 		var ion = "";
 		for (var i = 0; i < fragments.y.length; i++) {
@@ -356,7 +356,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 		.attr("y2", y - barHeight)
 		.style("cursor", "pointer")
 		.style("pointer-events", "none")
-		.attr("class", "fragBar");
+		.attr("class", "xispec_fragBar");
 
 	//if all fragments are lossy
 	if ((fragments.y.length == 0 || ylossy) && (fragments.b.length == 0 || blossy)){

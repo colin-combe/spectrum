@@ -78,9 +78,9 @@ var PepInputView = Backbone.View.extend({
 
     //update model with input data
 
-    if (this.model.JSONdata !== undefined && this.model.JSONdata !== null){
-      this.model.JSONdata.Peptides = peptides;
-      this.model.JSONdata.LinkSite = linkSites;
+    if (this.model.get("JSONdata") !== undefined && this.model.get("JSONdata") !== null){
+      this.model.get("JSONdata").Peptides = peptides;
+      this.model.get("JSONdata").LinkSite = linkSites;
       this.model.trigger("change:JSONdata");
     }
     else
@@ -93,7 +93,7 @@ var PepInputView = Backbone.View.extend({
 
   render: function() {
 
-    if(this.model.peptides === undefined || this.model.JSONdata === null)
+    if(this.model.peptides === undefined || this.model.get("JSONdata") === null)
       return;
 
     var pepStrsArr = [];
@@ -102,10 +102,10 @@ var PepInputView = Backbone.View.extend({
       for(j = 0; j < this.model.peptides[i].sequence.length; j++){
         pepStrsArr[i] += this.model.peptides[i].sequence[j].aminoAcid+this.model.peptides[i].sequence[j].Modification;
         //insert the # for the crosslink
-        if (this.model.JSONdata.LinkSite.length > 0){
-          for (var k = 0; k < this.model.JSONdata.LinkSite.length; k++) {
-            if (this.model.JSONdata.LinkSite[k].peptideId == i && this.model.JSONdata.LinkSite[k].linkSite == j)
-              pepStrsArr[i] += "#" // + (this.model.JSONdata.LinkSite[k].id+1); only needed for multiple cls
+        if (this.model.get("JSONdata").LinkSite.length > 0){
+          for (var k = 0; k < this.model.get("JSONdata").LinkSite.length; k++) {
+            if (this.model.get("JSONdata").LinkSite[k].peptideId == i && this.model.get("JSONdata").LinkSite[k].linkSite == j)
+              pepStrsArr[i] += "#" // + (this.model.get("JSONdata").LinkSite[k].id+1); only needed for multiple cls
           }
         }
       }

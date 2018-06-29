@@ -21,14 +21,9 @@
 
 var CLMSUI = CLMSUI || {};
 
-var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
+var SpectrumSettingsView = Backbone.View.extend({
 
-	events: function() {
-		var parentEvents = CLMSUI.utils.BaseFrameView.prototype.events;
-		if (_.isFunction(parentEvents)) {
-				parentEvents = parentEvents();
-		}
-		return _.extend ({}, parentEvents, {
+	events : {
 		'click #lossyChkBx': 'showLossy',
 		'click #absErrChkBx': 'absErrToggle',
 		'change #colorSelector': 'changeColorScheme',
@@ -37,12 +32,11 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 		'change #settingsDecimals' : 'changeDecimals',
 		'change #highlightColor' : 'updateJScolor',
 		'change #peakHighlightMode' : 'changePeakHighlightMode',
-		'click #toggleCustomCfgHelp' : 'toggleCustomCfgHelp',
+		'click #xispec_toggleCustomCfgHelp' : 'toggleCustomCfgHelp',
 		'click #settingsCustomCfgApply' : 'applyCustomCfg',
-		'submit #settingsForm' : 'applyData',
+		'submit #xispec_settingsForm' : 'applyData',
 		// 'keyup .stepInput' : 'updateStepSizeKeyUp',
 		'change .ionSelectChkbox': 'updateIons'
-		});
 	},
 
 	identifier: "Spectrum Settings",
@@ -60,8 +54,11 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 
 		this.listenTo(CLMSUI.vent, 'spectrumSettingsShow', this.bringToTop);
 		this.listenTo(CLMSUI.vent, 'spectrumSettingsToggle', this.toggleView);
-		this.listenTo(this.model, 'change', this.render);
+// 		this.listenTo(this.model, 'change', this.render);
 		this.listenTo(this.model, 'change:JSONdata', this.render);
+
+		this.isVisible = false;
+
 		this.wrapper = d3.select(this.el);
 
 		//borrowed from CLMSUI.BaseframeView
@@ -70,13 +67,13 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 		this.wrapper.selectAll(".draggableCorner").call (drag);
 
 		//menu
-		this.menu = this.wrapper.append("div").attr("class", "settings_menu");
+		this.menu = this.wrapper.append("div").attr("class", "xispec_settings_menu");
 		var buttonData = ["Data", "Appearance", "Custom config"]
 		buttonData.forEach(function(b, i){
 			var zIndex = 20 - i;
 			var b_id = b.replace(" ", "_").toLowerCase();
 			self.menu.append("button")
-				.attr("class", "settingsTab btn btn-1a")
+				.attr("class", "settingsTab xispec_btn xispec_btn-1a")
 				.attr("data-tab", b_id)
 				.attr("id", b_id)
 				.attr("style", "z-index: " + zIndex)
@@ -89,19 +86,19 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 		}
 
 		// add active class to first tab-button
-		this.menu.select('button').classed('active', true);
+		this.menu.select('button').classed('xispec_active', true);
 
-		var mainDiv = this.wrapper.append("div").attr("id", "settings_main");
+		var mainDiv = this.wrapper.append("div").attr("id", "xispec_settings_main");
 
 		//data ToDo: change to more BBlike data handling
-		var dataTab = mainDiv.append("div").attr("class", "settings-tab flex-column").attr("id", "settings_data");
+		var dataTab = mainDiv.append("div").attr("class", "xispec_settings-tab xispec_flex-column").attr("id", "settings_data");
 
-		var dataForm = dataTab.append("form").attr("id", "settingsForm").attr("method", "post").attr("class", "flex-column");
+		var dataForm = dataTab.append("form").attr("id", "xispec_settingsForm").attr("method", "post").attr("class", "xispec_flex-column");
 
-		// var dataFlexColumn = dataForm.append("div").attr("class", "flex-column");
+		// var dataFlexColumn = dataForm.append("div").attr("class", "xispec_flex-column");
 
-		var peptideLabel = dataForm.append("label").attr("class", "flex-row").text("Peptide Sequence: ")
-		this.peptideViewEl = peptideLabel.append('div').attr('class', 'flex-grow').append("input")
+		var peptideLabel = dataForm.append("label").attr("class", "xispec_flex-row").text("Peptide Sequence: ")
+		this.peptideViewEl = peptideLabel.append('div').attr('class', 'xispec_flex-grow').append("input")
 			.attr("type", "text")
 			.attr("required", "")
 			.attr("autofocus", "")
@@ -111,32 +108,32 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 		;
 		this.pepInputView = new PepInputView({model: this.model, el: this.peptideViewEl[0] });
 
-		var dataFlexRow = dataForm.append("div").attr("class", "flex-row midDataDiv");
+		var dataFlexRow = dataForm.append("div").attr("class", "xispec_flex-row xispec_midDataDiv");
 
-		var leftDiv = dataFlexRow.append("div").attr("class", "settingsDataLeft");
+		var leftDiv = dataFlexRow.append("div").attr("class", "xispec_settingsDataLeft");
 
-		this.peaklist = leftDiv.append("label").attr("class", "flex-column").attr("style", "height: 100%").text("Peak list (m/z\tintensity): ").append("textarea")
+		this.peaklist = leftDiv.append("label").attr("class", "xispec_flex-column").attr("style", "height: 100%").text("Peak list (m/z\tintensity): ").append("textarea")
 			.attr("required", "")
-			.attr("id", "settingsPeaklist")
+			.attr("id", "xispec_settingsPeaklist")
 			.attr("type", "text")
 			.attr("placeholder", "Peak List [m/z intensity]")
 			.attr("name", "peaklist")
-			.attr("class", "form-control")
+			.attr("class", "xispec_form-control")
 		;
 
-		var rightDiv = dataFlexRow.append("div").attr("class", "settingsDataRight");
+		var rightDiv = dataFlexRow.append("div").attr("class", "xispec_settingsDataRight");
 
-		var ionSelector = rightDiv.append("label").attr("class", "flex-row").text("Fragment Ions: ")
-			.append("div").attr("class", "multiSelect_dropdown flex-grow")
+		var ionSelector = rightDiv.append("label").attr("class", "xispec_flex-row").text("Fragment Ions: ")
+			.append("div").attr("class", "xispec_multiSelect_dropdown xispec_flex-grow")
 		;
 		ionSelector.append("input")
 			.attr("type", "text")
-			.attr("class", "btn-drop")
-			.attr("id", "ionSelection")
+			.attr("class", "xispec_btn-drop")
+			.attr("id", "xispec_ionSelection")
 			.attr("readonly", "")
 		;
-		var ionSelectorDropdown = ionSelector.append("div").attr("class", "multiSelect_dropdown-content mutliSelect");
-		var ionSelectorList = ionSelectorDropdown.append("ul").attr("id", 'ionList');
+		var ionSelectorDropdown = ionSelector.append("div").attr("class", "xispec_multiSelect_dropdown-content mutliSelect");
+		var ionSelectorList = ionSelectorDropdown.append("ul").attr("id", 'xispec_ionList');
 		var ionOptions = [
 			{value: "peptide", text: "Peptide Ion"},
 			{value: "a", text: "A Ion"},
@@ -161,12 +158,12 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 			.text(function(d) { return d.text; })
 		;
 
-		this.precursorZ = rightDiv.append("label").attr("class", "flex-row").text("Precursor charge state: ").append('div').attr('class', 'flex-grow')
+		this.precursorZ = rightDiv.append("label").attr("class", "xispec_flex-row").text("Precursor charge state: ").append('div').attr('class', 'xispec_flex-grow')
 			.append("input").attr("type", "number").attr("placeholder", "Charge").attr("autocomplete", "off").attr("name", "preCharge").attr("min", "1").attr("required", "")
 		;
 
-		var toleranceWrapper = rightDiv.append("label").attr("class", "flex-row").text("MS2 tolerance: ");
-		this.toleranceValue = toleranceWrapper.append('div').attr('class', 'flex-grow').append("input")
+		var toleranceWrapper = rightDiv.append("label").attr("class", "xispec_flex-row").text("MS2 tolerance: ");
+		this.toleranceValue = toleranceWrapper.append('div').attr('class', 'xispec_flex-grow').append("input")
 			.attr("type", "text")
 			// .attr("type", "number")
 			.attr("placeholder", "tolerance")
@@ -181,14 +178,14 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 			.attr("name", "tolUnit")
 			.attr("required", "")
 			.attr("style", "width: 65px; margin-left: 8px;")
-			.attr("class", "form-control")
+			.attr("class", "xispec_form-control")
 		;
 		this.toleranceUnit.append("option").attr("value", "ppm").text("ppm");
 		this.toleranceUnit.append("option").attr("value", "Da").text("Da");
 
-		this.crossLinkerModMassWrapper = rightDiv.append("label").attr("class", "flex-row").text("Cross-linker mod mass: ");
+		this.crossLinkerModMassWrapper = rightDiv.append("label").attr("class", "xispec_flex-row").text("Cross-linker mod mass: ");
 
-		this.crossLinkerModMass = this.crossLinkerModMassWrapper.append('div').attr('class', 'flex-grow')
+		this.crossLinkerModMass = this.crossLinkerModMassWrapper.append('div').attr('class', 'xispec_flex-grow')
 			.append("input")
 				.attr("placeholder", "CL mod mass")
 				.attr("autocomplete", "off")
@@ -201,25 +198,25 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 		;
 
 		//modTable
-		var modTableWrapper = dataForm.append("div").attr("class", "form-control dataTables_wrapper").attr("id", "modificationTable_wrapperOuter");
-		var modTable = modTableWrapper.append("table").attr("id", "modificationTable").attr("style", "width: 100%");
+		var modTableWrapper = dataForm.append("div").attr("class", "xispec_form-control dataTables_wrapper").attr("id", "xispec_modificationTable_wrapperOuter");
+		var modTable = modTableWrapper.append("table").attr("id", "xispec_modificationTable").attr("style", "width: 100%");
 		this.initializeModTable();
 
 		//end modTable
-		var dataBottom = dataForm.append("div").attr("class", "settings-bottom");
+		var dataBottom = dataForm.append("div").attr("class", "xispec_settings-bottom");
 
-		var applyBtn = dataBottom.append("input").attr("class", "btn btn-1 btn-1a network-control").attr("value", "Apply").attr("id", "settingsDataApply").attr("type", "submit");
-		var cancelBtn = dataBottom.append("input").attr("class", "btn btn-1 btn-1a network-control settingsCancel").attr("value", "Cancel").attr("id", "settingsCancel").attr("type", "button");
+		var applyxispec_btn = dataBottom.append("input").attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control").attr("value", "Apply").attr("id", "settingsDataApply").attr("type", "submit");
+		var cancelxispec_btn = dataBottom.append("input").attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control settingsCancel").attr("value", "Cancel").attr("id", "settingsCancel").attr("type", "button");
 
 		//appearance
 		var appearanceTab = mainDiv.append("div")
-			.attr("class", "settings-tab flex-column")
+			.attr("class", "xispec_settings-tab xispec_flex-column")
 			.attr("id", "settings_appearance")
 			.style("display", "none")
 		;
 
-		var colorSchemeSelector = appearanceTab.append("label").attr("class", "btn").text("Color scheme: ")
-			.append("select").attr("id", 'colorSelector').attr("class", 'form-control pointer')
+		var colorSchemeSelector = appearanceTab.append("label").text("Color scheme: ")
+			.append("select").attr("id", 'colorSelector').attr("class", 'xispec_form-control pointer')
 		;
 		var colOptions = [
 			{value: "RdBu", text: "Red (& Blue)"},
@@ -236,7 +233,7 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 			.text (function(d) { return d.text; })
 		;
 
-		var highlightColorSelector = appearanceTab.append("label").attr("class", "btn").text("Highlight Color: ")
+		var highlightColorSelector = appearanceTab.append("label").text("Highlight Color: ")
 			.append("input")
 				.attr("class", "jscolor pointer")
 				.attr("id", "highlightColor")
@@ -246,46 +243,46 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 		;
 		jscolor.installByClassName("jscolor");
 
-		var highlightingModeChkBx = appearanceTab.append("label").attr("class", "btn").text("Hide not selected fragments.")
+		var highlightingModeChkBx = appearanceTab.append("label").text("Hide not selected fragments.")
 			.append("input").attr("type", "checkbox").attr("id", "peakHighlightMode")
 		;
 
-		var lossyChkBx = appearanceTab.append("label").attr("class", "btn").text("Show neutral loss labels")
+		var lossyChkBx = appearanceTab.append("label").text("Show neutral loss labels")
 			.append("input").attr("type", "checkbox").attr("id", "lossyChkBx")
 		;
 
-		this.decimals = appearanceTab.append("label").attr("class", "btn").text("Number of decimals to display: ")
+		this.decimals = appearanceTab.append("label").text("Number of decimals to display: ")
 			.append("input").attr("type", "number").attr("id", "settingsDecimals").attr("min", "1").attr("max", "10").attr("autocomplete", "off")
 		;
 
-		this.absoluteError = appearanceTab.append("label").attr("class", "btn").text("Absolute error values (QC): ")
+		this.absoluteError = appearanceTab.append("label").text("Absolute error values (QC): ")
 			.append("input").attr("type", "checkbox").attr("id", "absErrChkBx")
 		;
 
 
 		//custom config
-		var customConfigTab = mainDiv.append("div").attr("class", "settings-tab flex-column").attr("id", "settings_custom_config").style("display", "none");
+		var customConfigTab = mainDiv.append("div").attr("class", "xispec_settings-tab xispec_flex-column").attr("id", "settings_custom_config").style("display", "none");
 		customConfigTab.append('div').attr('id', 'toggleCustomCfgHelp').attr('class', 'pointer').text('Help ').append('i').attr("class", "fa fa-question-circle").attr("aria-hidden", "true");
 		customConfigTab.append("textarea")
 			.attr("id", "customCfgHelp")
-			.attr("class", "form-control")
+			.attr("class", "xispec_form-control")
 			.text('# enable double fragmentation within one fragment\n# also fragmentation events on both peptides\nfragment:BLikeDoubleFragmentation\n\n# custom loss definition examples\n## Water\nloss:AminoAcidRestrictedLoss:NAME:H20;aminoacids:S,T,D,E;MASS:18.01056027;cterm\n## Amonia\nloss:AminoAcidRestrictedLoss:NAME:NH3;aminoacids:R,K,N,Q;MASS:17.02654493;nterm\n## AIons as loss from BIons\n## when defiend as loss the matched fragments will have less impact on the score then matching A-Ions\nloss:AIonLoss\n\n# also match peaks if they are one dalton off - assuming that sometimes the monoisotopic peak is missing\nMATCH_MISSING_MONOISOTOPIC:(true|false)');
-		this.customConfigInput = customConfigTab.append("textarea").attr("id", "settingsCustomCfg-input").attr("class", "form-control");
-		var customConfigBottom = customConfigTab.append("div").attr("class", "settings-bottom");
-		var customConfigSubmit = customConfigBottom.append("input").attr("class", "btn btn-1 btn-1a network-control").attr("value", "Apply").attr("id", "settingsCustomCfgApply").attr("type", "submit");
+		this.customConfigInput = customConfigTab.append("textarea").attr("id", "xispec_settingsCustomCfg-input").attr("class", "xispec_form-control");
+		var customConfigBottom = customConfigTab.append("div").attr("class", "xispec_settings-bottom");
+		var customConfigSubmit = customConfigBottom.append("input").attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control").attr("value", "Apply").attr("id", "settingsCustomCfgApply").attr("type", "submit");
 
 		d3.select(this.el).selectAll("label")
-			.classed ("label", true)
+			.classed ("xispec_label", true)
 		;
 
 		d3.select(this.el).selectAll("input[type=text]")
-			.classed ("form-control", true)
+			.classed ("xispec_form-control", true)
 		;
 		d3.select(this.el).selectAll("input[type=number]")
-			.classed ("form-control", true)
+			.classed ("xispec_form-control", true)
 		;
 		d3.select(this.el).selectAll("input[type=textarea]")
-			.classed ("form-control", true)
+			.classed ("xispec_form-control", true)
 		;
 
 	},
@@ -298,7 +295,7 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 
 	applyCustomCfg: function(e){
 
-		this.model.otherModel.customSettings = $("#settingsCustomCfg-input").val().split("\n");
+		this.model.otherModel.customSettings = $("#xispec_settingsCustomCfg-input").val().split("\n");
 		var json = this.model.get("JSONrequest");
 		// if(this.model.MSnTolerance.unit == "ppm"){
 		// 	json['annotation']['custom'] = ["LOWRESOLUTION:false"];	//ToDo: temp fix until new xiAnnotator version is released
@@ -307,7 +304,7 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 		// 	json['annotation']['custom'] = ["LOWRESOLUTION:true"];	//ToDo: temp fix until new xiAnnotator version is released
 		// }
 
-		json['annotation']['custom'] = $("#settingsCustomCfg-input").val().split("\n");
+		json['annotation']['custom'] = $("#xispec_settingsCustomCfg-input").val().split("\n");
 
 		this.model.otherModel.request_annotation(json);
 		this.model.otherModel.changedAnnotation = true;
@@ -318,6 +315,8 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 	},
 
 	toggleView: function(){
+		this.isVisible = (this.isVisible ? false : true);
+		this.render();
 		$(this.el).toggle();
 		this.modTable.draw();
 	},
@@ -334,8 +333,8 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 		}
 		var self = this;
 		var formData = new FormData($(form)[0]);
-		$('#settingsForm').hide();
-		var spinner = new Spinner({scale: 5}).spin (d3.select("#settings_main").node());
+		$('#xispec_settingsForm').hide();
+		var spinner = new Spinner({scale: 5}).spin (d3.select("#xispec_settings_main").node());
 
 		$.ajax({
 			url: self.model.baseDir+"php/formToJson.php",
@@ -352,14 +351,14 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 				self.model.otherModel.changedAnnotation = true;
 				self.model.otherModel.trigger("changed:annotation");
 				spinner.stop();
-				$('#settingsForm').show();
+				$('#xispec_settingsForm').show();
 			}
 		});
 
 		this.model.saveUserModificationsToCookie();
 		return false;
 
-		//window.SpectrumModel.request_annotation(window.SettingsSpectrumModel.JSONdata);
+		//window.SpectrumModel.request_annotation(window.SettingsSpectrummodel.get("JSONdata"));
 	},
 
 	//ToDo: improve error handling to be more informative - display outside of console
@@ -431,14 +430,14 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 			"columnDefs": [
 				{
 					"render": function ( data, type, row, meta ) {
-						return '<input class="form-control" id="modName_'+meta.row+'" title="modification code" name="mods[]" readonly type="text" value='+data+'>';
+						return '<input class="xispec_form-control" id="modName_'+meta.row+'" title="modification code" name="mods[]" readonly type="text" value='+data+'>';
 					},
 					"class": "invisible",
 					"targets": 0,
 				},
 				{
 					"render": function ( data, type, row, meta ) {
-						return row['id']+'<i class="fa fa-undo resetMod" title="reset modification to default" aria-hidden="true"></i></span>';
+						return row['id']+'<i class="fa fa-undo xispec_resetMod" title="reset modification to default" aria-hidden="true"></i></span>';
 					},
 					"targets": 1,
 				},
@@ -470,7 +469,7 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 							var stepSize = '0.'+'0'.repeat(data.toString().split('.')[1].length - 1) + 1;
 						else
 							var stepSize = 1;
-						return '<input class="form-control stepInput" id="modMass_'+meta.row+'" row="'+meta.row+'" title="modification mass" name="modMasses[]" type="text" required value='+data+' autocomplete=off>';
+						return '<input class="xispec_form-control stepInput" id="modMass_'+meta.row+'" row="'+meta.row+'" title="modification mass" name="modMasses[]" type="text" required value='+data+' autocomplete=off>';
 					},
 					"targets": 2,
 				},
@@ -498,18 +497,18 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 							}
 						}
 						data = data.split(",").join("");
-						return '<input class="form-control" id="modSpec_'+meta.row+'" row="'+meta.row+'" title="amino acids that can be modified" name="modSpecificities[]" type="text" required value='+data+' autocomplete=off>'
+						return '<input class="xispec_form-control" id="modSpec_'+meta.row+'" row="'+meta.row+'" title="amino acids that can be modified" name="modSpecificities[]" type="text" required value='+data+' autocomplete=off>'
 					},
 					"targets": 3,
 				}
 	            ]
 	    };
 
-	    this.modTable = $('#modificationTable').DataTable( modTableVars );
+	    this.modTable = $('#xispec_modificationTable').DataTable( modTableVars );
 
 
 	    //ToDo: change to BB event handling
-		$('#modificationTable').on('input', 'input', function() {
+		$('#xispec_modificationTable').on('input', 'input', function() {
 
 			var row = this.getAttribute("row");
 			var modName = $('#modName_'+row).val();
@@ -525,10 +524,10 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 
 		var displayModified = function (row){
 			row.addClass('userModified');
-			row.find(".resetMod").css("visibility", "visible");
+			row.find(".xispec_resetMod").css("visibility", "visible");
 		}
 
-		$('#modificationTable').on('click', '.resetMod', function() {
+		$('#xispec_modificationTable').on('click', '.xispec_resetMod', function() {
 			var modId = $(this).parent()[0].innerText;
 			self.model.delUserModification(modId, false);
 			self.modTable.ajax.reload();
@@ -539,23 +538,25 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 
 	render: function() {
 
+		if (!this.isVisible) return;
+
 		this.pepInputView.render();
 		this.modTable.ajax.url( this.model.baseDir + "php/convertModsToJSON.php?peps="+encodeURIComponent(this.model.pepStrsMods.join(";"))).load();
 		//ions
-		this.model.JSONdata.annotation.ions.forEach(function(ion){
+		this.model.get("JSONdata").annotation.ions.forEach(function(ion){
 			$('#'+ion.type).attr('checked', true);
 		});
 		var ionSelectionArr = new Array();
 		$('.ionSelectChkbox:checkbox:checked').each(function(){
 		    ionSelectionArr.push($(this).val());
 		});
-		$('#ionSelection').val(ionSelectionArr.join(", "));
+		$('#xispec_ionSelection').val(ionSelectionArr.join(", "));
 
 		this.peaklist[0][0].value = this.model.peaksToMGF();
-		this.precursorZ[0][0].value  = this.model.JSONdata.annotation.precursorCharge;
-		this.toleranceValue[0][0].value  = this.model.JSONdata.annotation.fragementTolerance.split(' ')[0];
-		this.toleranceUnit[0][0].value = this.model.JSONdata.annotation.fragementTolerance.split(" ")[1];
-		this.crossLinkerModMass[0][0].value = this.model.JSONdata.annotation['cross-linker'].modMass;
+		this.precursorZ[0][0].value  = this.model.get("JSONdata").annotation.precursorCharge;
+		this.toleranceValue[0][0].value  = this.model.get("JSONdata").annotation.fragementTolerance.split(' ')[0];
+		this.toleranceUnit[0][0].value = this.model.get("JSONdata").annotation.fragementTolerance.split(" ")[1];
+		this.crossLinkerModMass[0][0].value = this.model.get("JSONdata").annotation['cross-linker'].modMass;
 		this.decimals[0][0].value = this.model.showDecimals;
 
 		if(this.model.isLinear)
@@ -563,19 +564,18 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 		else
 			$(this.crossLinkerModMassWrapper[0][0]).show();
 
-		if (this.model.JSONdata.annotation.custom !== undefined)
-			this.customConfigInput[0][0].value = this.model.JSONdata.annotation.custom.join("\n");
+		if (this.model.get("JSONdata").annotation.custom !== undefined)
+			this.customConfigInput[0][0].value = this.model.get("JSONdata").annotation.custom.join("\n");
 
 		// this.updateStepSize($(this.toleranceValue[0][0]));
 		// this.updateStepSize($(this.crossLinkerModMass[0][0]));
 	},
 
 	cancel: function(){
+		this.isVisible = false;
 		$(this.wrapper[0]).hide();
 		document.getElementById('highlightColor').jscolor.hide();
 		this.model.resetModel();
-		// this.render();
-
 	},
 
 	toggleCustomCfgHelp: function(){
@@ -601,10 +601,10 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 
 	changeTab: function(e) {
 		var activeTab = $(e.currentTarget).data('tab');
-		$('.settings-tab').hide();
-		this.menu.selectAll('button').classed('active', false);
+		$('.xispec_settings-tab').hide();
+		this.menu.selectAll('button').classed('xispec_active', false);
 		$('#settings_'+activeTab).show();
-		$(e.target).addClass('active');
+		$(e.target).addClass('xispec_active');
 	},
 
 	updateJScolor: function(event) {
@@ -630,9 +630,9 @@ var SpectrumSettingsView = CLMSUI.utils.BaseFrameView.extend({
 		});
 
 		if (ionSelectionArr.length == 0)
-			$('#ionSelection').val("Select ions...");
+			$('#xispec_ionSelection').val("Select ions...");
 		else
-			$('#ionSelection').val(ionSelectionArr.join(", "));
+			$('#xispec_ionSelection').val(ionSelectionArr.join(", "));
 
 	},
 

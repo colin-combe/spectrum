@@ -28,7 +28,6 @@ d3.selection.prototype.moveToFront = function() {
 
 var FragmentationKeyView = Backbone.View.extend({
 
-
 	initialize: function() {
 		this.svg = d3.select(this.el.getElementsByTagName("svg")[0]);
 		this.fragKeyWrapper = this.svg.append("g");
@@ -55,7 +54,7 @@ var FragmentationKeyView = Backbone.View.extend({
 
 	render: function() {
 		this.clear();
-		if (this.model.JSONdata)
+		if (this.model.get("JSONdata"))
 			this.setData();
 		this.resize();
 	},
@@ -65,12 +64,12 @@ var FragmentationKeyView = Backbone.View.extend({
 		var self = this;
 
 		var pepCount = self.model.peptides.length;
-		this.linkPos = self.model.JSONdata.LinkSite;
+		this.linkPos = self.model.get("JSONdata").LinkSite;
 		this.changeCL = false;
 		this.changeMod = false;
 		this.pepModsArray = [];
 		this.peptideStrs = self.model.pepStrs;	//contains the aa sequences of the peptides in string form without modifications
-		var fragments = self.model.JSONdata.fragments;
+		var fragments = self.model.get("JSONdata").fragments;
 		this.annotations = [];
 		this.peptides = [];
 		for (var i = 0; i < this.peptideStrs.length; i++) {
@@ -101,17 +100,9 @@ var FragmentationKeyView = Backbone.View.extend({
 			}
 		}
 
-		this.tooltip = d3.select(this.el).append("span")
-			.style("font-size", "small")
-			//.style("height", "20px")
-			.style("padding", "0 5px")
-			.style("border-radius", "6px")
-			.attr("class", "tooltip")
-			.style("background-color", "black")
-			.style("color", "#ccc")
-			.style("pointer-events", "none")
-			.style("position", "absolute")
-			.style("opacity", 0);
+		this.tooltip = d3.select("body").append("span")
+			.attr("class", "xispec_tooltip")
+		;
 
 
 		this.align_peptides_to_CL();

@@ -84,16 +84,7 @@ Graph = function(targetSvg, model, options) {
 	else{
 		// target = this.g.node().parentNode.parentNode; //this would get you #spectrumPanel
 		this.tooltip = d3.select("body").append("span")
-			.style("font-size", "small")
-			.style("padding", "0 5px")
-			.style("border-radius", "6px")
-			.attr("class", "tooltip")
-			.style("background-color", "black")
-			.style("color", "#ccc")
-			.style("pointer-events", "none")
-			.style("position", "absolute")
-			.style("opacity", 0)
-			.style("z-index", 1);
+			.attr("class", "xispec_tooltip")
 	}
 
 	this.highlights = this.innerSVG.append("g").attr("class", "peakHighlights");
@@ -136,7 +127,7 @@ Graph = function(targetSvg, model, options) {
 	this.measureTooltipText['to'] = this.measureTooltip.append("text");
 	this.measureTooltipText['match'] = this.measureTooltip.append("text");
 	this.measureTooltipText['masses'] = this.measureTooltip.append("g")
-		.attr("class", "measureMasses")
+		.attr("class", "xispec_measureMasses")
 	;
 
 	// add Chart Title
@@ -179,9 +170,9 @@ Graph.prototype.setData = function(){
 	this.peaks = new Array();
 	this.pep1 = this.model.pep1;
 	this.pep2 = this.model.pep2;
-	if (this.model.JSONdata) {
-		for (var i = 0; i < this.model.JSONdata.peaks.length; i++){
-				var peak = this.model.JSONdata.peaks[i];
+	if (this.model.get("JSONdata")) {
+		for (var i = 0; i < this.model.get("JSONdata").peaks.length; i++){
+				var peak = this.model.get("JSONdata").peaks[i];
 			this.peaks.push(new Peak(i, this));
 		}
 
@@ -266,7 +257,6 @@ Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 	this.xlabel.attr("x", width/2).attr("y", height);
 	this.ylabelLeft.attr("transform","translate(" + -50 + " " + height/2+") rotate(-90)");
 	this.ylabelRight.attr("transform","translate(" + (width+45) + " " + height/2+") rotate(-90)");
-
 
 	self.redraw()();
 }
