@@ -61,17 +61,9 @@ var ErrorPlotView = Backbone.View.extend({
 		if (CLMSUI.compositeModelInst !== undefined)
 			this.tooltip = CLMSUI.compositeModelInst.get("tooltipModel");
 		else{
-			// target = window; //this would get you #spectrumPanel
 			this.tooltip = d3.select("body").append("span")
-				.style("font-size", "small")
-				.style("padding", "0 5px")
-				.style("border-radius", "6px")
-				.attr("class", "tooltip")
-				.style("background-color", "black")
-				.style("pointer-events", "none")
-				.style("position", "absolute")
-				.style("opacity", 0)
-				.style("z-index", 100);
+				.attr("class", "xispec_tooltip")
+			;
 		}
 
 		this.listenTo(this.model, 'change', this.render);
@@ -92,11 +84,11 @@ var ErrorPlotView = Backbone.View.extend({
 			var svgStrings = CLMSUI.svgUtils.capture (svgArr);
 			var svgXML = CLMSUI.svgUtils.makeXMLStr (new XMLSerializer(), svgStrings[0]);
 
-			var charge = this.model.JSONdata.annotation.precursorCharge;
+			var charge = this.model.get("JSONdata").annotation.precursorCharge;
 			var pepStrs = this.model.pepStrsMods;
-			var linkSites = Array(this.model.JSONdata.LinkSite.length);
+			var linkSites = Array(this.model.get("JSONdata").LinkSite.length);
 
-			this.model.JSONdata.LinkSite.forEach(function(ls){
+			this.model.get("JSONdata").LinkSite.forEach(function(ls){
 				linkSites[ls.peptideId] = ls.linkSite;
 			});
 
@@ -138,7 +130,7 @@ var ErrorPlotView = Backbone.View.extend({
 
 	render: function() {
 
-		if (this.model.JSONdata === undefined || this.model.JSONdata === null || !this.isVisible || !this.wrapperVisible)
+		if (this.model.get("JSONdata") === undefined || this.model.get("JSONdata") === null || !this.isVisible || !this.wrapperVisible)
 			return;
 
 		this.clear();
@@ -155,16 +147,16 @@ var ErrorPlotView = Backbone.View.extend({
 			if (fragment.type.includes("Loss"))
 				lossy = true;
 			fragment.clusterInfo.forEach(function(cluster){
-				var firstPeakId = self.model.JSONdata.clusters[cluster.Clusterid].firstPeakId;
+				var firstPeakId = self.model.get("JSONdata").clusters[cluster.Clusterid].firstPeakId;
 				var point = {
 					fragId: fragId,
 					peptideId: peptideId,
 					lossy: lossy,
-					x: self.options.xData == 'Intensity' ? self.model.JSONdata.peaks[firstPeakId].intensity : self.model.JSONdata.peaks[firstPeakId].mz,
+					x: self.options.xData == 'Intensity' ? self.model.get("JSONdata").peaks[firstPeakId].intensity : self.model.get("JSONdata").peaks[firstPeakId].mz,
 					error: cluster.error,
 					y: self.absolute ? Math.abs(cluster.error) : cluster.error,
-					charge: self.model.JSONdata.clusters[cluster.Clusterid].charge,
-					//mz: self.model.JSONdata.peaks[firstPeakId].mz
+					charge: self.model.get("JSONdata").clusters[cluster.Clusterid].charge,
+					//mz: self.model.get("JSONdata").peaks[firstPeakId].mz
 				}
 				self.data.push(point);
 			});

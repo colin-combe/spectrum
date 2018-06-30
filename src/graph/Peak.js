@@ -19,14 +19,14 @@
 //		graph/Peak.js
 
 function Peak (id, graph){
-	var peak = graph.model.JSONdata.peaks[id];
+	var peak = graph.model.get("JSONdata").peaks[id];
 	this.id = id;
 	this.x = peak.mz;
 	this.y = peak.intensity;
 	this.IsotopeClusters = [];
 	this.labels = [];
 	for (i=0; i<peak.clusterIds.length; i++){
-		cluster = graph.model.JSONdata.clusters[peak.clusterIds[i]]
+		cluster = graph.model.get("JSONdata").clusters[peak.clusterIds[i]]
 		cluster.id = peak.clusterIds[i]
 		this.IsotopeClusters.push(cluster);
 	}
@@ -81,7 +81,6 @@ function Peak (id, graph){
 		//set the dom events for it
 		var self = this;
 
-
 		this.lineGroup
 			.on("mouseover", function() {
 				var evt = d3.event;
@@ -135,7 +134,7 @@ function Peak (id, graph){
 					for (var i = 0; i < self.clusterIds.length; i++) {
 						if(fragments[f].clusterIds.indexOf(self.clusterIds[i]) != -1){
 							index = fragments[f].clusterIds.indexOf(self.clusterIds[i])
-							cluster = graph.model.JSONdata.clusters[self.clusterIds[i]]
+							cluster = graph.model.get("JSONdata").clusters[self.clusterIds[i]]
 						}
 					}
 
@@ -218,7 +217,6 @@ function Peak (id, graph){
 			self.graph.model.updateStickyHighlight(fragments, ctrl);
 		};
 
-
 	  	//create frag labels
 	  	//labeldrag
 		this.labelDrag = d3.behavior.drag();
@@ -278,19 +276,19 @@ function Peak (id, graph){
 
 			if (peakFrags.length > 0) {
 				var group = partition.group;
-				var labelgroup = self.lineLabelGroup.selectAll("g.label").data (peakFrags, makeIdentityID);
-				var labelLines = self.lineLabelGroup.selectAll("line.labelLine").data (peakFrags, makeIdentityID);
+				var labelgroup = self.lineLabelGroup.selectAll("g.xispec_label").data (peakFrags, makeIdentityID);
+				var labelLines = self.lineLabelGroup.selectAll("line.xispec_labelLine").data (peakFrags, makeIdentityID);
 
 				labelLines.enter()
 					.append("line")
 					.attr("stroke-width", 1)
 					.attr("stroke", "Black")
-					.attr("class", "labelLine")
+					.attr("class", "xispec_labelLine")
 					.style("stroke-dasharray", ("3, 3"));
 
 				var label = labelgroup.enter()
 					.append("g")
-						.attr("class", "label")
+						.attr("class", "xispec_label")
 						.style("cursor", "pointer")
 						.on("mouseover", function(d) {
 							var evt = d3.event;
@@ -346,7 +344,7 @@ function Peak (id, graph){
 					.attr("text-anchor", "middle")
 					.style("stroke-width", "6px")
 					.style("font-size", "0.8em")
-					.attr("class", "peakAnnotHighlight")
+					.attr("class", "xispec_peakAnnotHighlight")
 					.attr("stroke", this.graph.model.highlightColour);
 
 			   	label.append("text")
@@ -354,7 +352,7 @@ function Peak (id, graph){
 					.attr("x", 0)
 					.attr("text-anchor", "middle")
 					.style("font-size", "0.8em")
-					.attr("class", "peakAnnot")
+					.attr("class", "xispec_peakAnnot")
 					.attr ("fill", function(d) {
 						var pepIndex = d.peptideId+1;
 						return self.graph.model["p" + pepIndex + partition.colourClass];
@@ -364,10 +362,10 @@ function Peak (id, graph){
 		}, this);
 
 		var fset = d3.set (this.fragments.map (function (frag) { return frag.id; }));
-		this.labelgroups = self.lineLabelGroup.selectAll("g.label").filter (function(d) { return fset.has(d.id); });
-		this.labels = this.labelgroups.selectAll("text.peakAnnot");
-		this.labelHighlights = this.labelgroups.selectAll("text.peakAnnotHighlight");
-		this.labelLines = self.lineLabelGroup.selectAll("line.labelLine").filter (function(d) { return fset.has(d.id); });
+		this.labelgroups = this.lineLabelGroup.selectAll("g.xispec_label").filter (function(d) { return fset.has(d.id); });
+		this.labels = this.labelgroups.selectAll("text.xispec_peakAnnot");
+		this.labelHighlights = this.labelgroups.selectAll("text.xispec_peakAnnotHighlight");
+		this.labelLines = this.labelgroups.selectAll("line.xispec_labelLine").filter (function(d) { return fset.has(d.id); });
 		this.highlight(false);
 
 	}

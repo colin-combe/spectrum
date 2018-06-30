@@ -1,51 +1,51 @@
 
-.subViewHeader{
+.xispec_subViewHeader{
   color: #ffffff;
   padding-left: 0.5em;
   border-top: 1px solid black;
   border-bottom: 1px solid white;
-  background: rgb(9, 29, 66);
+  background: rgba(117, 0, 0, 1);
 }
 
-.subViewHeader .btn{
+.xispec_subViewHeader .xispec_btn{
   padding: 0px 6px;
   font-size: smaller;
 }
 
-.errSVG {
+.xispec_errSVG {
     width: 100%;
     flex-grow: 1;
 }
 
-.subViewContent {
+.xispec_subViewContent {
 	flex-direction: row;
 	display:  flex;
 	height: calc(100% - 20px);
 	width: 100%;
 }
 
-#subViewContent-left {
+#xispec_subViewContent-left {
     flex-grow:  1;
     display:  flex;
 }
 
-#subViewContent-right {
+#xispec_subViewContent-right {
     flex-grow:  1;
     /* position: relative; */
     display:  flex;
 }
 
 
-.subViewHeader .fa{
+.xispec_subViewHeader .fa{
   margin: 2px 3px;
 }
 
-.subViewHeader .minMax{
+.xispec_subViewHeader .minMax{
   position: absolute;
   right: 5px;
 }
 
-.subViewHeader .dockRight{
+.xispec_subViewHeader .xispec_dockRight{
     -webkit-transform: rotate(90deg);
     -moz-transform: rotate(90deg);
     -o-transform: rotate(90deg);
@@ -53,7 +53,7 @@
     transform: rotate(90deg);
 }
 
-.subViewHeader .dockBottom{
+.xispec_subViewHeader .xispec_dockBottom{
     -webkit-transform: rotate(180deg);
     -moz-transform: rotate(180deg);
     -o-transform: rotate(180deg);
@@ -61,7 +61,7 @@
     transform: rotate(180deg);
 }
 
-.subViewHeader .dockLeft{
+.xispec_subViewHeader .xispec_dockLeft{
     -webkit-transform: rotate(-90deg);
     -moz-transform: rotate(-90deg);
     -o-transform: rotate(-90deg);
@@ -69,38 +69,38 @@
     transform: rotate(-90deg);
 }
 
-#QCdiv{
+#xispec_QCdiv{
 	position: relative;
 }
 
-.subViewHeader .rightControls{
+.xispec_subViewHeader .xispec_rightControls{
   order;
   float: right;
   margin-right: 20px;
 }
 
 
-.right{
+.xispec_QCdiv-right{
   order: 1;
   border-left: 1px solid;
 }
 
-.right .subViewContent-plot{
+.xispec_QCdiv-right .xispec_subViewContent-plot{
   /* margin-top: 1em; */
   flex-grow: 1;
   display: flex;
 }
 
-.left{
+.xispec_QCdiv-left{
   order: -2;
   border-right: 1px solid;
 }
 
-.left .subViewContent-plot{
+.xispec_QCdiv-left .xispec_subViewContent-plot{
   margin-top: 1em;
 }
 
-.rightControls{
+.xispec_rightControls{
   order;
   float: right;
   margin-right: 20px;
