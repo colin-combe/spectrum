@@ -352,7 +352,7 @@
     pointer-events: none;
     position: absolute;
     opacity: 0;
-    z-index: 1;
+    z-index: 50;
     font-family: "Lato-Regular", Helvetica, Arial, sans-serif;
     font-weight: 300;
     line-height: 1.3em;

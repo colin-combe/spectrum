@@ -277,7 +277,7 @@ var SpectrumView = Backbone.View.extend({
 	},
 
 	enableRevertAnnotation: function(){
-		if(this.model.get('database') || !this.model.get('standalone')){
+		if(this.model.get('database')){
 			$(this.el).css('background-color', 'rgb(210, 224, 255)');
 			$('#xispec_revertAnnotation').addClass('xispec_btn-1a');
 			$('#xispec_revertAnnotation').removeClass('disabled');

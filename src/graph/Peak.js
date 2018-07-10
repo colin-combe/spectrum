@@ -362,10 +362,13 @@ function Peak (id, graph){
 		}, this);
 
 		var fset = d3.set (this.fragments.map (function (frag) { return frag.id; }));
-		this.labelgroups = this.lineLabelGroup.selectAll("g.xispec_label").filter (function(d) { return fset.has(d.id); });
-		this.labels = this.labelgroups.selectAll("text.xispec_peakAnnot");
-		this.labelHighlights = this.labelgroups.selectAll("text.xispec_peakAnnotHighlight");
-		this.labelLines = this.labelgroups.selectAll("line.xispec_labelLine").filter (function(d) { return fset.has(d.id); });
+		var labelgroups = this.lineLabelGroup.selectAll("g.xispec_label").filter (function(d) { return fset.has(d.id); });
+
+		this.labels = labelgroups.selectAll("text.xispec_peakAnnot");
+		this.labelHighlights = labelgroups.selectAll("text.xispec_peakAnnotHighlight");
+
+		this.labelLines = this.lineLabelGroup.selectAll("line.xispec_labelLine").filter (function(d) { return fset.has(d.id); });
+
 		this.highlight(false);
 
 	}

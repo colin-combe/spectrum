@@ -205,8 +205,18 @@ var SpectrumSettingsView = Backbone.View.extend({
 		//end modTable
 		var dataBottom = dataForm.append("div").attr("class", "xispec_settings-bottom");
 
-		var applyxispec_btn = dataBottom.append("input").attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control").attr("value", "Apply").attr("id", "settingsDataApply").attr("type", "submit");
-		var cancelxispec_btn = dataBottom.append("input").attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control settingsCancel").attr("value", "Cancel").attr("id", "settingsCancel").attr("type", "button");
+		var applyxispec_btn = dataBottom.append("input")
+			.attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control")
+			.attr("value", "Apply")
+			.attr("id", "settingsDataApply")
+			.attr("type", "submit")
+		;
+		var cancelxispec_btn = dataBottom.append("input")
+			.attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control settingsCancel")
+			.attr("value", "Cancel")
+			.attr("id", "settingsCancel")
+			.attr("type", "button")
+		;
 
 		//appearance
 		var appearanceTab = mainDiv.append("div")
@@ -337,7 +347,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 		var spinner = new Spinner({scale: 5}).spin (d3.select("#xispec_settings_main").node());
 
 		$.ajax({
-			url: self.model.baseDir+"php/formToJson.php",
+			url: self.model.get('baseDir')+"php/formToJson.php",
 			type: 'POST',
 			data: formData,
 			async: false,
@@ -355,7 +365,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 			}
 		});
 
-		this.model.saveUserModificationsToCookie();
+// 		this.model.saveUserModificationsToCookie();
 		return false;
 
 		//window.SpectrumModel.request_annotation(window.SettingsSpectrummodel.get("JSONdata"));
@@ -404,6 +414,44 @@ var SpectrumSettingsView = Backbone.View.extend({
 			return false;
 		}
 
+
+		//modifications
+		var inputMods = this.extractModsFromPepStr(this.model.pepStrsMods.join(''));
+
+		if(formData['mods[]'][0] === undefined){
+			var formDataMods = new Array(formData['mods[]']);
+			var formDataSpecificities = new Array(formData['modSpecificities[]'])
+		}
+		else{
+			var formDataMods = formData['mods[]'];
+			var formDataSpecificities = formData['modSpecificities[]'];
+		}
+
+		for (var i = 0; i < formDataMods.length; i++) {
+			var formDataAminoAcidsArr = formDataSpecificities[i].value.split('');
+
+			var inputMod = inputMods.filter(function(mod){ return mod.id == formDataMods[i].value})[0];
+			var inputAminoAcidsArr = inputMod.aminoAcids.split('');
+
+			if(formDataAminoAcidsArr.indexOf('*') != -1){
+				console.log('ok', formDataMods[i].value);
+				// return true;
+			}
+			else{
+				for (var j = 0; j < inputAminoAcidsArr.length; j++) {
+					if (formDataAminoAcidsArr.indexOf(inputAminoAcidsArr[j]) == -1){
+						console.log('not ok', formDataMods[i].value);
+						alert('Invalid modification specificity for: ' + formDataMods[i].value);
+						return false;
+					}
+					// else{
+					// 	console.log('ok', formDataMods[i].value);
+					// 	return true;
+					// };
+				};
+			};
+		};
+
 		return true;
 
 	},
@@ -411,22 +459,17 @@ var SpectrumSettingsView = Backbone.View.extend({
 	initializeModTable: function(){
 		var self = this;
 		var modTableVars = {
-			// "scrollY": '130px',
 			"scrollCollapse": true,
 			"paging":   false,
 			"ordering": false,
 			"info":     false,
 			"searching":false,
-			"processing": true,
-			"serverSide": true,
-			"ajax": self.model.baseDir + "php/convertModsToJSON.php?peps=",
 			"columns": [
-				{ "title": "Mod-Input", "data": "id" },
+				{ "title": "Mod-Input" ,"className": "invisible"},
 				{ "title": "Modification", "className": "dt-center" },
 				{ "title": "Mass", "className": "dt-center" },
-				{ "title": "Specificity", "data": "aminoAcid", "className": "dt-center" },
+				{ "title": "Specificity", "className": "dt-center" },
 			],
-
 			"columnDefs": [
 				{
 					"render": function ( data, type, row, meta ) {
@@ -437,34 +480,25 @@ var SpectrumSettingsView = Backbone.View.extend({
 				},
 				{
 					"render": function ( data, type, row, meta ) {
-						return row['id']+'<i class="fa fa-undo xispec_resetMod" title="reset modification to default" aria-hidden="true"></i></span>';
+						return row[0]+'<i class="fa fa-undo xispec_resetMod" title="reset modification to default" aria-hidden="true"></i></span>';
 					},
 					"targets": 1,
 				},
 				{
 					"render": function ( data, type, row, meta ) {
 						data = 0;
-						var found = false;
+
 						var rowNode = self.modTable.rows( meta.row ).nodes().to$();
 
-						//check knownModifications first
-						if(self.model.knownModifications['modifications'] !== undefined){
-							for (var i = 0; i < self.model.knownModifications['modifications'].length; i++) {
-								if(self.model.knownModifications['modifications'][i].id == row.id)
-									data = self.model.knownModifications['modifications'][i].mass;
-									found = true;
-							}
-						}
-						//then check JSONdata annotation
-						if (!found && self.model.annotationData.modifications){
-							for (var i = 0; i < self.model.annotationData.modifications.length; i++) {
-								if(self.model.annotationData.modifications[i].id == row.id){
-									data = self.model.annotationData.modifications[i].massDifference;
-
+						for (var i = 0; i < self.model.knownModifications.length; i++) {
+							if(self.model.knownModifications[i].id == row[0]){
+								data = self.model.knownModifications[i].mass;
+								if (self.model.knownModifications[i].changed){
+									displayModified(rowNode);
 								}
 							}
 						}
-						data = parseFloat(data.toFixed(10).toString()); // limit to 10 decimal places and get rid of tailing zeroes
+						data = parseFloat(parseFloat(data).toFixed(10).toString()); // limit to 10 decimal places and get rid of tailing zeroes
 						if(data.toString().indexOf('.') !== -1)
 							var stepSize = '0.'+'0'.repeat(data.toString().split('.')[1].length - 1) + 1;
 						else
@@ -475,24 +509,18 @@ var SpectrumSettingsView = Backbone.View.extend({
 				},
 				{
 					"render": function ( data, type, row, meta ) {
-						//check knownModifications first
-						if(self.model.knownModifications['modifications'] !== undefined){
-							for (var i = 0; i < self.model.knownModifications['modifications'].length; i++) {
-								if(self.model.knownModifications['modifications'][i].id == row.id){
-									data = data.split(",");
-									data = _.union(data, self.model.knownModifications['modifications'][i].aminoAcids);
-									data.sort();
-									data = data.join("");
+						if(self.model.knownModifications !== undefined){
+							for (var i = 0; i < self.model.knownModifications.length; i++) {
+								if(self.model.knownModifications[i].id == row[0]){
+									data = data.split("");
+									if (self.model.knownModifications[i].aminoAcids == '*')
+										data = '*';
+									else{
+										data = _.union(data, self.model.knownModifications[i].aminoAcids);
+										data.sort();
+										data = data.join("");
+									}
 									var found = true;
-								}
-							}
-						}
-						//then check JSONdata annotation
-						if (!found && self.model.annotationData.modifications){
-							aminoAcids = "";
-							for (var i = 0; i < self.model.annotationData.modifications.length; i++) {
-								if(self.model.annotationData.modifications[i].id == row.id){
-									aminoAcids += self.model.annotationData.modifications[i].aminoacid;
 								}
 							}
 						}
@@ -501,11 +529,10 @@ var SpectrumSettingsView = Backbone.View.extend({
 					},
 					"targets": 3,
 				}
-	            ]
-	    };
+			]
+		};
 
 	    this.modTable = $('#xispec_modificationTable').DataTable( modTableVars );
-
 
 	    //ToDo: change to BB event handling
 		$('#xispec_modificationTable').on('input', 'input', function() {
@@ -515,10 +542,11 @@ var SpectrumSettingsView = Backbone.View.extend({
 			var modMass = parseFloat($('#modMass_'+row).val());
 			var modSpec = $('#modSpec_'+row).val();
 
-			var mod = {'id': modName, 'mass': modMass, 'aminoAcids': modSpec};
+			var mod = {'id': modName, 'mass': modMass, 'aminoAcids': modSpec.split('')};
 
-			self.model.updateUserModifications(mod, false);
-			displayModified($(this).closest("tr"));
+			var updatedMod = self.model.updateModification(mod);
+			if (!updatedMod.userMod)
+				displayModified($(this).closest("tr"));
 
 		 });
 
@@ -529,8 +557,8 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 		$('#xispec_modificationTable').on('click', '.xispec_resetMod', function() {
 			var modId = $(this).parent()[0].innerText;
-			self.model.delUserModification(modId, false);
-			self.modTable.ajax.reload();
+			self.model.resetModification(modId);
+			self.renderModTable();
 		});
 
 
@@ -541,7 +569,8 @@ var SpectrumSettingsView = Backbone.View.extend({
 		if (!this.isVisible) return;
 
 		this.pepInputView.render();
-		this.modTable.ajax.url( this.model.baseDir + "php/convertModsToJSON.php?peps="+encodeURIComponent(this.model.pepStrsMods.join(";"))).load();
+
+		this.renderModTable();
 		//ions
 		this.model.get("JSONdata").annotation.ions.forEach(function(ion){
 			$('#'+ion.type).attr('checked', true);
@@ -569,6 +598,55 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 		// this.updateStepSize($(this.toleranceValue[0][0]));
 		// this.updateStepSize($(this.crossLinkerModMass[0][0]));
+	},
+
+	extractModsFromPepStr: function(pepStrMods){
+		var modifications = new Array();
+
+		var re = /[^A-Z]+/g;
+		var result;
+		while (result = re.exec(pepStrMods)) {
+
+			new_mod = {};
+			new_mod.id = result[0];
+			new_mod.aminoAcids = pepStrMods[result.index - 1];
+
+			var found = false;
+			for (var i=0; i < modifications.length; i++) {
+				if (modifications[i].id === new_mod.id) {
+					var found = true;
+					if (modifications[i].aminoAcids.indexOf(new_mod.aminoAcids) == -1)
+						modifications[i].aminoAcids += new_mod.aminoAcids;
+					break;
+				}
+			}
+			if (!found) modifications.push(new_mod);
+		}
+
+		return modifications;
+	},
+
+	renderModTable: function(){
+
+		// ToDo: modifications might be better placed inside model
+		var modifications = this.extractModsFromPepStr(this.model.pepStrsMods.join(''));
+
+		var self = this;
+		this.modTable.clear();
+
+		if(modifications.length == 0) {
+			this.modTable.draw( false );
+		}
+		else{
+			modifications.forEach(function(mod){
+				self.modTable.row.add( [
+					mod.id,
+					mod.id,
+					0,
+					mod.aminoAcids,
+				] ).draw( false );
+			});
+		}
 	},
 
 	cancel: function(){

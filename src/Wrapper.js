@@ -177,7 +177,7 @@ xiSPEC.convert_to_json_request = function (data) {
 	}
     if (data.sequence2 !== undefined) {
         peptides[1] = xiSPEC.arrayifyPeptide(data.sequence2);
-        linkSites[1] = {"id":0, "peptideId":1, "linkSite": data.linkPos1}
+        linkSites[1] = {"id":0, "peptideId":1, "linkSite": data.linkPos2}
     }
 
 	var peaks = [];

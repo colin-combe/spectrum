@@ -185,8 +185,8 @@ var FragmentationKeyView = Backbone.View.extend({
 					self.tooltip.transition()
 							.duration(200)
 							.style("opacity", .9);
-					self.tooltip.style("left", (d3.event.layerX + 15) + "px")
-							.style("top", (d3.event.layerY) + "px");
+					self.tooltip.style("left", (d3.event.pageX + 15) + "px")
+							.style("top", (d3.event.pageY) + "px");
 				}
 			});
 
@@ -264,8 +264,8 @@ var FragmentationKeyView = Backbone.View.extend({
 					self.tooltip.transition()
 							.duration(200)
 							.style("opacity", .9);
-					self.tooltip.style("left", (d3.event.layerX + 15) + "px")
-							.style("top", (d3.event.layerY) + "px");
+					self.tooltip.style("left", (d3.event.pageX + 15) + "px")
+							.style("top", (d3.event.pageY) + "px");
 				});
 				this.origCL.on("mouseout", function(){
 					self.origCLHighlight.attr("opacity", 0);
@@ -458,17 +458,16 @@ var FragmentationKeyView = Backbone.View.extend({
 					var y = 83;
 
 				//check if it is a valid modification change
-/*				if (self.model.checkForValidModification(self.changeMod.mod, pepLetterData.aminoAcid)){
+				if (self.model.checkForValidModification(self.changeMod.fullMod, pepLetterData.aminoAcid)){
 					self.validModChange = true;
-					pepLetterHighlight.setAttribute("style", "cursor:pointer");
-					pepLetter.setAttribute("style", "cursor:pointer");
+					pepLetterHighlight.style("cursor","pointer");
+					pepLetter.style("cursor","pointer");
 				}
 				else{
 					self.validModChange = false;
-					pepLetterHighlight.setAttribute("style", "cursor:not-allowed");
-					pepLetter.setAttribute("style", "cursor:not-allowed");
-				}*/
-				//
+					pepLetterHighlight.style("cursor","not-allowed");
+					pepLetter.style("cursor","not-allowed");
+				}
 				if (pepLetterData.pepIndex == 0)
 					var color = self.model.p1color;
 				else if (pepLetterData.pepIndex == 1)
