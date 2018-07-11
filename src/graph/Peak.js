@@ -217,8 +217,8 @@ function Peak (id, graph){
 			self.graph.model.updateStickyHighlight(fragments, ctrl);
 		};
 
-	  	//create frag labels
-	  	//labeldrag
+		//create frag labels
+		//labeldrag
 		this.labelDrag = d3.behavior.drag();
 		this.labelDrag
 			.on("dragstart", function(){
@@ -347,12 +347,15 @@ function Peak (id, graph){
 					.attr("class", "xispec_peakAnnotHighlight")
 					.attr("stroke", this.graph.model.highlightColour);
 
-			   	label.append("text")
+				label.append("text")
 					.text(function(d) {return d.name;})
 					.attr("x", 0)
 					.attr("text-anchor", "middle")
 					.style("font-size", "0.8em")
-					.attr("class", "xispec_peakAnnot")
+					.attr("class", function(d){
+						var pepIndex = d.peptideId+1;
+						return "xispec_peakAnnot pep" + pepIndex + " " + partition.colourClass;
+					})
 					.attr ("fill", function(d) {
 						var pepIndex = d.peptideId+1;
 						return self.graph.model["p" + pepIndex + partition.colourClass];
@@ -562,6 +565,18 @@ Peak.prototype.updateColor = function(){
 			this.colour = this.graph.model.p2color_cluster;
 	}
 	this.line.attr("stroke", this.colour);
-	if(this.labels.length)
-		this.labels.attr("fill", this.colour);
+	if(this.labels.length){
+
+		var filter_p1 = function(label){ return label.peptideId == 0};
+		var filter_p2 = function(label){ return label.peptideId == 1};
+		var filter_lossy = function(label){ return label.class == "lossy"};
+		var filter_nonLossy = function(label){ return label.class == "non-lossy"};
+
+		this.labels.filter(filter_p1).filter(filter_nonLossy).attr("fill", this.graph.model.p1color);
+		this.labels.filter(filter_p1).filter(filter_lossy).attr("fill", this.graph.model.p1color_loss);
+		this.labels.filter(filter_p2).filter(filter_nonLossy).attr("fill", this.graph.model.p2color);
+		this.labels.filter(filter_p2).filter(filter_lossy).attr("fill", this.graph.model.p2color_loss);
+		
+	}
+
 }

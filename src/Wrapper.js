@@ -23,6 +23,8 @@ xiSPEC.init = function(
 	targetDiv,
 	model_variables
 ) {
+	if (model_variables === undefined)	model_variables = {};
+
 	// targetDiv could be div itself or id of div - lets deal with that
 	if (typeof targetDiv === "string"){
 		if(targetDiv.charAt(0) == "#") targetDiv = targetDiv.substr(1);
@@ -32,8 +34,6 @@ xiSPEC.init = function(
 	}
 
 	d3.select(this.targetDiv).selectAll("*").remove();
-
-	if (model_variables === undefined)	model_variables = {};
 
 	//init models
 	this.SpectrumModel = new AnnotatedSpectrumModel(model_variables);

@@ -20,7 +20,7 @@
 #xispec_settings_main .xispec_form-control{
   display: inline-block;
   background-color: #fff;
-  /* flex-grow: 1; */
+  flex-grow: 1;
 }
 
 #xispec_settings_main .xispec_settings-tab{
@@ -163,8 +163,9 @@
 }
 
 #xispec_settingsCustomCfg-input{
-  height: 440px;
-  width: 100%;
+  flex-basis: 440px;
+  /* width: 100%; */
+  /* flex-grow: 1; */
 }
 
 #xispec_settings {

@@ -25,6 +25,18 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		this.measureMode = false;
 		this.showAllFragmentsHighlight = true;
 
+		this.notUpperCase = "/[^A-Z]/g"; //change to global var
+		this.cmap = colorbrewer.RdBu[8];
+		this.p1color = this.cmap[0];
+		this.p1color_cluster = this.cmap[2];
+		this.p1color_loss = this.cmap[1];
+		this.p2color = this.cmap[7];
+		this.p2color_cluster = this.cmap[5];
+		this.p2color_loss = this.cmap[6];
+		this.peakColour = "#a6a6a6";
+		this.highlightColour = "#FFFF00";
+		this.highlightWidth = 8;
+
 		this.pepStrs = [];
 		this.pepStrsMods = [];
 		this.userModifications = [];
@@ -77,18 +89,18 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 		var JSONrequest = this.get("JSONrequest");
 
-		// knownModifications for standalone
-		// if(!this.database && JSONrequest && JSONrequest.annotation && JSONrequest.annotation.modifications){
-		// 	this.knownModifications = JSONrequest.annotation.modifications.map(function(mod){
-		// 		 var obj = {};
-		// 		 obj.id = mod.id;
-		// 		 obj.mass = parseFloat(mod.mass);
-		// 		 obj.aminoAcids = mod.aminoAcids;
-		// 		 obj.changed = false;
-		// 		 obj.userMod = true;
-		// 		 return obj;
-		// 	 });
-		// }
+		// if knownModifications are not set get them from the JSONrequest
+		if(this.knownModifications.length == 0 && JSONrequest && JSONrequest.annotation && JSONrequest.annotation.modifications){
+			this.knownModifications = JSONrequest.annotation.modifications.map(function(mod){
+				 var obj = {};
+				 obj.id = mod.id;
+				 obj.mass = parseFloat(mod.mass);
+				 obj.aminoAcids = mod.aminoAcids;
+				 obj.changed = false;
+				 obj.userMod = true;
+				 return obj;
+			 });
+		}
 
 
 		$("#measuringTool").prop("checked", false);
@@ -135,17 +147,6 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 				this.fragments[i].id = i;
 			};
 		};
-		this.notUpperCase = "/[^A-Z]/g"; //change to global var
-		this.cmap = colorbrewer.RdBu[8];
-		this.p1color = this.cmap[0];
-		this.p1color_cluster = this.cmap[2];
-		this.p1color_loss = this.cmap[1];
-		this.p2color = this.cmap[7];
-		this.p2color_cluster = this.cmap[5];
-		this.p2color_loss = this.cmap[6];
-		this.peakColour = "#a6a6a6";
-		this.highlightColour = "#FFFF00";
-		this.highlightWidth = 8;
 
 		// this.calcPrecursorMass();
 
@@ -606,6 +607,8 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 	request_annotation: function(json_request, originalMatch){
 
+		json_request['annotation']['custom'] = this.customConfig;
+		if (!this.keepCustomConfig) this.customConfig = '';
 		// ToDo: necessary?
 		this.userModifications = [];
 		this.otherModel.userModifications = [];

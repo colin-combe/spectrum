@@ -33,7 +33,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 		'change #highlightColor' : 'updateJScolor',
 		'change #peakHighlightMode' : 'changePeakHighlightMode',
 		'click #xispec_toggleCustomCfgHelp' : 'toggleCustomCfgHelp',
-		'click #settingsCustomCfgApply' : 'applyCustomCfg',
+		'click #xispec_settingsCustomCfgApply' : 'applyCustomCfg',
 		'submit #xispec_settingsForm' : 'applyData',
 		// 'keyup .stepInput' : 'updateStepSizeKeyUp',
 		'change .ionSelectChkbox': 'updateIons'
@@ -272,14 +272,29 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 		//custom config
 		var customConfigTab = mainDiv.append("div").attr("class", "xispec_settings-tab xispec_flex-column").attr("id", "settings_custom_config").style("display", "none");
-		customConfigTab.append('div').attr('id', 'toggleCustomCfgHelp').attr('class', 'pointer').text('Help ').append('i').attr("class", "fa fa-question-circle").attr("aria-hidden", "true");
+		customConfigTab.append('div')
+			.attr('id', 'xispec_toggleCustomCfgHelp')
+			.attr('class', 'pointer')
+			.text('Help ')
+			.append('i').attr("class", "fa fa-question-circle").attr("aria-hidden", "true")
+		;
 		customConfigTab.append("textarea")
-			.attr("id", "customCfgHelp")
+			.attr("id", "xispec_customCfgHelp")
 			.attr("class", "xispec_form-control")
-			.text('# enable double fragmentation within one fragment\n# also fragmentation events on both peptides\nfragment:BLikeDoubleFragmentation\n\n# custom loss definition examples\n## Water\nloss:AminoAcidRestrictedLoss:NAME:H20;aminoacids:S,T,D,E;MASS:18.01056027;cterm\n## Amonia\nloss:AminoAcidRestrictedLoss:NAME:NH3;aminoacids:R,K,N,Q;MASS:17.02654493;nterm\n## AIons as loss from BIons\n## when defiend as loss the matched fragments will have less impact on the score then matching A-Ions\nloss:AIonLoss\n\n# also match peaks if they are one dalton off - assuming that sometimes the monoisotopic peak is missing\nMATCH_MISSING_MONOISOTOPIC:(true|false)');
+			.attr("style", "display:none")
+			.text('# enable double fragmentation within one fragment\n# also fragmentation events on both peptides\nfragment:BLikeDoubleFragmentation\n\n# custom loss definition examples\n## Water\nloss:AminoAcidRestrictedLoss:NAME:H20;aminoacids:S,T,D,E;MASS:18.01056027;cterm\n## Amonia\nloss:AminoAcidRestrictedLoss:NAME:NH3;aminoacids:R,K,N,Q;MASS:17.02654493;nterm\n## AIons as loss from BIons\n## when defiend as loss the matched fragments will have less impact on the score then matching A-Ions\nloss:AIonLoss\n\n# also match peaks if they are one dalton off - assuming that sometimes the monoisotopic peak is missing\nMATCH_MISSING_MONOISOTOPIC:(true|false)')
+		;
+		var customConfigInputLabel = customConfigTab.append('label').attr("for", "xispec_settingsCustomCfg-input").text('Custom config input:');
 		this.customConfigInput = customConfigTab.append("textarea").attr("id", "xispec_settingsCustomCfg-input").attr("class", "xispec_form-control");
 		var customConfigBottom = customConfigTab.append("div").attr("class", "xispec_settings-bottom");
-		var customConfigSubmit = customConfigBottom.append("input").attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control").attr("value", "Apply").attr("id", "settingsCustomCfgApply").attr("type", "submit");
+
+		customConfigBottom.append("label").text("keep config")
+			.append("input")
+				.attr("type", "checkbox")
+				.attr("name", "keepCustomCfg")
+				.attr("id", "xispec_keepCustomCfg")
+		;
+		var customConfigSubmit = customConfigBottom.append("input").attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control").attr("value", "Apply").attr("id", "xispec_settingsCustomCfgApply").attr("type", "submit");
 
 		d3.select(this.el).selectAll("label")
 			.classed ("xispec_label", true)
@@ -305,16 +320,10 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 	applyCustomCfg: function(e){
 
-		this.model.otherModel.customSettings = $("#xispec_settingsCustomCfg-input").val().split("\n");
 		var json = this.model.get("JSONrequest");
-		// if(this.model.MSnTolerance.unit == "ppm"){
-		// 	json['annotation']['custom'] = ["LOWRESOLUTION:false"];	//ToDo: temp fix until new xiAnnotator version is released
-		// }
-		// else{
-		// 	json['annotation']['custom'] = ["LOWRESOLUTION:true"];	//ToDo: temp fix until new xiAnnotator version is released
-		// }
 
-		json['annotation']['custom'] = $("#xispec_settingsCustomCfg-input").val().split("\n");
+		this.model.otherModel.customConfig = $("#xispec_settingsCustomCfg-input").val().split("\n");
+		this.model.otherModel.keepCustomConfig = $('#xispec_keepCustomCfg').is(":checked");
 
 		this.model.otherModel.request_annotation(json);
 		this.model.otherModel.changedAnnotation = true;
@@ -356,7 +365,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 			processData: false,
 			success: function (response) {
 				var json = JSON.parse(response);
-				// json['annotation']['custom'] = "LOWRESOLUTION:false\n";	//ToDo: temp fix until new xiAnnotator version is released
+				json['annotation']['custom'] = self.model.otherModel.customConfig;
 				self.model.otherModel.request_annotation(json);
 				self.model.otherModel.changedAnnotation = true;
 				self.model.otherModel.trigger("changed:annotation");
@@ -416,42 +425,43 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 
 		//modifications
-		var inputMods = this.extractModsFromPepStr(this.model.pepStrsMods.join(''));
+		if(formData['mods[]']){
+			var inputMods = this.extractModsFromPepStr(this.model.pepStrsMods.join(''));
 
-		if(formData['mods[]'][0] === undefined){
-			var formDataMods = new Array(formData['mods[]']);
-			var formDataSpecificities = new Array(formData['modSpecificities[]'])
-		}
-		else{
-			var formDataMods = formData['mods[]'];
-			var formDataSpecificities = formData['modSpecificities[]'];
-		}
-
-		for (var i = 0; i < formDataMods.length; i++) {
-			var formDataAminoAcidsArr = formDataSpecificities[i].value.split('');
-
-			var inputMod = inputMods.filter(function(mod){ return mod.id == formDataMods[i].value})[0];
-			var inputAminoAcidsArr = inputMod.aminoAcids.split('');
-
-			if(formDataAminoAcidsArr.indexOf('*') != -1){
-				console.log('ok', formDataMods[i].value);
-				// return true;
+			if(formData['mods[]'][0] === undefined){
+				var formDataMods = new Array(formData['mods[]']);
+				var formDataSpecificities = new Array(formData['modSpecificities[]'])
 			}
 			else{
-				for (var j = 0; j < inputAminoAcidsArr.length; j++) {
-					if (formDataAminoAcidsArr.indexOf(inputAminoAcidsArr[j]) == -1){
-						console.log('not ok', formDataMods[i].value);
-						alert('Invalid modification specificity for: ' + formDataMods[i].value);
-						return false;
-					}
-					// else{
-					// 	console.log('ok', formDataMods[i].value);
-					// 	return true;
-					// };
+				var formDataMods = formData['mods[]'];
+				var formDataSpecificities = formData['modSpecificities[]'];
+			}
+
+			for (var i = 0; i < formDataMods.length; i++) {
+				var formDataAminoAcidsArr = formDataSpecificities[i].value.split('');
+
+				var inputMod = inputMods.filter(function(mod){ return mod.id == formDataMods[i].value})[0];
+				var inputAminoAcidsArr = inputMod.aminoAcids.split('');
+
+				if(formDataAminoAcidsArr.indexOf('*') != -1){
+					console.log('ok', formDataMods[i].value);
+					// return true;
+				}
+				else{
+					for (var j = 0; j < inputAminoAcidsArr.length; j++) {
+						if (formDataAminoAcidsArr.indexOf(inputAminoAcidsArr[j]) == -1){
+							console.log('not ok', formDataMods[i].value);
+							alert('Invalid modification specificity for: ' + formDataMods[i].value);
+							return false;
+						}
+						// else{
+						// 	console.log('ok', formDataMods[i].value);
+						// 	return true;
+						// };
+					};
 				};
 			};
 		};
-
 		return true;
 
 	},
@@ -571,9 +581,11 @@ var SpectrumSettingsView = Backbone.View.extend({
 		this.pepInputView.render();
 
 		this.renderModTable();
+
 		//ions
+		$('.ionSelectChkbox:checkbox').prop('checked', false);
 		this.model.get("JSONdata").annotation.ions.forEach(function(ion){
-			$('#'+ion.type).attr('checked', true);
+			$('#'+ion.type).prop('checked', true);
 		});
 		var ionSelectionArr = new Array();
 		$('.ionSelectChkbox:checkbox:checked').each(function(){
@@ -657,7 +669,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 	},
 
 	toggleCustomCfgHelp: function(){
-		$('#customCfgHelp').toggle();
+		$('#xispec_customCfgHelp').toggle();
 	},
 
 	// updateStepSizeKeyUp: function(e){
@@ -695,7 +707,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 	changePeakHighlightMode: function(event){
 		var model = this.model.otherModel; //apply changes directly for now
 		var $target = $(event.target);
-        var selected = $target .is(':checked');
+		var selected = $target .is(':checked');
 		model.showAllFragmentsHighlight = !selected;
 		model.trigger("changed:fragHighlighting");
 	},
