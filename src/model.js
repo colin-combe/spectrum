@@ -25,7 +25,6 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		this.measureMode = false;
 		this.showAllFragmentsHighlight = true;
 
-		this.notUpperCase = "/[^A-Z]/g"; //change to global var
 		this.cmap = colorbrewer.RdBu[8];
 		this.p1color = this.cmap[0];
 		this.p1color_cluster = this.cmap[2];
@@ -39,17 +38,9 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 		this.pepStrs = [];
 		this.pepStrsMods = [];
-		this.userModifications = [];
 		this.fragmentIons = [];
 		this.peakList = [];
 		this.precursorCharge = null;
-		//ToDo: reimplement userModifications
-		// if (!_.isUndefined(Cookies.get('customMods')))
-		// 	this.userModifications = JSON.parse(Cookies.get('customMods'));
-
-		$.getJSON(self.get('baseDir') + 'json/aaMasses.json', function(data) {
-    		self.aaMasses = data
-		});
 
 		//ToDo: change JSONdata gets called 3 times for some reason?
 		// define event triggers and listeners better
@@ -387,40 +378,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		this.changedAnnotation = true;
 	},
 
-	matchMassToAA: function(mass) {
-		var self = this;
-		var aaArray = this.aaMasses.filter(function(d){
-
-			if (Math.abs(mass - d.monoisotopicMass) < 0.01)
-				return true;
-			// if(self.MSnTolerance.unit == "ppm"){
-			// 	var uplim = d.monoisotopicMass + peak * self.MSnTolerance.value * 1e-6;
-			// 	var lowlim = d.monoisotopicMass - peak * self.MSnTolerance.value * 1e-6;
-			// 	if(delta < uplim && delta > lowlim)
-			// 		return true;
-			// }
-			//TODO: matchMass for Da error type
-			// if(self.MSnTolerance.unit == "Da"){
-			// 	var uplim = d.monoisotopicMass + self.MSnTolerance.value;
-			// 	var lowlim = d.monoisotopicMass - self.MSnTolerance.value;
-			// 	if(delta < uplim && delta > lowlim)
-			// 		return d.aminoAcid;
-			// }
-		}).map(function(d){return d.aminoAcid});
-		aaStr = aaArray.join();
-		return aaStr;
-	},
-
 	checkForValidModification: function(mod, aminoAcid){
-
-		// for (var i = 0; i < this.userModifications.length; i++) {
-		// 	if(this.userModifications[i].id == mod){
-		// 		if ($.inArray(aminoAcid, this.userModifications[i].aminoAcids) != -1 || this.userModifications[i].aminoAcids == [])
-		// 			return true;
-		// 		else
-		// 			return false;
-		// 	}
-		// }
 
 		for (var i = 0; i < this.knownModifications.length; i++) {
 			if(this.knownModifications[i].id == mod){
@@ -607,15 +565,15 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 	request_annotation: function(json_request, originalMatch){
 
+		if (originalMatch === undefined) originalMatch = false;
+		if (originalMatch){
+			this.originalMatchRequest = json_request;
+			this.reset_all_modifications();
+		}
+
 		json_request['annotation']['custom'] = this.customConfig;
 		if (!this.keepCustomConfig) this.customConfig = '';
-		// ToDo: necessary?
-		this.userModifications = [];
-		this.otherModel.userModifications = [];
 
-		if (originalMatch === undefined) originalMatch = false;
-
-		if (originalMatch) this.originalMatchRequest = json_request;
 
 		this.trigger('request_annotation:pending');
 		console.log("annotation request:", json_request);
@@ -658,8 +616,10 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 	resetModel: function(){
 
+		// used to reset SettingsModel
 		var json_data_copy = jQuery.extend({}, this.otherModel.get("JSONdata"));
 		var json_request_copy =  jQuery.extend({}, this.otherModel.get("JSONrequest"));
+		this.knownModifications = jQuery.extend(true, [], this.otherModel.knownModifications);
 		this.set({"JSONdata": json_data_copy, "JSONrequest": json_request_copy});
 		this.trigger("change:JSONdata");
 

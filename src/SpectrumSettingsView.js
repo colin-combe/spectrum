@@ -368,6 +368,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 				json['annotation']['custom'] = self.model.otherModel.customConfig;
 				self.model.otherModel.request_annotation(json);
 				self.model.otherModel.changedAnnotation = true;
+				self.model.otherModel.knownModifications = $.extend(true, [], self.model.knownModifications);
 				self.model.otherModel.trigger("changed:annotation");
 				spinner.stop();
 				$('#xispec_settingsForm').show();

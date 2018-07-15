@@ -68,6 +68,7 @@ var ErrorPlotView = Backbone.View.extend({
 
 		this.listenTo(this.model, 'change', this.render);
 		this.listenTo(this.model, 'changed:ColorScheme', this.render);
+		this.listenTo(this.model, 'changed:HighlightColor', this.render);
 		this.listenTo(this.model, 'changed:Highlights', this.updateHighlights);
 	},
 

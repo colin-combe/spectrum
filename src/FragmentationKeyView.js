@@ -46,7 +46,8 @@ var FragmentationKeyView = Backbone.View.extend({
 		this.listenTo(this.model, 'destroy', this.remove);
 		this.listenTo(this.model, 'changed:Highlights', this.updateHighlights);
 		this.listenTo(this.model, 'changed:ColorScheme', this.updateColors);
-		this.listenTo(this.model, 'changed:HighlightColor', this.updateHighlightColors);
+		this.listenTo(this.model, 'changed:HighlightColor', this.updateColors);
+// 		this.listenTo(this.model, 'changed:HighlightColor', this.updateHighlightColors);
 		this.listenTo(window, 'resize', _.debounce(this.resize));
 		this.listenTo(CLMSUI.vent, 'resize:spectrum', this.resize);
 
@@ -369,8 +370,8 @@ var FragmentationKeyView = Backbone.View.extend({
 						changeCrossLink(d);
 					}
 					//change the mod if changeMod is active and it's a valid modification for this aa
-					//if(self.changeMod !== false && self.validModChange){
-					if(self.changeMod !== false){
+					if(self.changeMod !== false && self.validModChange){
+// 					if(self.changeMod !== false){
 						changeMod(d);
 					}
 				})
@@ -776,31 +777,33 @@ var FragmentationKeyView = Backbone.View.extend({
 	},
 
 	updateColors: function(){
-		var lines = this.fraglines;
-		for(l = 0; l < lines.length; l++){
-			if (lines[l].peptideId == 0){
-				if (lines[l].bText) lines[l].bText.style("fill", this.model.p1color);
-				if (lines[l].yText) lines[l].yText.style("fill", this.model.p1color);
-			}
-			else if (lines[l].peptideId == 1){
-				if (lines[l].bText) lines[l].bText.style("fill", this.model.p2color);
-				if (lines[l].yText) lines[l].yText.style("fill", this.model.p2color);
-			}
-		}
-		this.colorLetters("all");
+// 		var lines = this.fraglines;
+// 		for(l = 0; l < lines.length; l++){
+// 			if (lines[l].peptideId == 0){
+// 				if (lines[l].bText) lines[l].bText.style("fill", this.model.p1color);
+// 				if (lines[l].yText) lines[l].yText.style("fill", this.model.p1color);
+// 			}
+// 			else if (lines[l].peptideId == 1){
+// 				if (lines[l].bText) lines[l].bText.style("fill", this.model.p2color);
+// 				if (lines[l].yText) lines[l].yText.style("fill", this.model.p2color);
+// 			}
+// 		}
+// 		this.colorLetters("all");
+		this.render();
+		this.updateHighlights();
 	},
 
-	updateHighlightColors: function(){
+// 	updateHighlightColors: function(){
 
-		for (var i = 0; i < this.fraglines.length; i++) {
+// 		for (var i = 0; i < this.fraglines.length; i++) {
 
-			if (this.fraglines[i].bHighlight !== undefined)
-				this.fraglines[i].bHighlight.attr("stroke", this.model.highlightColour);
-			if (this.fraglines[i].yHighlight !== undefined)
-				this.fraglines[i].yHighlight.attr("stroke", this.model.highlightColour);
-		}
+// 			if (this.fraglines[i].bHighlight !== undefined)
+// 				this.fraglines[i].bHighlight.attr("stroke", this.model.highlightColour);
+// 			if (this.fraglines[i].yHighlight !== undefined)
+// 				this.fraglines[i].yHighlight.attr("stroke", this.model.highlightColour);
+// 		}
 
-	},
+// 	},
 
 	resize: function(){
 			var parentDivWidth = $(this.el).width();

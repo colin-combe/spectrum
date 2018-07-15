@@ -489,7 +489,7 @@ Graph.prototype.measure = function(on){
 			for(i=1; i<7; i++){
 				var massObj = new Object();
 				massObj.mass = distance * i;
-				massObj.matchAA = self.model.matchMassToAA(distance * i)
+				massObj.matchAA = xiSPEC.matchMassToAA(distance * i);
 				massArr.push(massObj);
 			};
 
