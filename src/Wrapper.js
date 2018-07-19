@@ -68,6 +68,7 @@ xiSPEC.init = function(
 		+'	<button id="reset" title="Reset to initial zoom level" class="xispec_btn xispec_btn-1 xispec_btn-1a">Reset Zoom</button>'
 		+'</form>'
 		+'<i id="toggleSettings" title="Show/Hide Settings" class="xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-cog" aria-hidden="true"></i>'
+		+'<i id="xispec_revertAnnotation" title="revert to original annotation" class="xispec_btn xispec_btn-topNav fa fa-undo xispec_disabled"  aria-hidden="true"></i>'
 		+"<span id='xispec_extra_spectrumControls_after'></span>"
 		+'<a href="http://spectrumviewer.org/help.php" target="_blank"><i title="Help" class="xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-question" aria-hidden="true"></i></a>'
 		+"</div>"
@@ -128,8 +129,28 @@ xiSPEC.init = function(
 };
 
 xiSPEC.setData = function(data){
+	// EXAMPLE:
+	// xiSPEC.setData({
+	// sequence1: "KQTALVELVK",
+    // sequence2: "QNCcarbamidomethylELFEQLGEYKFQNALLVR",
+    // linkPos1: 1,
+    // linkPos2: 13,
+	// 	crossLinkerModMass: 0,
+	//	modifications: [{id: 'carbamidomethyl', mass: 57.021464, aminoAcids: ['C']}],
+	//	precursorCharge: 3,
+	//	fragmentTolerance: {"tolerance": '20.0', 'unit': 'ppm'},
+	//	ionTypes: "peptide;b;y",
+	//	precursorMz: 1012.1,
+	//	peaklist: [[mz, int], [mz, int], ...],
+	//	requestId: 1,
+	// }
+
+
+	// if (!ignoreResultUnlessLastRequested || (json && json.annotation && json.annotation.requestId && json.annotation.requestId === CLMSUI.loadSpectra.lastRequestedID)) {
+// 	if (data.annotation && data.annotation.requestId && json.annotation.requestId === CLMSUI.loadSpectra.lastRequestedID)) {
 
 	var json_request = this.convert_to_json_request(data);
+
 	this.SpectrumModel.request_annotation(json_request, true);
 
 };
@@ -164,6 +185,9 @@ xiSPEC.convert_to_json_request = function (data) {
 	}
 	if(data.fragmentTolerance === undefined){
 		data.fragmentTolerance = {"tolerance": '20.0', 'unit': 'ppm'};
+	}
+	if(data.requestID === undefined){
+		data.requestID = -1;
 	}
 
 
@@ -206,6 +230,7 @@ xiSPEC.convert_to_json_request = function (data) {
     annotationRequest.annotation.precursorMZ = +data.precursorMZ;
     annotationRequest.annotation.precursorCharge = +data.precursorCharge;
 	annotationRequest.annotation.custom = [];
+	annotationRequest.annotation.requestID = data.requestID.toString();
 
     console.log("request", annotationRequest);
 	return annotationRequest;

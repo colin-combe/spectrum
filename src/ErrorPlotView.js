@@ -155,6 +155,7 @@ var ErrorPlotView = Backbone.View.extend({
 					lossy: lossy,
 					x: self.options.xData == 'Intensity' ? self.model.get("JSONdata").peaks[firstPeakId].intensity : self.model.get("JSONdata").peaks[firstPeakId].mz,
 					error: cluster.error,
+					errorUnit: cluster.errorUnit,
 					y: self.absolute ? Math.abs(cluster.error) : cluster.error,
 					charge: self.model.get("JSONdata").clusters[cluster.Clusterid].charge,
 					//mz: self.model.get("JSONdata").peaks[firstPeakId].mz
@@ -307,7 +308,7 @@ var ErrorPlotView = Backbone.View.extend({
 
 	showTooltip: function(x, y, data){
 
-		var contents = [["charge", data.charge], ["error", data.error.toFixed(3)], [this.options.xData, data.x.toFixed(this.model.showDecimals)]];
+		var contents = [["charge", data.charge], ["error", data.error.toFixed(this.model.showDecimals) + ' ' + data.errorUnit], [this.options.xData, data.x.toFixed(this.model.showDecimals)]];
 
 		var fragId = data.fragId;
 		var fragments = this.model.fragments.filter(function(d) { return d.id == fragId; });

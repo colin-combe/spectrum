@@ -51,6 +51,10 @@ var FragmentationKeyView = Backbone.View.extend({
 		this.listenTo(window, 'resize', _.debounce(this.resize));
 		this.listenTo(CLMSUI.vent, 'resize:spectrum', this.resize);
 
+		this.tooltip = d3.select("body").append("span")
+			.attr("class", "xispec_tooltip")
+		;
+
 	},
 
 	render: function() {
@@ -101,10 +105,7 @@ var FragmentationKeyView = Backbone.View.extend({
 			}
 		}
 
-		this.tooltip = d3.select("body").append("span")
-			.attr("class", "xispec_tooltip")
-		;
-
+		this.tooltip.style("opacity", 0);
 
 		this.align_peptides_to_CL();
 
@@ -201,6 +202,12 @@ var FragmentationKeyView = Backbone.View.extend({
 			});
 
 			this.CL.on("click", function() {
+				self.tooltip.text("Now click on an amino acid to complete");
+				self.tooltip.transition()
+						.duration(200)
+						.style("opacity", .9);
+				self.tooltip.style("left", (d3.event.pageX + 15) + "px")
+						.style("top", (d3.event.pageY) + "px");
 				if (!self.changeMod){
 					self.tooltip.style("opacity", 0);
 					self.CLlineHighlight.attr("opacity", 1);
@@ -367,21 +374,30 @@ var FragmentationKeyView = Backbone.View.extend({
 				.attr('class', "pepLetterG")
 				.on("click", function(d, i) {
 					if(self.changeCL != false){
+						self.tooltip.transition()
+							.duration(500)
+							.style("opacity", 0);
 						changeCrossLink(d);
 					}
 					//change the mod if changeMod is active and it's a valid modification for this aa
 					if(self.changeMod !== false && self.validModChange){
-// 					if(self.changeMod !== false){
+						self.tooltip.transition()
+							.duration(500)
+							.style("opacity", 0);
 						changeMod(d);
 					}
 				})
 				.on("mouseover", function(d, i) {
-					if(self.changeMod !== false){	//if changeMod is active
-						changeModStartHighlight(this, d);
-					};
+					if(self.changeMod !== false || self.changeCL !== false){
+						self.tooltip.style("left", (d3.event.pageX + 15) + "px")
+							.style("top", (d3.event.pageY) + "px");
+						if(self.changeMod !== false){	//if changeMod is active
+							changeModStartHighlight(this, d);
+						};
 
-					if(self.changeCL != false){
-						changeCLHighlight(this, d);
+						if(self.changeCL != false){
+							changeCLHighlight(this, d);
+						}
 					}
 				})
 				.on("mouseout", function(d) {
@@ -613,13 +629,13 @@ var FragmentationKeyView = Backbone.View.extend({
 
 				})
 				.on("click", function(d) {
+					self.tooltip.text("Now click on an amino acid to complete");
+					self.tooltip.style("left", (d3.event.pageX + 15) + "px")
+							.style("top", (d3.event.pageY) + "px");
+
 					d3.selectAll("text.pepLetterHighlight").style("opacity", 0);
 					d3.selectAll("g.modLetterG").style("cursor", "default");
 					if (!self.changeMod  && !self.changeCL){
-
-						self.tooltip.transition()
-							.duration(500)
-							.style("opacity", 0);
 
 						if (!_.isUndefined(self.CLline))
 							self.CLline.style("cursor", "not-allowed");

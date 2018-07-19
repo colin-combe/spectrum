@@ -24,6 +24,8 @@ var SpectrumView = Backbone.View.extend({
 		var graphOptions = {xlabel:"m/z", ylabelLeft:"Intensity", ylabelRight:"% of base Peak"};
 		this.graph = new Graph (this.svg, this.model, graphOptions);
 
+		$(this.el).css('background-color', '#fff');
+
 		this.listenTo(this.model, 'change', this.render);
 		this.listenTo(this.model, "changed:Zoom", this.updateRange);
 		this.listenTo(window, 'resize', _.debounce(this.resize));
@@ -35,14 +37,13 @@ var SpectrumView = Backbone.View.extend({
 		this.listenTo(this.model, 'changed:lossyShown', this.showLossy);
 		this.listenTo(this.model, 'request_annotation:pending', this.showSpinner);
 		this.listenTo(this.model, 'request_annotation:done', this.hideSpinner);
-		this.listenTo(this.model, 'request_annotation:done', this.disableRevertAnnotation);
 		this.listenTo(this.model, 'changed:annotation', this.enableRevertAnnotation);
 		this.listenTo(this.model, 'changed:fragHighlighting', this.updatePeakHighlighting);
 		//this.listenTo(this.model, 'destroy', this.remove);
 	},
 
 	render: function() {
-		$(this.el).css('background-color', '#fff');
+// 		$(this.el).css('background-color', '#fff');
 		this.graph.clear();
 		this.lockZoom();
 		if (this.model.get("JSONdata"))
@@ -256,11 +257,9 @@ var SpectrumView = Backbone.View.extend({
 	showSpinner: function(){
 		this.graph.clear();
 		this.spinner.spin(d3.select(this.el).node());
-// 		console.log('show');
 	},
 
 	hideSpinner: function(){
-// 		console.log('hide');
 		this.spinner.stop();
 	},
 
@@ -277,15 +276,13 @@ var SpectrumView = Backbone.View.extend({
 	},
 
 	enableRevertAnnotation: function(){
-		if(this.model.get('database')){
-			$(this.el).css('background-color', 'rgb(210, 224, 255)');
-			$('#xispec_revertAnnotation').addClass('xispec_btn-1a');
-			$('#xispec_revertAnnotation').removeClass('disabled');
-		}
+		$(this.el).css('background-color', 'rgb(210, 224, 255)');
+		$('#xispec_revertAnnotation').addClass('xispec_btn-1a');
+		$('#xispec_revertAnnotation').removeClass('xispec_disabled');
 	},
 
 	disableRevertAnnotation: function(){
 		$('#xispec_revertAnnotation').removeClass('xispec_btn-1a');
-		$('#xispec_revertAnnotation').addClass('disabled');
+		$('#xispec_revertAnnotation').addClass('xispec_disabled');
 	},
 });

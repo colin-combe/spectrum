@@ -338,6 +338,11 @@
     padding-left: 0;
 }
 
+.xispec_disabled{
+  color: #999!important;
+  cursor: default;
+}
+
 .xispec_userModified{
     background-color: #a0bbde !important;
     font-weight: bold !important;
