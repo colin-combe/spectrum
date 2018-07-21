@@ -58,22 +58,20 @@ var PrecursorInfoView = Backbone.View.extend({
 	},
 
 	render: function() {
-		var data = this.model.annotationData;
+		var precursor = this.model.precursor;
 		var content = "";
 
 		var dataArr = [];
-		if (data.precursorIntensity !== undefined && data.precursorIntensity != -1)
-			dataArr.push("Intensity=" + data.precursorIntensity);
-		if (data.precursorMZ !== undefined && data.precursorMZ != -1)
-			dataArr.push("m/z=" + data.precursorMZ.toFixed(this.model.showDecimals));
-		// if(this.model.calcMass !== undefined)
-		// 	dataArr.push("calc m/z=" + (this.model.calcMass/data.precursorCharge+1.007276).toFixed(this.model.showDecimals));
-		if (data.precursorCharge !== undefined)
-			dataArr.push("z=" + data.precursorCharge);
-		if (data.precursorError !== undefined && data.precursorError != "")
-			dataArr.push("error=" + data.precursorError);
-		if (data.psmID !== undefined)
-			dataArr.push("psmID=" + data.psmID);
+		if (precursor.intensity !== undefined && precursor.intensity != -1)
+			dataArr.push("Intensity=" + precursor.intensity);
+		if (precursor.matchMz !== undefined && precursor.matchMz != -1)
+			dataArr.push("match m/z=" + precursor.matchMz.toFixed(this.model.showDecimals));
+		if(precursor.calcMz !== undefined)
+			dataArr.push("calc m/z=" + precursor.calcMz.toFixed(this.model.showDecimals));
+		if (precursor.charge !== undefined)
+			dataArr.push("z=" + precursor.charge);
+		if (precursor.error !== undefined && precursor.error != "")
+			dataArr.push("error=" + precursor.error);
 
 		content += dataArr.join("; ");
 		this.content.text(content);

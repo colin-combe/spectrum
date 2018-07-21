@@ -85,7 +85,7 @@ var ErrorPlotView = Backbone.View.extend({
 			var svgStrings = CLMSUI.svgUtils.capture (svgArr);
 			var svgXML = CLMSUI.svgUtils.makeXMLStr (new XMLSerializer(), svgStrings[0]);
 
-			var charge = this.model.get("JSONdata").annotation.precursorCharge;
+			var charge = this.model.precursor.charge;
 			var pepStrs = this.model.pepStrsMods;
 			var linkSites = Array(this.model.get("JSONdata").LinkSite.length);
 

@@ -166,7 +166,7 @@ var FragmentationKeyView = Backbone.View.extend({
 				.attr("x2", this.xStep * (CLpos - 1))
 				.attr("y2", 55)
 				.attr("stroke", "black")
-				.attr("stroke-width", 1.5)
+				.attr("stroke-width", 2.3)
 				.style("cursor", "pointer");
 
 			//line for changing
@@ -176,14 +176,14 @@ var FragmentationKeyView = Backbone.View.extend({
 				.attr("x2", this.xStep * (CLpos - 1))
 				.attr("y2", 55)
 				.attr("stroke", "black")
-				.attr("stroke-width", 1.5)
+				.attr("stroke-width", 2.3)
 				.attr("opacity", 0)
 				.style("cursor", "pointer");
 
 			this.CL.on("mouseover", function() {
 				if (!self.changeMod  && !self.changeCL){
 					self.CLlineHighlight.attr("opacity", 0.8);
-					self.tooltip.text("Click to change cross-link position");
+					self.tooltip.text("Cross-link: Click to change position");
 					self.tooltip.transition()
 							.duration(200)
 							.style("opacity", .9);
@@ -234,71 +234,6 @@ var FragmentationKeyView = Backbone.View.extend({
 			.attr("text-anchor", "middle")
 			.style("font-size", "0.7em")
 			.style("cursor", "default");
-
-		//changeInfo
-		//ToDo: make cleaner
-		if(this.model.match !== undefined){
-			if (this.model.match.oldLinkPos !== undefined){
-					var linkPos = [];
-					for (var i = 0; i < this.peptides.length; i++) {
-						linkPos.push(this.model.match.oldLinkPos[i])
-						var j = 0;
-						while(this.peptides[i][j] == "#") {
-								linkPos[i] += 1
-								j++;
-						}
-					}
-					this.origCL = this.g.append("g");
-					this.origCLHighlight = this.origCL.append("line")
-					.attr("x1", this.xStep * (linkPos[0] - 1))
-					.attr("y1", 25)
-					.attr("x2", this.xStep * (linkPos[1] - 1))
-					.attr("y2", 55)
-					.attr("stroke", this.model.highlightColour)
-					.attr("stroke-width", 5)
-					.attr("opacity", 0)
-					.style("cursor", "pointer");
-					this.origCLline = this.origCL.append("line")
-					.attr("x1", this.xStep * (linkPos[0] - 1))
-					.attr("y1", 25)
-					.attr("x2", this.xStep * (linkPos[1] - 1))
-					.attr("y2", 55)
-					.attr("stroke", "lightgrey")
-					.attr("opacity", 1)
-					.style("cursor", "pointer");
-				this.origCL.on("mouseover", function(){
-					self.origCLHighlight.attr("opacity", 1);
-					self.tooltip.text("Revert to original cross-link position");
-					self.tooltip.transition()
-							.duration(200)
-							.style("opacity", .9);
-					self.tooltip.style("left", (d3.event.pageX + 15) + "px")
-							.style("top", (d3.event.pageY) + "px");
-				});
-				this.origCL.on("mouseout", function(){
-					self.origCLHighlight.attr("opacity", 0);
-					self.tooltip.transition()
-						.duration(500)
-						.style("opacity", 0);
-				});
-				this.origCL.on("click", function(){
-					self.tooltip.transition()
-							.duration(500)
-							.style("opacity", 0);
-					self.model.changeLinkPos([self.model.match.oldLinkPos[0], self.model.match.oldLinkPos[1]]);
-				});
-				// //get position
-				// var x = 0
-				// for (var i = 0; i < this.pepLetters.length; i++) {
-				// 		if(parseInt(this.pepLetters[i][this.pepLetters[i].length-1][0][0].getAttribute("x")) > x)
-				// 			x = parseInt(this.pepLetters[i][this.pepLetters[i].length-1][0][0].getAttribute("x"));
-				// }
-				// this.changeInfo = this.g.append('g');
-				// var scoreInfo = this.changeInfo.append('text')
-				// 	.text("link was changed")
-				// 	.attr("x", x+20);
-			}
-		}
 
 	},
 
@@ -596,9 +531,10 @@ var FragmentationKeyView = Backbone.View.extend({
 						var pepIndex = this.__data__.pepIndex;
 						var pos = this.__data__.pos;
 						var modMass = this.__data__.modMass;
-						var tooltipHTML = "Click to change the position";
+						var tooltipHTML = "";
 						if (modMass !== undefined)
-							tooltipHTML += "</br>mod mass: " + modMass;
+							tooltipHTML += "Modification mass: " + modMass + "</br>";
+						tooltipHTML += "Click to change the position";
 
 						d3.select(self.pepLetterHighlights[pepIndex][0][pos]).style("opacity", 1);
 						d3.select(this).select("text.modLetterHighlight").style("opacity", 1); //highlight modLetter

@@ -366,6 +366,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 			success: function (response) {
 				var json = JSON.parse(response);
 				json['annotation']['custom'] = self.model.otherModel.customConfig;
+				json['annotation']['precursorMZ'] = self.model.otherModel.precursor.matchMz;
 				json['annotation']['requestID'] = self.model.otherModel.lastRequestedID + Date.now();
 				self.model.otherModel.request_annotation(json);
 				self.model.otherModel.changedAnnotation = true;
@@ -596,7 +597,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 		$('#xispec_ionSelection').val(ionSelectionArr.join(", "));
 
 		this.peaklist[0][0].value = this.model.peaksToMGF();
-		this.precursorZ[0][0].value  = this.model.get("JSONdata").annotation.precursorCharge;
+		this.precursorZ[0][0].value  = this.model.precursor.charge;
 		this.toleranceValue[0][0].value  = this.model.get("JSONdata").annotation.fragementTolerance.split(' ')[0];
 		this.toleranceUnit[0][0].value = this.model.get("JSONdata").annotation.fragementTolerance.split(" ")[1];
 		this.crossLinkerModMass[0][0].value = this.model.get("JSONdata").annotation['cross-linker'].modMass;

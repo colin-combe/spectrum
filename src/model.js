@@ -41,7 +41,8 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		this.pepStrsMods = [];
 		this.fragmentIons = [];
 		this.peakList = [];
-		this.precursorCharge = null;
+		this.precursor = {}
+		this.precursor.charge = null;
 
 		//ToDo: change JSONdata gets called 3 times for some reason?
 		// define event triggers and listeners better
@@ -111,7 +112,6 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 		this.fragmentIons = this.annotationData.ions || [];
 		this.peakList = JSONdata.peaks || [];
-		this.precursorCharge = this.annotationData.precursorCharge || this.get("charge");
 		var crossLinker = this.annotationData['cross-linker'];
 		if (this.annotationData['cross-linker'] !== undefined)
 			this.crossLinkerModMass = crossLinker.modMass;
@@ -139,7 +139,12 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 			};
 		};
 
-		// this.calcPrecursorMass();
+		if (JSONdata.annotation){
+			this.precursor.charge = JSONdata.annotation.precursorCharge;
+			this.precursor.matchMz = JSONdata.annotation.precursorMZ;
+			this.precursor.error = JSONdata.annotation.precursorError;
+			this.calcPrecursorMass();
+		}
 
 		this.trigger("changed:data");
 
@@ -356,18 +361,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 		var JSONdata = this.get("JSONdata");
 
-		// // don't calculate the mass if JSONdata is empty
-		// if (JSONdata === null){
-		// 	this.mass = null
-		// 	return
-		// }
-		// don't calculate the mass if it's already defined by xiAnnotator
-		if (this.annotationData !== undefined)
-			if (this.annotationData.precursorMZ !== undefined && this.annotationData.precursorMZ !== -1)
-				return;
-
-		if(this.annotationData.modifications === undefined)
-			return;
+		var modifications = this.annotationData.modifications || {};
 
 		var aastr = "ARNDCEQGHILKMFPSTWYV";
 		var mA = new Array();
@@ -394,22 +388,18 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 		var massArr = new Array();
 		var h2o = 18.010565;
-
+		var proton_mass = 1.007276466879;
 		for (var i = 0; i < this.peptides.length; i++) {
-			// if (this.modifications === undefined){
-			// 	this.modifications = new Object();
-			// 	this.modifications.data = JSONdata.annotation.modifications;
-			// }
 			massArr[i] = h2o;
 			for (var j = 0; j < this.peptides[i].sequence.length; j++) {
-				var AA = this.peptides[i].sequence[j].aminoAcid;
-				massArr[i] += mA[aastr.indexOf(AA)];
+				var AA = this.peptides[i].sequence[j];
+				massArr[i] += mA[aastr.indexOf(AA.aminoAcid)];
 				//mod
-				var mod = this.peptides[i].sequence[j].Modification;
+				var mod = AA.Modification;
 				if(mod != ""){
-					for (var k = 0; k < this.annotationData.modifications.length; k++) {
-						if (this.annotationData.modifications[k].id == mod)
-						massArr[i] += this.annotationData.modifications[k].massDifference;
+					for (var k = 0; k < modifications.length; k++) {
+						if (modifications[k].id == mod && modifications[k].aminoacid == AA.aminoAcid)
+						massArr[i] += modifications[k].massDifference;
 					}
 				}
 			}
@@ -425,12 +415,20 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		for (var i = 0; i < massArr.length; i++) {
 			totalMass += massArr[i];
 		}
+
+		if (totalMass == h2o){
+			this.precursor.calcMass = 0;
+			this.precursor.calcMz = 0;
+			return;
+		}
+
 		// NOT Multilink future proof
 		if(JSONdata.LinkSite.length > 1){
 			if (JSONdata.LinkSite[0].linkSite != -1 && JSONdata.LinkSite[1].linkSite != -1)
 				totalMass += clModMass;
 		}
-		this.calc_precursor_mass = totalMass;
+		this.precursor.calcMass = totalMass;
+		this.precursor.calcMz = (totalMass / this.precursor.charge) + proton_mass;
 		this.trigger("changed:mass");
 	},
 
@@ -468,7 +466,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 					this.knownModifications[i].original = {
 						mass: this.knownModifications[i].mass,
 						aminoAcids: this.knownModifications[i].aminoAcids
-						};
+					};
 				}
 				this.knownModifications[i].mass = update_mod.mass;
 				this.knownModifications[i].aminoAcids = update_mod.aminoAcids;

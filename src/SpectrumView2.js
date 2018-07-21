@@ -43,7 +43,9 @@ var SpectrumView = Backbone.View.extend({
 	},
 
 	render: function() {
-// 		$(this.el).css('background-color', '#fff');
+		if (!this.model.changedAnnotation){
+			this.disableRevertAnnotation();
+		}
 		this.graph.clear();
 		this.lockZoom();
 		if (this.model.get("JSONdata"))
@@ -282,6 +284,7 @@ var SpectrumView = Backbone.View.extend({
 	},
 
 	disableRevertAnnotation: function(){
+		$(this.el).css('background-color', '#fff');
 		$('#xispec_revertAnnotation').removeClass('xispec_btn-1a');
 		$('#xispec_revertAnnotation').addClass('xispec_disabled');
 	},
