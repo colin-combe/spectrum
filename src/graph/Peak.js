@@ -130,22 +130,28 @@ function Peak (id, graph){
 			var fragCount = fragments.length;
 			for (var f = 0; f < fragCount; f++){
 					//get right cluster for peak
-					index = 0;
+// 					var index = 0;
 					for (var i = 0; i < self.clusterIds.length; i++) {
 						if(fragments[f].clusterIds.indexOf(self.clusterIds[i]) != -1){
-							index = fragments[f].clusterIds.indexOf(self.clusterIds[i])
-							cluster = graph.model.get("JSONdata").clusters[self.clusterIds[i]]
+							var index = fragments[f].clusterIds.indexOf(self.clusterIds[i])
+							var cluster = graph.model.get("JSONdata").clusters[self.clusterIds[i]]
 						}
 					}
-
-					charge = cluster.charge;
-					error = fragments[f].clusterInfo[index].error.toFixed(2)+" "+fragments[f].clusterInfo[index].errorUnit;
+					var matchedMissingMonoIsotopic = fragments[f].clusterInfo[index].matchedMissingMonoIsotopic;
+					var charge = cluster.charge;
+					var error = fragments[f].clusterInfo[index].error.toFixed(self.graph.model.showDecimals)+" "+fragments[f].clusterInfo[index].errorUnit;
 					var chargeStr = "";
 					for (var i = 0; i < charge; i++){
 						chargeStr += "+";
 					}
 					header.push(fragments[f].name + chargeStr);
-					contents.push([fragments[f].name + " (" + fragments[f].sequence + ")", "charge: " + charge + ", error: " + error]);
+
+					var fragName = fragments[f].name + " (" + fragments[f].sequence + ")";
+					var fragInfo = "charge: " + charge + ", error: " + error;
+					if (matchedMissingMonoIsotopic) fragInfo += ", missing monoisotopic peak";
+					
+					var fragmentBodyText = [fragName, fragInfo];
+					contents.push(fragmentBodyText);
 			};
 
 
@@ -576,7 +582,7 @@ Peak.prototype.updateColor = function(){
 		this.labels.filter(filter_p1).filter(filter_lossy).attr("fill", this.graph.model.p1color_loss);
 		this.labels.filter(filter_p2).filter(filter_nonLossy).attr("fill", this.graph.model.p2color);
 		this.labels.filter(filter_p2).filter(filter_lossy).attr("fill", this.graph.model.p2color_loss);
-		
+
 	}
 
 }

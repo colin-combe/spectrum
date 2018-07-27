@@ -350,7 +350,7 @@ var FragmentationKeyView = Backbone.View.extend({
 				.attr("text-anchor", "middle")
 				.attr("fill", pep.color)
 				.attr("class", 'pepLetterHighlight')
-				.attr("stroke-width", "2px")
+				.attr("stroke-width", 3)
 				.attr("stroke", self.model.highlightColour)
 				.attr("opacity", 0)
 				.style("cursor", "default")

@@ -21,9 +21,11 @@ window.onresize = function() { window.trigger('resize') };
 
 xiSPEC.init = function(
 	targetDiv,
-	model_variables
+	model_variables,
+	showCustomCfg
 ) {
 	if (model_variables === undefined)	model_variables = {};
+	if (showCustomCfg === undefined)	showCustomCfg = false;
 
 	// targetDiv could be div itself or id of div - lets deal with that
 	if (typeof targetDiv === "string"){
@@ -122,7 +124,7 @@ xiSPEC.init = function(
 	this.SettingsView = new SpectrumSettingsView({
 		model: this.SettingsSpectrumModel,
 		el:"#xispec_settingsWrapper",
-		showCustomCfg: false,
+		showCustomCfg: showCustomCfg,
 	});
 
 
@@ -150,7 +152,7 @@ xiSPEC.setData = function(data){
 // 	if (data.annotation && data.annotation.requestId && json.annotation.requestId === CLMSUI.loadSpectra.lastRequestedID)) {
 
 	var json_request = this.convert_to_json_request(data);
-
+	// this.SpectrumModel.customConfig = data.customConfig;
 	this.SpectrumModel.request_annotation(json_request, true);
 
 };
@@ -229,8 +231,8 @@ xiSPEC.convert_to_json_request = function (data) {
     annotationRequest.annotation["cross-linker"] = {'modMass': data.crossLinkerModMass}; // yuk
     annotationRequest.annotation.precursorMZ = +data.precursorMZ;
     annotationRequest.annotation.precursorCharge = +data.precursorCharge;
-	annotationRequest.annotation.custom = [];
 	annotationRequest.annotation.requestID = data.requestID.toString();
+	annotationRequest.annotation.custom = data.customConfig;
 
     console.log("request", annotationRequest);
 	return annotationRequest;

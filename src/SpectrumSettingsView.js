@@ -288,13 +288,20 @@ var SpectrumSettingsView = Backbone.View.extend({
 		this.customConfigInput = customConfigTab.append("textarea").attr("id", "xispec_settingsCustomCfg-input").attr("class", "xispec_form-control");
 		var customConfigBottom = customConfigTab.append("div").attr("class", "xispec_settings-bottom");
 
-		customConfigBottom.append("label").text("keep config")
-			.append("input")
-				.attr("type", "checkbox")
-				.attr("name", "keepCustomCfg")
-				.attr("id", "xispec_keepCustomCfg")
-		;
+		// customConfigBottom.append("label").text("keep config")
+		// 	.append("input")
+		// 		.attr("type", "checkbox")
+		// 		.attr("name", "keepCustomCfg")
+		// 		.attr("id", "xispec_keepCustomCfg")
+		// ;
 		var customConfigSubmit = customConfigBottom.append("input").attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control").attr("value", "Apply").attr("id", "xispec_settingsCustomCfgApply").attr("type", "submit");
+
+		var customConfigCancel = customConfigBottom.append("input")
+			.attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control settingsCancel")
+			.attr("value", "Cancel")
+			.attr("id", "settingsCancel")
+			.attr("type", "button")
+		;
 
 		d3.select(this.el).selectAll("label")
 			.classed ("xispec_label", true)
@@ -321,9 +328,15 @@ var SpectrumSettingsView = Backbone.View.extend({
 	applyCustomCfg: function(e){
 
 		var json = this.model.get("JSONrequest");
+		var customConfig = $("#xispec_settingsCustomCfg-input").val().split("\n");
 
-		this.model.otherModel.customConfig = $("#xispec_settingsCustomCfg-input").val().split("\n");
-		this.model.otherModel.keepCustomConfig = $('#xispec_keepCustomCfg').is(":checked");
+		json.annotation.custom = customConfig;
+		// if ($('#xispec_keepCustomCfg').is(":checked")){
+ 	// 		this.model.otherModel.keepCustomConfig = customConfig;
+		// }
+		// else {
+		// 	this.model.otherModel.keepCustomConfig = false;
+		// }
 
 		this.model.otherModel.request_annotation(json);
 		this.model.otherModel.changedAnnotation = true;
@@ -365,7 +378,8 @@ var SpectrumSettingsView = Backbone.View.extend({
 			processData: false,
 			success: function (response) {
 				var json = JSON.parse(response);
-				json['annotation']['custom'] = self.model.otherModel.customConfig;
+// 				json['annotation']['custom'] = self.model.otherModel.customConfig;
+				json['annotation']['custom'] = self.model.otherModel.annotationData.custom;
 				json['annotation']['precursorMZ'] = self.model.otherModel.precursor.matchMz;
 				json['annotation']['requestID'] = self.model.otherModel.lastRequestedID + Date.now();
 				self.model.otherModel.request_annotation(json);
@@ -582,6 +596,12 @@ var SpectrumSettingsView = Backbone.View.extend({
 		if (!this.isVisible) return;
 
 		this.pepInputView.render();
+
+		// var cc_checked = false;
+		// if(this.model.otherModel.keepCustomConfig !== false){
+		// 	cc_checked = true
+		// }
+		// $('#xispec_keepCustomCfg').prop("checked", cc_checked);
 
 		this.renderModTable();
 

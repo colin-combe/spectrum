@@ -25,6 +25,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		this.measureMode = false;
 		this.showAllFragmentsHighlight = true;
 		this.changedAnnotation = false;
+		// this.keepCustomConfig = false;
 
 		this.cmap = colorbrewer.RdBu[8];
 		this.p1color = this.cmap[0];
@@ -531,8 +532,9 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 			this.reset_all_modifications();
 		}
 
-		json_request['annotation']['custom'] = this.customConfig;
-		if (!this.keepCustomConfig) this.customConfig = '';
+		// if (this.keepCustomConfig) {
+		// 	json_request['annotation']['custom'] = this.customConfig;
+		// }
 
 		if (json_request.annotation.requestID)
 			this.lastRequestedID = json_request.annotation.requestID;
