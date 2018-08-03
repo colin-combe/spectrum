@@ -19,27 +19,42 @@ _.extend (CLMSUI.vent, Backbone.Events);
 _.extend(window, Backbone.Events);
 window.onresize = function() { window.trigger('resize') };
 
-xiSPEC.init = function(
-	targetDiv,
-	model_variables,
-	showCustomCfg
-) {
-	if (model_variables === undefined)	model_variables = {};
-	if (showCustomCfg === undefined)	showCustomCfg = false;
+xiSPEC.init = function(options) {
 
-	// targetDiv could be div itself or id of div - lets deal with that
-	if (typeof targetDiv === "string"){
-		if(targetDiv.charAt(0) == "#") targetDiv = targetDiv.substr(1);
-		this.targetDiv = document.getElementById(targetDiv);
+	var defaultOptions = {
+		targetDiv: 'xispec_wrapper',
+		showCustomConfig: false,
+		showQualityControl: 'bottom',
+		baseDir:  './',
+		xiAnnotatorBaseURL: 'https://xi3.bio.ed.ac.uk/xiAnnotator/',
+		knownModifications: [],
+		knownModificationsURL: false,
+	};
+
+	options = _.extend(defaultOptions, options);
+
+	var model_options = {
+		baseDir: options.baseDir,
+		xiAnnotatorBaseURL: options.xiAnnotatorBaseURL,
+		knownModifications: options.knownModifications,
+		knownModificationsURL: options.knownModificationsURL,
+		database: options.database,
+		tmpDB: options.tmpDB
+	};
+
+	// options.targetDiv could be div itself or id of div - lets deal with that
+	if (typeof options.targetDiv === "string"){
+		if(options.targetDiv.charAt(0) == "#") options.targetDiv = options.targetDiv.substr(1);
+		options.targetDiv = document.getElementById(options.targetDiv);
 	} else {
-		this.targetDiv = targetDiv;
+		options.targetDiv = options.targetDiv;
 	}
 
-	d3.select(this.targetDiv).selectAll("*").remove();
+	d3.select(options.targetDiv).selectAll("*").remove();
 
 	//init models
-	this.SpectrumModel = new AnnotatedSpectrumModel(model_variables);
-	this.SettingsSpectrumModel = new AnnotatedSpectrumModel(model_variables);
+	this.SpectrumModel = new AnnotatedSpectrumModel(model_options);
+	this.SettingsSpectrumModel = new AnnotatedSpectrumModel(model_options);
 	this.SpectrumModel.otherModel = this.SettingsSpectrumModel;
 	this.SettingsSpectrumModel.otherModel = this.SpectrumModel;
 
@@ -91,7 +106,7 @@ xiSPEC.init = function(
 		+"</div>"
 	;
 
-	d3.select(this.targetDiv)
+	d3.select(options.targetDiv)
 		// .classed ("xiSPECwrapper", true)
 		.append("div")
 		// .attr ("class", "verticalFlexContainer")
@@ -104,7 +119,10 @@ xiSPEC.init = function(
 	this.Spectrum = new SpectrumView({model: this.SpectrumModel, el:"#xispec_spectrumPanel"});
 	this.FragmentationKey = new FragmentationKeyView({model: this.SpectrumModel, el:"#xispec_spectrumMainPlotDiv"});
 	this.InfoView = new PrecursorInfoView ({model: this.SpectrumModel, el:"#xispec_spectrumPanel"});
-	this.QCwrapper = new QCwrapperView({el: '#xispec_QCdiv'});
+	this.QCwrapper = new QCwrapperView({
+		el: '#xispec_QCdiv',
+		showQualityControl: options.showQualityControl,
+	});
 	this.ErrorIntensityPlot = new ErrorPlotView({
 		model: this.SpectrumModel,
 		el:"#xispec_subViewContent-left",
@@ -124,7 +142,7 @@ xiSPEC.init = function(
 	this.SettingsView = new SpectrumSettingsView({
 		model: this.SettingsSpectrumModel,
 		el:"#xispec_settingsWrapper",
-		showCustomCfg: showCustomCfg,
+		showCustomCfg: options.showCustomConfig,
 	});
 
 
@@ -143,7 +161,7 @@ xiSPEC.setData = function(data){
 	//	fragmentTolerance: {"tolerance": '20.0', 'unit': 'ppm'},
 	//	ionTypes: "peptide;b;y",
 	//	precursorMz: 1012.1,
-	//	peaklist: [[mz, int], [mz, int], ...],
+	//	peakList: [[mz, int], [mz, int], ...],
 	//	requestId: 1,
 	// }
 
@@ -207,9 +225,9 @@ xiSPEC.convert_to_json_request = function (data) {
     }
 
 	var peaks = [];
-	for (var i = 0; i < data.peaklist.length; i++) {
+	for (var i = 0; i < data.peakList.length; i++) {
 		peaks.push(
-			{"intensity": data.peaklist[i][1], "mz": data.peaklist[i][0]}
+			{"intensity": data.peakList[i][1], "mz": data.peakList[i][0]}
 		);
 	}
 

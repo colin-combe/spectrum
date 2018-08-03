@@ -37,7 +37,7 @@ var QCwrapperView = Backbone.View.extend({
 
 		var defaultOptions = {
 			splitIds: ['#xispec_spectrumMainPlotDiv', '#xispec_QCdiv'],
-			showOnStartUp: true,
+			showQualityControl: "bottom",
 		};
 		this.options = _.extend(defaultOptions, viewOptions);
 
@@ -133,8 +133,15 @@ var QCwrapperView = Backbone.View.extend({
 			.attr('title', 'hide QC plots')
 		;
 
-		if(!this.options.showOnStartUp)
+		if(this.options.showQualityControl == 'bottom'){
+			this.dockBottom();
+		}
+		else if (this.options.showQualityControl == 'side') {
+			this.dockRight();
+		}
+		else if (this.options.showQualityControl == 'min') {
 			this.minView();
+		}
 	},
 
 	downloadQCSVG: function(){

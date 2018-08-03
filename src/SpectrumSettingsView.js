@@ -320,9 +320,10 @@ var SpectrumSettingsView = Backbone.View.extend({
 	},
 
 	changeDecimals: function(){
-		var model = this.model.otherModel; //apply changes directly for now
-		model.showDecimals = parseInt(this.decimals[0][0].value);
-		model.trigger('change'); //necessary for PrecursorInfoView update
+		var showDecimals = parseInt(this.decimals[0][0].value);
+		this.model.showDecimals = showDecimals;
+		this.model.otherModel.showDecimals = showDecimals; //apply changes directly for now
+		this.model.otherModel.trigger('change'); //necessary for PrecursorInfoView update
 	},
 
 	applyCustomCfg: function(e){
