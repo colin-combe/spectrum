@@ -1,12 +1,12 @@
 var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 	defaults: function() {
-    return {
-      baseDir:  './',
+	return {
+	  baseDir:  './',
 	  xiAnnotatorBaseURL: 'https://xi3.bio.ed.ac.uk/xiAnnotator/',
 	  knownModifications: [],
 	  knownModificationsURL: false,
-    };
+	};
   },
 
 	initialize: function(){
@@ -177,17 +177,17 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		var xmax = Number.NEGATIVE_INFINITY;
 		var tmp;
 		for (var i=peaks.length-1; i>=0; i--) {
-		    tmp = peaks[i].mz;
-		    if (tmp < xmin) xmin = tmp;
-		    if (tmp > xmax) xmax = tmp;
+			tmp = peaks[i].mz;
+			if (tmp < xmin) xmin = tmp;
+			if (tmp > xmax) xmax = tmp;
 		}
 
 		this.xmaxPrimary = xmax + 50;
 		this.xminPrimary = xmin - 50;
 		var ymax = Number.NEGATIVE_INFINITY;
 		for (var i=peaks.length-1; i>=0; i--) {
-		    tmp = peaks[i].intensity;
-		    if (tmp > ymax) ymax = tmp;
+			tmp = peaks[i].intensity;
+			if (tmp > ymax) ymax = tmp;
 		}
 
 		//this.ymaxPrimary = ymax / 0.9;
@@ -548,8 +548,8 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		var response = $.ajax({
 			type: "POST",
 			headers: {
-			    'Accept': 'application/json',
-			    'Content-Type': 'application/json'
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
 			},
 			data: JSON.stringify(json_request),
 			// async: false,

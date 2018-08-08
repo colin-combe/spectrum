@@ -1,12 +1,12 @@
-//    xiSPEC Spectrum Viewer
-//    Copyright 2016 Rappsilber Laboratory, University of Edinburgh
+//	xiSPEC Spectrum Viewer
+//	Copyright 2016 Rappsilber Laboratory, University of Edinburgh
 //
-//    This product includes software developed at
-//    the Rappsilber Laboratory (http://www.rappsilberlab.org/).
+//	This product includes software developed at
+//	the Rappsilber Laboratory (http://www.rappsilberlab.org/).
 //
-//    author: Lars Kolbowski
+//	author: Lars Kolbowski
 //
-//    Wrapper.js
+//	Wrapper.js
 
 "use strict";
 
@@ -92,15 +92,15 @@ xiSPEC.init = function(options) {
 		+"</div>"
 		+"<div class='xispec_plotsDiv'>"
 		+"  <div id='xispec_spectrumMainPlotDiv'>"
-		+"      <svg id='xispec_spectrumSVG'></svg>"
-		+"      <div id='xispec_measureTooltip'></div>"
+		+"	  <svg id='xispec_spectrumSVG'></svg>"
+		+"	  <div id='xispec_measureTooltip'></div>"
 		+"  </div>"
 		+"  <div id='xispec_QCdiv'>"
-		+"      <div class='xispec_subViewHeader'></div>"
-		+"      <div class='xispec_subViewContent'>"
-		+"          <div class='xispec_subViewContent-plot' id='xispec_subViewContent-left'><svg id='xispec_errIntSVG' class='xispec_errSVG'></svg></div>"
-		+"          <div class='xispec_subViewContent-plot' id='xispec_subViewContent-right'><svg id='xispec_errMzSVG' class='xispec_errSVG'></svg></div>"
-		+"      </div>"
+		+"	  <div class='xispec_subViewHeader'></div>"
+		+"	  <div class='xispec_subViewContent'>"
+		+"		  <div class='xispec_subViewContent-plot' id='xispec_subViewContent-left'><svg id='xispec_errIntSVG' class='xispec_errSVG'></svg></div>"
+		+"		  <div class='xispec_subViewContent-plot' id='xispec_subViewContent-right'><svg id='xispec_errMzSVG' class='xispec_errSVG'></svg></div>"
+		+"	  </div>"
 		+"  </div>"
 		+"</div>"
 		+"</div>"
@@ -152,9 +152,9 @@ xiSPEC.setData = function(data){
 	// EXAMPLE:
 	// xiSPEC.setData({
 	// sequence1: "KQTALVELVK",
-    // sequence2: "QNCcarbamidomethylELFEQLGEYKFQNALLVR",
-    // linkPos1: 1,
-    // linkPos2: 13,
+	// sequence2: "QNCcarbamidomethylELFEQLGEYKFQNALLVR",
+	// linkPos1: 1,
+	// linkPos2: 13,
 	// 	crossLinkerModMass: 0,
 	//	modifications: [{id: 'carbamidomethyl', mass: 57.021464, aminoAcids: ['C']}],
 	//	precursorCharge: 3,
@@ -204,7 +204,7 @@ xiSPEC.convert_to_json_request = function (data) {
 		data.modifications = [];
 	}
 	if(data.fragmentTolerance === undefined){
-		data.fragmentTolerance = {"tolerance": '20.0', 'unit': 'ppm'};
+		data.fragmentTolerance = {"tolerance": '10.0', 'unit': 'ppm'};
 	}
 	if(data.requestID === undefined){
 		data.requestID = -1;
@@ -212,17 +212,17 @@ xiSPEC.convert_to_json_request = function (data) {
 
 
 	var annotationRequest = {};
-    var peptides = [];
-    var linkSites = [];
-    peptides[0] = xiSPEC.arrayifyPeptide(data.sequence1);
+	var peptides = [];
+	var linkSites = [];
+	peptides[0] = xiSPEC.arrayifyPeptide(data.sequence1);
 
 	if(data.linkPos1 !== undefined){
-    	linkSites[0] = {"id":0, "peptideId":0, "linkSite": data.linkPos1};
+		linkSites[0] = {"id":0, "peptideId":0, "linkSite": data.linkPos1};
 	}
-    if (data.sequence2 !== undefined) {
-        peptides[1] = xiSPEC.arrayifyPeptide(data.sequence2);
-        linkSites[1] = {"id":0, "peptideId":1, "linkSite": data.linkPos2}
-    }
+	if (data.sequence2 !== undefined) {
+		peptides[1] = xiSPEC.arrayifyPeptide(data.sequence2);
+		linkSites[1] = {"id":0, "peptideId":1, "linkSite": data.linkPos2}
+	}
 
 	var peaks = [];
 	for (var i = 0; i < data.peakList.length; i++) {
@@ -231,51 +231,51 @@ xiSPEC.convert_to_json_request = function (data) {
 		);
 	}
 
-    annotationRequest.Peptides = peptides;
-    annotationRequest.LinkSite = linkSites;
+	annotationRequest.Peptides = peptides;
+	annotationRequest.LinkSite = linkSites;
 	annotationRequest.peaks = peaks;
-    annotationRequest.annotation = {};
+	annotationRequest.annotation = {};
 
-    var ionTypes = data.ionTypes.split(";");
-    var ionTypeCount = ionTypes.length;
-    var ions = [];
-    for (var it = 0; it < ionTypeCount; it++) {
-        var ionType = ionTypes[it];
-        ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
-    }
-    annotationRequest.annotation.fragmentTolerance = data.fragmentTolerance;
+	var ionTypes = data.ionTypes.split(";");
+	var ionTypeCount = ionTypes.length;
+	var ions = [];
+	for (var it = 0; it < ionTypeCount; it++) {
+		var ionType = ionTypes[it];
+		ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
+	}
+	annotationRequest.annotation.fragmentTolerance = data.fragmentTolerance;
 	annotationRequest.annotation.modifications = data.modifications;
 	annotationRequest.annotation.ions = ions;
-    annotationRequest.annotation["cross-linker"] = {'modMass': data.crossLinkerModMass}; // yuk
-    annotationRequest.annotation.precursorMZ = +data.precursorMZ;
-    annotationRequest.annotation.precursorCharge = +data.precursorCharge;
+	annotationRequest.annotation["cross-linker"] = {'modMass': data.crossLinkerModMass}; // yuk
+	annotationRequest.annotation.precursorMZ = +data.precursorMZ;
+	annotationRequest.annotation.precursorCharge = +data.precursorCharge;
 	annotationRequest.annotation.requestID = data.requestID.toString();
 	annotationRequest.annotation.custom = data.customConfig;
 
-    console.log("request", annotationRequest);
+	console.log("request", annotationRequest);
 	return annotationRequest;
 
 };
 
 xiSPEC.arrayifyPeptide = function (seq_mods) {
-    var peptide = {};
-    peptide.sequence = [];
+	var peptide = {};
+	peptide.sequence = [];
 
-    var seq_AAonly = seq_mods.replace(/[^A-Z]/g, '')
-    var seq_length = seq_AAonly.length;
+	var seq_AAonly = seq_mods.replace(/[^A-Z]/g, '')
+	var seq_length = seq_AAonly.length;
 
-    for (var i = 0; i < seq_length; i++) {
-        peptide.sequence[i] = {"aminoAcid":seq_AAonly[i], "Modification": ""}
-    }
+	for (var i = 0; i < seq_length; i++) {
+		peptide.sequence[i] = {"aminoAcid":seq_AAonly[i], "Modification": ""}
+	}
 
-    var re = /[^A-Z]+/g;
-    var offset = 1;
+	var re = /[^A-Z]+/g;
+	var offset = 1;
 	var result;
-    while (result = re.exec(seq_mods)) {
-        peptide.sequence[result.index - offset]["Modification"] = result[0];
+	while (result = re.exec(seq_mods)) {
+		peptide.sequence[result.index - offset]["Modification"] = result[0];
 		offset += result[0].length;
-    }
-    return peptide;
+	}
+	return peptide;
 };
 
 xiSPEC.matchMassToAA = function(mass, tolerance) {
