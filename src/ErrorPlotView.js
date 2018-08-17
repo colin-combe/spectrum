@@ -26,12 +26,12 @@ var ErrorPlotView = Backbone.View.extend({
 
 	initialize: function(viewOptions) {
 
-		this.listenTo(CLMSUI.vent, 'QCabsErr', this.toggleAbsErr);
-		this.listenTo(CLMSUI.vent, 'QCPlotToggle', this.toggleView);
+		this.listenTo(xiSPEC.vent, 'QCabsErr', this.toggleAbsErr);
+		this.listenTo(xiSPEC.vent, 'QCPlotToggle', this.toggleView);
 		this.listenTo(window, 'resize', _.debounce(this.render));
-		this.listenTo(CLMSUI.vent, 'resize:spectrum', this.render);
-		this.listenTo(CLMSUI.vent, 'downloadQCSVG', this.downloadSVG);
-		this.listenTo(CLMSUI.vent, 'show:QC', this.wrapperVisToggle);
+		this.listenTo(xiSPEC.vent, 'resize:spectrum', this.render);
+		this.listenTo(xiSPEC.vent, 'downloadQCSVG', this.downloadSVG);
+		this.listenTo(xiSPEC.vent, 'show:QC', this.wrapperVisToggle);
 
 		var self = this;
 
@@ -68,7 +68,7 @@ var ErrorPlotView = Backbone.View.extend({
 
 		this.listenTo(this.model, 'change', this.render);
 		this.listenTo(this.model, 'changed:ColorScheme', this.render);
-		this.listenTo(this.model, 'changed:HighlightColor', this.render);
+		this.listenTo(this.model, 'change:highlightColor', this.render);
 		this.listenTo(this.model, 'changed:Highlights', this.updateHighlights);
 	},
 
@@ -131,10 +131,10 @@ var ErrorPlotView = Backbone.View.extend({
 
 	render: function() {
 
+		this.clear();
 		if (this.model.get("JSONdata") === undefined || this.model.get("JSONdata") === null || !this.isVisible || !this.wrapperVisible)
 			return;
 
-		this.clear();
 		//get Data
 		var fragments = this.model.fragments;
 
@@ -259,7 +259,7 @@ var ErrorPlotView = Backbone.View.extend({
 			.enter().append('circle')
 			.attr("cx", function (d) { return self.x(d['x']); } )
 		 	.attr("cy", function (d) { return self.y(d['y']); } )
-			.style('fill', this.model.highlightColour)
+			.style('fill', this.model.get('highlightColor'))
 			.style('opacity', 0)
 			.style('pointer-events', 'none')
 			.attr('id', function (d) { return d.fragId })

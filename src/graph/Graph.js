@@ -168,19 +168,16 @@ Graph = function(targetSvg, model, options) {
 Graph.prototype.setData = function(){
 	//create peaks array with Peaks
 	this.peaks = new Array();
-	this.pep1 = this.model.pep1;
-	this.pep2 = this.model.pep2;
 	if (this.model.get("JSONdata")) {
 		for (var i = 0; i < this.model.get("JSONdata").peaks.length; i++){
 				var peak = this.model.get("JSONdata").peaks[i];
 			this.peaks.push(new Peak(i, this));
 		}
 
-		this.model.peaks = this.peaks;
 		this.updatePeakColors();
 	}
-	if(this.model.lockZoom){
-		this.resize(this.model.xmin, this.model.xmax, this.model.ymin, this.model.ymax);
+	if(this.model.get('lockZoom')){
+		this.resize(this.model.get('mzRange')[0], this.model.get('mzRange')[1], this.model.ymin, this.model.ymax);
 		this.disableZoom();
 	}
 	else{
@@ -192,7 +189,7 @@ Graph.prototype.setData = function(){
 Graph.prototype.resize = function(xmin, xmax, ymin, ymax) {
 	var self = this;
 	//reset measureTool
-	if(this.model.measureMode)
+	if(this.model.get('measureMode'))
 		this.measureClear();
 	//see https://gist.github.com/mbostock/3019563
 	var cx = self.g.node().parentNode.parentNode.clientWidth;
@@ -603,8 +600,7 @@ Graph.prototype.redraw = function(){
 }
 
 Graph.prototype.clear = function(){
-	this.model.measureMode = false;
-	this.measure(false);
+	this.model.set('measureMode', false);
 	this.peaks = [];
 	this.highlights.selectAll("*").remove();
 	this.peaksSVG.selectAll("*").remove();
@@ -637,7 +633,7 @@ Graph.prototype.updatePeakColors = function(){
 			if (_.intersection(self.model.highlights, p.fragments).length > 0 || _.intersection(highlightClusterIds, p.clusterIds).length > 0)
 				p.line.attr("stroke", p.colour);
 			else
-				p.line.attr("stroke", self.model.peakColour);
+				p.line.attr("stroke", self.model.get('peakColor'));
 
 		});
 
@@ -688,8 +684,8 @@ Graph.prototype.updateHighlightColors = function(){
 	var peakCount = this.peaks.length;
 		for (var p = 0; p < peakCount; p++) {
 			if(this.peaks[p].highlightLine !== undefined){
-				this.peaks[p].highlightLine.attr("stroke", this.model.highlightColour);
-				this.peaks[p].labelHighlights.attr("stroke", this.model.highlightColour);
+				this.peaks[p].highlightLine.attr("stroke", this.model.get('highlightColor'));
+				this.peaks[p].labelHighlights.attr("stroke", this.model.get('highlightColor'));
 			}
 		}
 }

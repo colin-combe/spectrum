@@ -19,6 +19,7 @@
 //
 //		SpectrumSettingsView.js
 
+var xiSPEC = xiSPEC || {};
 var CLMSUI = CLMSUI || {};
 
 var SpectrumSettingsView = Backbone.View.extend({
@@ -52,8 +53,8 @@ var SpectrumSettingsView = Backbone.View.extend({
 		SpectrumSettingsView.__super__.initialize.apply (this, arguments);
 		var self = this;
 
-		this.listenTo(CLMSUI.vent, 'spectrumSettingsShow', this.bringToTop);
-		this.listenTo(CLMSUI.vent, 'spectrumSettingsToggle', this.toggleView);
+		this.listenTo(xiSPEC.vent, 'spectrumSettingsShow', this.bringToTop);
+		this.listenTo(xiSPEC.vent, 'spectrumSettingsToggle', this.toggleView);
 // 		this.listenTo(this.model, 'change', this.render);
 		this.listenTo(this.model, 'change:JSONdata', this.render);
 
@@ -91,9 +92,16 @@ var SpectrumSettingsView = Backbone.View.extend({
 		var mainDiv = this.wrapper.append("div").attr("id", "xispec_settings_main");
 
 		//data ToDo: change to more BBlike data handling
-		var dataTab = mainDiv.append("div").attr("class", "xispec_settings-tab xispec_flex-column").attr("id", "settings_data");
+		var dataTab = mainDiv.append("div")
+			.attr("class", "xispec_settings-tab xispec_flex-column")
+			.attr("id", "settings_data")
+		;
 
-		var dataForm = dataTab.append("form").attr("id", "xispec_settingsForm").attr("method", "post").attr("class", "xispec_flex-column");
+		var dataForm = dataTab.append("form")
+			.attr("id", "xispec_settingsForm")
+			.attr("method", "post")
+			.attr("class", "xispec_flex-column")
+		;
 
 		// var dataFlexColumn = dataForm.append("div").attr("class", "xispec_flex-column");
 
@@ -247,17 +255,17 @@ var SpectrumSettingsView = Backbone.View.extend({
 			.append("input")
 				.attr("class", "jscolor pointer")
 				.attr("id", "highlightColor")
-				.attr("value", "#FFFF00")
+				.attr("value", this.model.get('highlightColor'))
 				.attr("type", "text")
 				.attr("style", "width: 103px;")
 		;
 		jscolor.installByClassName("jscolor");
 
-		var highlightingModeChkBx = appearanceTab.append("label").text("Hide not selected fragments.")
+		var highlightingModeChkBx = appearanceTab.append("label").text("Hide not selected fragments: ")
 			.append("input").attr("type", "checkbox").attr("id", "peakHighlightMode")
 		;
 
-		var lossyChkBx = appearanceTab.append("label").text("Show neutral loss labels")
+		var lossyChkBx = appearanceTab.append("label").text("Show neutral loss labels: ")
 			.append("input").attr("type", "checkbox").attr("id", "lossyChkBx")
 		;
 
@@ -340,8 +348,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 		// }
 
 		this.model.otherModel.request_annotation(json);
-		this.model.otherModel.changedAnnotation = true;
-		this.model.otherModel.trigger("changed:annotation");
+		this.model.otherModel.set('changedAnnotation', true);
 
 		// this.render();
 
@@ -380,13 +387,12 @@ var SpectrumSettingsView = Backbone.View.extend({
 			success: function (response) {
 				var json = JSON.parse(response);
 // 				json['annotation']['custom'] = self.model.otherModel.customConfig;
-				json['annotation']['custom'] = self.model.otherModel.annotationData.custom;
+				json['annotation']['custom'] = self.model.otherModel.get("JSONdata").annotation.custom;
 				json['annotation']['precursorMZ'] = self.model.otherModel.precursor.matchMz;
 				json['annotation']['requestID'] = self.model.otherModel.lastRequestedID + Date.now();
 				self.model.otherModel.request_annotation(json);
-				self.model.otherModel.changedAnnotation = true;
+				self.model.otherModel.set('changedAnnotation', true);
 				self.model.otherModel.knownModifications = $.extend(true, [], self.model.knownModifications);
-				self.model.otherModel.trigger("changed:annotation");
 				spinner.stop();
 				$('#xispec_settingsForm').show();
 			}
@@ -608,7 +614,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 		//ions
 		$('.ionSelectChkbox:checkbox').prop('checked', false);
-		this.model.get("JSONdata").annotation.ions.forEach(function(ion){
+		this.model.fragmentIons.forEach(function(ion){
 			$('#'+ion.type).prop('checked', true);
 		});
 		var ionSelectionArr = new Array();
@@ -619,9 +625,9 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 		this.peaklist[0][0].value = this.model.peaksToMGF();
 		this.precursorZ[0][0].value  = this.model.precursor.charge;
-		this.toleranceValue[0][0].value  = this.model.get("JSONdata").annotation.fragementTolerance.split(' ')[0];
-		this.toleranceUnit[0][0].value = this.model.get("JSONdata").annotation.fragementTolerance.split(" ")[1];
-		this.crossLinkerModMass[0][0].value = this.model.get("JSONdata").annotation['cross-linker'].modMass;
+		this.toleranceValue[0][0].value  = this.model.MSnTolerance.value;
+		this.toleranceUnit[0][0].value = this.model.MSnTolerance.unit;
+		this.crossLinkerModMass[0][0].value = this.model.crossLinkerModMass;
 		this.decimals[0][0].value = this.model.showDecimals;
 
 		if(this.model.isLinear)
@@ -629,8 +635,8 @@ var SpectrumSettingsView = Backbone.View.extend({
 		else
 			$(this.crossLinkerModMassWrapper[0][0]).show();
 
-		if (this.model.get("JSONdata").annotation.custom !== undefined)
-			this.customConfigInput[0][0].value = this.model.get("JSONdata").annotation.custom.join("\n");
+		if (this.model.customConfig !== undefined)
+			this.customConfigInput[0][0].value = this.model.customConfig.join("\n");
 
 		// this.updateStepSize($(this.toleranceValue[0][0]));
 		// this.updateStepSize($(this.crossLinkerModMass[0][0]));
@@ -725,7 +731,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 		var color = '#' + event.originalEvent.srcElement.value;
 		//for now change color of model directly
 		//ToDo: Maybe change this also to apply/cancel and/or put in reset to default values
-		this.model.otherModel.changeHighlightColor( color );
+		this.model.otherModel.set('highlightColor', color);
 	},
 
 	changePeakHighlightMode: function(event){
@@ -762,7 +768,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 		var model = this.model.otherModel; //apply changes directly for now
 		var $target = $(e.target);
 		var selected = $target.is(':checked');
-		CLMSUI.vent.trigger('QCabsErr', selected);
+		xiSPEC.vent.trigger('QCabsErr', selected);
 	},
 
 	changeColorScheme: function(e){

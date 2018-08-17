@@ -27,12 +27,14 @@
 #xispec_subViewContent-left {
     flex-grow:  1;
     display:  flex;
+	min-height: 1px; /* firefox fix */
 }
 
 #xispec_subViewContent-right {
     flex-grow:  1;
     /* position: relative; */
     display:  flex;
+	min-height: 1px; /* firefox fix */
 }
 
 

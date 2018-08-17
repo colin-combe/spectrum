@@ -35,6 +35,7 @@ You need to include the following files:
     <!-- Spectrum viewer .js files -->
     <script type="text/javascript" src="src/Wrapper.js"></script>
     <script type="text/javascript" src="src/model.js"></script>
+    <script type="text/javascript" src="src/SpectrumControlsView.js"></script>
     <script type="text/javascript" src="src/SpectrumView2.js"></script>
     <script type="text/javascript" src="src/FragmentationKeyView.js"></script>
     <script type="text/javascript" src="src/PrecursorInfoView.js"></script>
@@ -59,22 +60,29 @@ You need to include the following files:
 
 ### Usage
 
-To initialize the module call the init function
+To initialize the module call the init function.
+
+targetDiv is the only required option.
 
 ```
 
 var options = {
-  targetDiv: 'xispec_wrapper'                     // id of your html target div
-  showCustomConfig: false,                        // show/hide custom annotation options tab in settings view
-  showQualityControl: 'bottom',                   // select where to show the quality control plots per default. values: 'bottom', 'side', 'min'
-  baseDir:  './',                                 // path to base directory of the spectrum viewer on your website 
+  targetDiv: 'xispec_wrapper'                 // id of your html target div for the spectrum viewer
+  showCustomConfig: false,                    // show/hide custom annotation options tab in settings view
+  showQualityControl: 'bottom',               // select where to show the quality control plots per default. values: 'bottom', 'side', 'min'
+  baseDir:  './',                             // path to base directory of the spectrum viewer on your website 
   xiAnnotatorBaseURL: 'https://xi3.bio.ed.ac.uk/xiAnnotator/',    // url of annotator change if you're hosting xiAnnotator yourself
+  highlightColor: '#FFFF00',                  // initial highlight color (can be changed in settings)
+  highlightWidth: 8,                          // highlight width
+  peakColor: "#a6a6a6",                       // color for not annotated peaks
 };
-
 
 xiSPEC.init(options);
 
 ```
+
+
+
 
 To set the data call the setData function with the spectra data:
 ```

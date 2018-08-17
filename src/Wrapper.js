@@ -11,10 +11,11 @@
 "use strict";
 
 var xiSPEC = {};
+var xiSPEC = xiSPEC || {};
 var CLMSUI = CLMSUI || {};
 // http://stackoverflow.com/questions/11609825/backbone-js-how-to-communicate-between-views
-CLMSUI.vent = {};
-_.extend (CLMSUI.vent, Backbone.Events);
+xiSPEC.vent = {};
+_.extend (xiSPEC.vent, Backbone.Events);
 
 _.extend(window, Backbone.Events);
 window.onresize = function() { window.trigger('resize') };
@@ -33,14 +34,21 @@ xiSPEC.init = function(options) {
 
 	options = _.extend(defaultOptions, options);
 
-	var model_options = {
-		baseDir: options.baseDir,
-		xiAnnotatorBaseURL: options.xiAnnotatorBaseURL,
-		knownModifications: options.knownModifications,
-		knownModificationsURL: options.knownModificationsURL,
-		database: options.database,
-		tmpDB: options.tmpDB
-	};
+	// remove non-model options
+	var model_options = jQuery.extend({}, options)
+	delete model_options.targetDiv;
+	delete model_options.showCustomConfig;
+	delete model_options.showQualityControl;
+
+
+	// var model_options = {
+	// 	baseDir: options.baseDir,
+	// 	xiAnnotatorBaseURL: options.xiAnnotatorBaseURL,
+	// 	knownModifications: options.knownModifications,
+	// 	knownModificationsURL: options.knownModificationsURL,
+	// 	database: options.database,
+	// 	tmpDB: options.tmpDB
+	// };
 
 	// options.targetDiv could be div itself or id of div - lets deal with that
 	if (typeof options.targetDiv === "string"){
@@ -69,27 +77,8 @@ xiSPEC.init = function(options) {
 		+"	<div class='xispec_dynDiv_resizeDiv_bl draggableCorner'></div>"
 		+"	<div class='xispec_dynDiv_resizeDiv_br draggableCorner'></div>"
 		+"</div>"
-		+"<div id='xispec_spectrumControls'>"
-		+"<span id='xispec_extra_spectrumControls_before'></span>"
-		+'<i class="xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-download" aria-hidden="true" id="xispec_dl_spectrum_SVG" title="download SVG" style="cursor: pointer;"></i>'
-		+"<label class='xispec_btn'>Move Labels<input id='moveLabels' type='checkbox'></label>"
-		+'<label class="xispec_btn" title="toggle measure mode on/off">Measure<input class="pointer" id="measuringTool" type="checkbox"></label>'
-		+'<form id="setrange">'
-		+'	<label class="xispec_btn" title="m/z range" style="cursor: default;">m/z:</label>'
-		+'	<label class="xispec_btn" for="lockZoom" title="Lock current zoom level" id="lock" class="xispec_btn">🔓</label><input id="lockZoom" type="checkbox" style="display: none;">'
-		+'	<input type="text" id="xleft" size="5" title="m/z range from:">'
-		+'	<span>-</span>'
-		+'	<input type="text" id="xright" size="5" title="m/z range to:">'
-		+'	<input type="submit" id="rangeSubmit" value="Set" class="xispec_btn xispec_btn-1 xispec_btn-1a" style="display: none;">'
-		+'	<span id="range-error"></span>'
-		+'	<button id="reset" title="Reset to initial zoom level" class="xispec_btn xispec_btn-1 xispec_btn-1a">Reset Zoom</button>'
-		+'</form>'
-		+'<i id="toggleSettings" title="Show/Hide Settings" class="xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-cog" aria-hidden="true"></i>'
-		+'<i id="xispec_revertAnnotation" title="revert to original annotation" class="xispec_btn xispec_btn-topNav fa fa-undo xispec_disabled"  aria-hidden="true"></i>'
-		+"<span id='xispec_extra_spectrumControls_after'></span>"
-		+'<a href="http://spectrumviewer.org/help.php" target="_blank"><i title="Help" class="xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-question" aria-hidden="true"></i></a>'
-		+"</div>"
-		+"</div>"
+		+"<div id='xispec_spectrumControls'></div>"
+		// +"</div>"
 		+"<div class='xispec_plotsDiv'>"
 		+"  <div id='xispec_spectrumMainPlotDiv'>"
 		+"	  <svg id='xispec_spectrumSVG'></svg>"
@@ -107,15 +96,11 @@ xiSPEC.init = function(options) {
 	;
 
 	d3.select(options.targetDiv)
-		// .classed ("xiSPECwrapper", true)
 		.append("div")
-		// .attr ("class", "verticalFlexContainer")
 		.attr ("id", 'xispec_spectrumPanel')
-		// http://stackoverflow.com/questions/90178/make-a-div-fill-the-height-of-the-remaining-screen-space?rq=1
-		//.style ("display", "table")
 		.html (_html)
 	;
-
+	this.SpectrumControls = new SpectrumControlsView({model: this.SpectrumModel, el:"#xispec_spectrumControls"});
 	this.Spectrum = new SpectrumView({model: this.SpectrumModel, el:"#xispec_spectrumPanel"});
 	this.FragmentationKey = new FragmentationKeyView({model: this.SpectrumModel, el:"#xispec_spectrumMainPlotDiv"});
 	this.InfoView = new PrecursorInfoView ({model: this.SpectrumModel, el:"#xispec_spectrumPanel"});
@@ -137,7 +122,7 @@ xiSPEC.init = function(options) {
 		margin: {top: 10, right: 30, bottom: 20, left: 65},
 		svg: "#xispec_errMzSVG",
 	});
-	CLMSUI.vent.trigger('show:QC', true);
+	xiSPEC.vent.trigger('show:QC', true);
 
 	this.SettingsView = new SpectrumSettingsView({
 		model: this.SettingsSpectrumModel,
@@ -155,14 +140,15 @@ xiSPEC.setData = function(data){
 	// sequence2: "QNCcarbamidomethylELFEQLGEYKFQNALLVR",
 	// linkPos1: 1,
 	// linkPos2: 13,
-	// 	crossLinkerModMass: 0,
-	//	modifications: [{id: 'carbamidomethyl', mass: 57.021464, aminoAcids: ['C']}],
-	//	precursorCharge: 3,
-	//	fragmentTolerance: {"tolerance": '20.0', 'unit': 'ppm'},
-	//	ionTypes: "peptide;b;y",
-	//	precursorMz: 1012.1,
-	//	peakList: [[mz, int], [mz, int], ...],
-	//	requestId: 1,
+	// crossLinkerModMass: 0,
+	// modifications: [{id: 'carbamidomethyl', mass: 57.021464, aminoAcids: ['C']}],
+	// losses: [{ id: 'H2O', specificity: ['D', 'S', 'T', 'E', 'CTerm'], mass: 18.01056027}],
+	// precursorCharge: 3,
+	// fragmentTolerance: {"tolerance": '20.0', 'unit': 'ppm'},
+	// ionTypes: "peptide;b;y",
+	// precursorMz: 1012.1,
+	// peakList: [[mz, int], [mz, int], ...],
+	// requestId: 1,
 	// }
 
 
@@ -188,6 +174,11 @@ xiSPEC.sanityChecks = function(data){
 	return true;
 };
 
+xiSPEC.clear = function(){
+	this.SpectrumModel.clear();
+	this.SettingsSpectrumModel.clear();
+};
+
 xiSPEC.convert_to_json_request = function (data) {
 
 	if (!this.sanityChecks(data)) return false;
@@ -202,6 +193,9 @@ xiSPEC.convert_to_json_request = function (data) {
 	}
 	if(data.modifications === undefined){
 		data.modifications = [];
+	}
+	if(data.losses === undefined){
+		data.losses === [];
 	}
 	if(data.fragmentTolerance === undefined){
 		data.fragmentTolerance = {"tolerance": '10.0', 'unit': 'ppm'};
@@ -249,6 +243,7 @@ xiSPEC.convert_to_json_request = function (data) {
 	annotationRequest.annotation["cross-linker"] = {'modMass': data.crossLinkerModMass}; // yuk
 	annotationRequest.annotation.precursorMZ = +data.precursorMZ;
 	annotationRequest.annotation.precursorCharge = +data.precursorCharge;
+	annotationRequest.annotation.losses = data.losses;
 	annotationRequest.annotation.requestID = data.requestID.toString();
 	annotationRequest.annotation.custom = data.customConfig;
 

@@ -91,7 +91,13 @@ var PepInputView = Backbone.View.extend({
 
   },
 
+  clear: function() {
+    this.el.value = '';
+  },
+
   render: function() {
+
+    this.clear();
 
     if(this.model.peptides === undefined || this.model.get("JSONdata") === null)
       return;

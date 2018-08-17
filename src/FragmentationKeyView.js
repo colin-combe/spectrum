@@ -46,10 +46,9 @@ var FragmentationKeyView = Backbone.View.extend({
 		this.listenTo(this.model, 'destroy', this.remove);
 		this.listenTo(this.model, 'changed:Highlights', this.updateHighlights);
 		this.listenTo(this.model, 'changed:ColorScheme', this.updateColors);
-		this.listenTo(this.model, 'changed:HighlightColor', this.updateColors);
-// 		this.listenTo(this.model, 'changed:HighlightColor', this.updateHighlightColors);
+		this.listenTo(this.model, 'change:highlightColor', this.updateColors);
 		this.listenTo(window, 'resize', _.debounce(this.resize));
-		this.listenTo(CLMSUI.vent, 'resize:spectrum', this.resize);
+		this.listenTo(xiSPEC.vent, 'resize:spectrum', this.resize);
 
 		this.tooltip = d3.select("body").append("span")
 			.attr("class", "xispec_tooltip")
@@ -155,7 +154,7 @@ var FragmentationKeyView = Backbone.View.extend({
 				.attr("y1", 25)
 				.attr("x2", this.xStep * (CLpos - 1))
 				.attr("y2", 55)
-				.attr("stroke", self.model.highlightColour)
+				.attr("stroke", self.model.get('highlightColor'))
 				.attr("stroke-width", 10)
 				.attr("opacity", 0)
 				.style("cursor", "pointer");
@@ -227,7 +226,7 @@ var FragmentationKeyView = Backbone.View.extend({
 		var changeModLetterG = this.g.append("g")
 		this.changeModLetterHighlight = changeModLetterG.append("text")
 			.attr("text-anchor", "middle")
-			.attr("stroke", self.model.highlightColour)
+			.attr("stroke", self.model.get('highlightColor'))
 			.style("font-size", "0.7em")
 			.attr("stroke-width", "2px")
 		this.changeModLetter = changeModLetterG.append("text")
@@ -351,7 +350,7 @@ var FragmentationKeyView = Backbone.View.extend({
 				.attr("fill", pep.color)
 				.attr("class", 'pepLetterHighlight')
 				.attr("stroke-width", 3)
-				.attr("stroke", self.model.highlightColour)
+				.attr("stroke", self.model.get('highlightColor'))
 				.attr("opacity", 0)
 				.style("cursor", "default")
 				.text(function(d) {
@@ -510,7 +509,7 @@ var FragmentationKeyView = Backbone.View.extend({
 			function get_mod_mass(fullModName){
 				if (fullModName === undefined)
 					return;
-				var mod = self.model.annotationData.modifications.filter(function(m){
+				var mod = self.model.get("JSONdata").annotation.modifications.filter(function(m){
 					return m.id == fullModName;
 				});
 				if (mod.length < 1){
@@ -601,7 +600,7 @@ var FragmentationKeyView = Backbone.View.extend({
 				.attr("class", "modLetterHighlight")
 				.attr("y", pep.y[1])
 				.attr("text-anchor", "middle")
-				.attr("stroke", self.model.highlightColour)
+				.attr("stroke", self.model.get('highlightColor'))
 				.style("font-size", "0.7em")
 				.text(function(d){ return d.shortMod;})
 				.attr("stroke-width", "2px")
@@ -692,8 +691,8 @@ var FragmentationKeyView = Backbone.View.extend({
 
 	greyLetters: function(){
 		for (var i = 0; i < this.pepLetters.length; i++) {
-			this.pepLetters[i].attr("fill", this.model.peakColour);
-			this.modLetters[i].attr("fill", this.model.peakColour);
+			this.pepLetters[i].attr("fill", this.model.get('peakColor'));
+			this.modLetters[i].attr("fill", this.model.get('peakColor'));
 		}
 	},
 
@@ -750,9 +749,9 @@ var FragmentationKeyView = Backbone.View.extend({
 // 		for (var i = 0; i < this.fraglines.length; i++) {
 
 // 			if (this.fraglines[i].bHighlight !== undefined)
-// 				this.fraglines[i].bHighlight.attr("stroke", this.model.highlightColour);
+// 				this.fraglines[i].bHighlight.attr("stroke", this.model.get('highlightColor'));
 // 			if (this.fraglines[i].yHighlight !== undefined)
-// 				this.fraglines[i].yHighlight.attr("stroke", this.model.highlightColour);
+// 				this.fraglines[i].yHighlight.attr("stroke", this.model.get('highlightColor'));
 // 		}
 
 // 	},

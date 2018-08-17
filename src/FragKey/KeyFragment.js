@@ -57,7 +57,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 	//svg elements
 	this.g = this.FragKey.g.append('g');
-  
+
 /*	var group = this.g
 		.on("mouseover", function() {
 			var evt = d3.event;
@@ -157,8 +157,8 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 		this.bHighlight = this.bgroup.append("path")
 			.attr("d", highlightPath)
-			.attr("stroke", this.FragKey.model.highlightColour)
-			.attr("stroke-width", this.FragKey.model.highlightWidth)
+			.attr("stroke", this.FragKey.model.get('highlightColor'))
+			.attr("stroke-width", this.FragKey.model.get('highlightWidth'))
 			.attr("opacity", 0)
 			.style("cursor", "pointer");
 
@@ -225,7 +225,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 				blossy = false;
 		};
 		if (blossy){
-			this.bTail.attr("stroke", this.FragKey.model.peakColour);
+			this.bTail.attr("stroke", this.FragKey.model.get('peakColor'));
 		}
 		else {
 			this.bTail.attr("stroke", "black");
@@ -277,8 +277,8 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 		this.yHighlight = this.ygroup.append("path")
 			.attr("d", highlightPath)
-			.attr("stroke", this.FragKey.model.highlightColour)
-			.attr("stroke-width", this.FragKey.model.highlightWidth)
+			.attr("stroke", this.FragKey.model.get('highlightColor'))
+			.attr("stroke-width", this.FragKey.model.get('highlightWidth'))
 			.attr("opacity", 0)
 			.style("cursor", "pointer")
 
@@ -342,7 +342,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 				ylossy = false;
 		};
 		if (ylossy){
-			this.yTail.attr("stroke", this.FragKey.model.peakColour);
+			this.yTail.attr("stroke", this.FragKey.model.get('peakColor'));
 		}
 		else {
 			this.yTail.attr("stroke", "black");
@@ -360,7 +360,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 	//if all fragments are lossy
 	if ((fragments.y.length == 0 || ylossy) && (fragments.b.length == 0 || blossy)){
-		this.fragBar.attr("stroke", this.FragKey.model.peakColour);
+		this.fragBar.attr("stroke", this.FragKey.model.get('peakColor'));
 	}
 	else {
 		this.fragBar.attr("stroke", "black");

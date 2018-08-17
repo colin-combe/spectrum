@@ -70,8 +70,8 @@ function Peak (id, graph){
 
 	if (this.fragments.length > 0) {
 		this.highlightLine = this.lineGroup.append('line')
-								.attr("stroke", this.graph.model.highlightColour)
-								.attr("stroke-width", this.graph.model.highlightWidth)
+								.attr("stroke", this.graph.model.get('highlightColor'))
+								.attr("stroke-width", this.graph.model.get('highlightWidth'))
 								.attr("opacity","0")
 								.attr("stroke-opacity", "0.7")
 								.attr("x1", 0)
@@ -149,7 +149,7 @@ function Peak (id, graph){
 					var fragName = fragments[f].name + " (" + fragments[f].sequence + ")";
 					var fragInfo = "charge: " + charge + ", error: " + error;
 					if (matchedMissingMonoIsotopic) fragInfo += ", missing monoisotopic peak";
-					
+
 					var fragmentBodyText = [fragName, fragInfo];
 					contents.push(fragmentBodyText);
 			};
@@ -351,7 +351,7 @@ function Peak (id, graph){
 					.style("stroke-width", "6px")
 					.style("font-size", "0.8em")
 					.attr("class", "xispec_peakAnnotHighlight")
-					.attr("stroke", this.graph.model.highlightColour);
+					.attr("stroke", this.graph.model.get('highlightColor'));
 
 				label.append("text")
 					.text(function(d) {return d.name;})
@@ -393,7 +393,7 @@ function Peak (id, graph){
 	}
 
 
-	this.colour = this.graph.model.peakColour;
+	this.colour = this.graph.model.get('peakColor');
 	if (this.fragments.length > 0){
 
 		var lossy = true;
@@ -548,7 +548,7 @@ Peak.prototype.showLabels = function(lossyOverride){
 }
 
 Peak.prototype.updateColor = function(){
-	this.colour = this.graph.model.peakColour;
+	this.colour = this.graph.model.get('peakColor');
 	if (this.fragments.length > 0){
 		if (this.fragments[0].peptideId == 0) {
 			if (this.fragments[0].class == "non-lossy")

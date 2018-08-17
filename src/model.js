@@ -6,6 +6,10 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 	  xiAnnotatorBaseURL: 'https://xi3.bio.ed.ac.uk/xiAnnotator/',
 	  knownModifications: [],
 	  knownModificationsURL: false,
+	  highlightColor: '#FFFF00',
+	  highlightWidth: 8,
+	  peakColor: "#a6a6a6",
+	  colorScheme: colorbrewer.RdBu[8],
 	};
   },
 
@@ -21,22 +25,18 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		}
 
 		this.showDecimals = 2;
-		this.moveLabels = false;
-		this.measureMode = false;
+		this.set('moveLabels', false);
+		this.set('measureMode', false);
 		this.showAllFragmentsHighlight = true;
-		this.changedAnnotation = false;
+		this.set('changedAnnotation', false);
 		// this.keepCustomConfig = false;
 
-		this.cmap = colorbrewer.RdBu[8];
-		this.p1color = this.cmap[0];
-		this.p1color_cluster = this.cmap[2];
-		this.p1color_loss = this.cmap[1];
-		this.p2color = this.cmap[7];
-		this.p2color_cluster = this.cmap[5];
-		this.p2color_loss = this.cmap[6];
-		this.peakColour = "#a6a6a6";
-		this.highlightColour = "#FFFF00";
-		this.highlightWidth = 8;
+		this.p1color = this.get('colorScheme')[0];
+		this.p1color_cluster = this.get('colorScheme')[2];
+		this.p1color_loss = this.get('colorScheme')[1];
+		this.p2color = this.get('colorScheme')[7];
+		this.p2color_cluster = this.get('colorScheme')[5];
+		this.p2color_loss = this.get('colorScheme')[6];
 
 		this.pepStrs = [];
 		this.pepStrsMods = [];
@@ -44,6 +44,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		this.peakList = [];
 		this.precursor = {}
 		this.precursor.charge = null;
+		this.customConfig = [];
 
 		//ToDo: change JSONdata gets called 3 times for some reason?
 		// define event triggers and listeners better
@@ -96,25 +97,24 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		}
 
 
-		$("#measuringTool").prop("checked", false);
-		$("#moveLabels").prop("checked", false);
+		$("#xispec_measuringTool").prop("checked", false);
+		$("#xispec_moveLabels").prop("checked", false);
 		this.sticky = Array();
 		this.highlights = Array();
 		var JSONdata = this.get("JSONdata");
 
-		this.annotationData = JSONdata.annotation || {};
-
-		if (this.annotationData.fragementTolerance !== undefined){
+		if (JSONdata.annotation.fragementTolerance !== undefined){
 			this.MSnTolerance = {
-				"value": parseFloat(this.annotationData.fragementTolerance.split(" ")[0]),
-				"unit": this.annotationData.fragementTolerance.split(" ")[1]
+				"value": parseFloat(JSONdata.annotation.fragementTolerance.split(" ")[0]),
+				"unit": JSONdata.annotation.fragementTolerance.split(" ")[1]
 			};
 		}
 
-		this.fragmentIons = this.annotationData.ions || [];
+		this.fragmentIons = JSONdata.annotation.ions || [];
+		this.customConfig = JSONdata.annotation.custom || [];
 		this.peakList = JSONdata.peaks || [];
-		var crossLinker = this.annotationData['cross-linker'];
-		if (this.annotationData['cross-linker'] !== undefined)
+		var crossLinker = JSONdata.annotation['cross-linker'];
+		if (JSONdata.annotation['cross-linker'] !== undefined)
 			this.crossLinkerModMass = crossLinker.modMass;
 
 		this.pepStrs = [];
@@ -164,9 +164,24 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 	},
 
 	clear: function(){
-		this.set("JSONdata", null);
 		this.sticky = Array();
-		Backbone.Model.prototype.clear.call(this);
+		this.precursor = {};
+		this.crossLinkerModMass = null;
+		this.fragmentIons = Array();
+		this.fragments = Array();
+		this.originalMatchRequest = {};
+
+		this.pepStrs = [];
+		this.pepStrsMods = [];
+		this.fragmentIons = [];
+		this.peakList = [];
+		this.precursor = {}
+		this.precursor.charge = null;
+		this.MSnTolerance = {};
+		this.customConfig = [];
+
+		this.set("JSONdata", null);
+		// Backbone.Model.prototype.clear.call(this);
 	},
 
 	setGraphData: function(){
@@ -182,8 +197,8 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 			if (tmp > xmax) xmax = tmp;
 		}
 
-		this.xmaxPrimary = xmax + 50;
-		this.xminPrimary = xmin - 50;
+		this.xmaxPrimary = (xmax + 50).toFixed(0);
+		this.xminPrimary = (xmin - 50).toFixed(0);
 		var ymax = Number.NEGATIVE_INFINITY;
 		for (var i=peaks.length-1; i>=0; i--) {
 			tmp = peaks[i].intensity;
@@ -193,9 +208,8 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		//this.ymaxPrimary = ymax / 0.9;
 		this.ymaxPrimary = ymax;
 
-		if (!this.lockZoom){
-			this.xmax = this.xmaxPrimary;
-			this.xmin = this.xminPrimary;
+		if (!this.get('lockZoom')){
+			this.set('mzRange', [this.xminPrimary, this.xmaxPrimary]);
 			this.ymax = this.ymaxPrimary;
 			this.ymin = 0;
 		}
@@ -203,9 +217,12 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 	},
 
 	setZoom: function(domain){
-		this.xmin = domain[0].toFixed(0);
-		this.xmax = domain[1].toFixed(0);
-		this.trigger("changed:Zoom");
+		this.set('mzRange', [domain[0].toFixed(0), domain[1].toFixed(0)]);
+	},
+
+	resetZoom: function(){
+		this.set('mzRange', [this.xminPrimary, this.xmaxPrimary]);
+		this.trigger('resetZoom');
 	},
 
 	addHighlight: function(fragments){
@@ -262,33 +279,28 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 	changeColorScheme: function(scheme){
 		switch(scheme) {
 			case "RdBu":
-				this.cmap = colorbrewer.RdBu[8];
+				this.set('colorScheme', colorbrewer.RdBu[8]);
 				break;
 			case "BrBG":
-				this.cmap = colorbrewer.BrBG[8];
+				this.set('colorScheme', colorbrewer.BrBG[8]);
 				break;
 			case "PiYG":
-				this.cmap = colorbrewer.PiYG[8];
+				this.set('colorScheme', colorbrewer.PiYG[8]);
 				break;
 			case "PRGn":
-				this.cmap = colorbrewer.PRGn[8];
+				this.set('colorScheme', colorbrewer.PRGn[8]);
 				break;
 			case "PuOr":
-				this.cmap = colorbrewer.PuOr[8];
+				this.set('colorScheme', colorbrewer.PuOr[8]);
 				break;
 		}
-		this.p1color = this.cmap[0];
-		this.p1color_cluster = this.cmap[2];
-		this.p1color_loss = this.cmap[1];
-		this.p2color = this.cmap[7];
-		this.p2color_cluster = this.cmap[5];
-		this.p2color_loss = this.cmap[6];
+		this.p1color = this.get('colorScheme')[0];
+		this.p1color_cluster = this.get('colorScheme')[2];
+		this.p1color_loss = this.get('colorScheme')[1];
+		this.p2color = this.get('colorScheme')[7];
+		this.p2color_cluster = this.get('colorScheme')[5];
+		this.p2color_loss = this.get('colorScheme')[6];
 		this.trigger("changed:ColorScheme");
-	},
-
-	changeHighlightColor: function(color){
-		this.highlightColour = color;
-		this.trigger("changed:HighlightColor");
 	},
 
 	changeLinkPos: function(newLinkSites){
@@ -311,8 +323,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 			this.setData();
 		}
 
-		this.trigger("changed:annotation");
-		this.changedAnnotation = true;
+		this.set('changedAnnotation', true);
 	},
 
 
@@ -341,8 +352,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 			this.setData();
 		}
 
-		this.trigger("changed:annotation");
-		this.changedAnnotation = true;
+		this.set('changedAnnotation', true);
 	},
 
 	checkForValidModification: function(mod, aminoAcid){
@@ -362,7 +372,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 		var JSONdata = this.get("JSONdata");
 
-		var modifications = this.annotationData.modifications || {};
+		var modifications = JSONdata.annotation.modifications;
 
 		var aastr = "ARNDCEQGHILKMFPSTWYV";
 		var mA = new Array();
@@ -410,8 +420,8 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		var clModMass = 0;
 		if(this.get("clModMass") !== undefined)
 			var clModMass = parseInt(this.get("clModMass"));
-		else if (this.annotationData['cross-linker'] !== undefined)
-			var clModMass = this.annotationData['cross-linker'].modMass;
+		else if (JSONdata.annotation['cross-linker'] !== undefined)
+			var clModMass = JSONdata.annotation['cross-linker'].modMass;
 
 		for (var i = 0; i < massArr.length; i++) {
 			totalMass += massArr[i];
@@ -527,7 +537,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 		if (originalMatch === undefined) originalMatch = false;
 		if (originalMatch){
-			this.changedAnnotation = false;
+			this.set('changedAnnotation', false);
 			this.originalMatchRequest = $.extend(true, {}, json_request);
 			this.reset_all_modifications();
 		}
@@ -572,19 +582,22 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		});
 	},
 
-	revert_annotation: function(){
+	revertAnnotation: function(){
 // 		this.userModifications = [];
 // 		this.otherModel.userModifications = [];
-		if(!this.changedAnnotation)
-			return
+		if(!this.get('changedAnnotation'))
+			return;
 		else {
 			this.reset_all_modifications();
 			this.otherModel.reset_all_modifications();
 			this.request_annotation(this.originalMatchRequest);
+			this.set('changedAnnotation', false);
 		}
 	},
 
 	resetModel: function(){
+
+		if (this.otherModel.get("JSONdata") == null) return;
 
 		// used to reset SettingsModel
 		var json_data_copy = jQuery.extend({}, this.otherModel.get("JSONdata"));
