@@ -92,7 +92,7 @@ $annotation = array(
   'fragmentTolerance' => $tol,
   'modifications' => $modifications,
   'ions' => $ions,
-  'cross-linker' => $cl,
+  'crosslinker' => $cl,
   'precursorCharge' => $preCharge,
   // 'custom' => $customCfg
 );

@@ -35,6 +35,7 @@ var SpectrumControlsView = Backbone.View.extend({
 		'click #xispec_toggleSettings' : 'toggleSettings',
 		'click #xispec_revertAnnotation' : 'revertAnnotation',
 		'click #xispec_toggleSpecList' : 'toggleSpecList',
+		'click #xispec_butterflyChkbx': 'butterflyToggle',
 	},
 
 	initialize: function() {
@@ -148,6 +149,19 @@ var SpectrumControlsView = Backbone.View.extend({
 			.attr('title', 'revert to original annotation')
 		;
 
+		this.butterflyToggleLabel = this.wrapper.append('label')
+			.attr('class', 'xispec_btn')
+			.attr('title', 'Display original annotation as butterfly plot')
+			.attr('style', 'display:none;')
+			.text("Butterfly plot")
+		;
+
+		var butterflyCheckbox = this.butterflyToggleLabel.append('input')
+			.attr('class', 'pointer')
+			.attr('id', 'xispec_butterflyChkbx')
+			.attr('type', 'checkbox')
+		;
+
 		var extra_controls_after = this.wrapper.append('span')
 			.attr("id", "xispec_extra_spectrumControls_after")
 		;
@@ -173,8 +187,8 @@ var SpectrumControlsView = Backbone.View.extend({
 
 	updateRange: function(){
 		var mzRange = this.model.get('mzRange');
-		$("#xispec_xleft").val(mzRange[0]);
-		$("#xispec_xright").val(mzRange[1]);
+		$("#xispec_xleft").val(mzRange[0].toFixed(0));
+		$("#xispec_xright").val(mzRange[1].toFixed(0));
 	},
 
 	lockZoom: function(){
@@ -215,12 +229,10 @@ var SpectrumControlsView = Backbone.View.extend({
 		}
 		else{
 			$("#xispec_range-error").hide();
-			this.model.set('mzRange', [xl, xr]);
-			// this.graph.resize(xl, xr, this.model.ymin, this.model.ymax);
+			this.model.set('mzRange', [parseInt(xl), parseInt(xr)]);
 		}
 
 	},
-
 
 	resetZoom: function(){
 		this.model.resetZoom();
@@ -236,19 +248,29 @@ var SpectrumControlsView = Backbone.View.extend({
 
 	revertAnnotation: function(){
 		if(this.model.get('changedAnnotation')){
-			this.model.revertAnnotation();
+			xiSPEC.revertAnnotation();
+			xiSPEC.vent.trigger('butterflyToggle', false);
+			$('#xispec_butterflyChkbx').prop('checked', false);
 		};
 	},
 
 	changedAnnotation: function(){
 		if(this.model.get('changedAnnotation')){
+			this.butterflyToggleLabel.attr('style', 'display:inline;');
 			$('#xispec_revertAnnotation').addClass('xispec_btn-1a');
 			$('#xispec_revertAnnotation').removeClass('xispec_disabled');
 		}
 		else{
+			this.butterflyToggleLabel.attr('style', 'display:none;');
 			$('#xispec_revertAnnotation').removeClass('xispec_btn-1a');
 			$('#xispec_revertAnnotation').addClass('xispec_disabled');
 		}
+	},
+
+	butterflyToggle: function(e) {
+		var $target = $(e.target);
+		var selected = $target.is(':checked');
+		xiSPEC.vent.trigger('butterflyToggle', selected);
 	},
 
 });

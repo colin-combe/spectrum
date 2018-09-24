@@ -49,7 +49,7 @@ var QCwrapperView = Backbone.View.extend({
 			onDragEnd: function(){ xiSPEC.vent.trigger('resize:spectrum'); }
 		});
 
-		this.dock = 'bottom';
+		this.dock = this.options.showQualityControl;
 		// this.isVisible = true;
 
 		this.headerDiv = d3.select(this.el.getElementsByClassName("xispec_subViewHeader")[0]);
@@ -100,11 +100,6 @@ var QCwrapperView = Backbone.View.extend({
 			.attr('class', 'xispec_rightControls')
 		;
 
-		// this.xispec_dockLeftxispec_btn = rightControls.append('i')
-		// 	.attr('class', 'fa fa-window-maximize pointer xispec_dockLeft')
-		// 	.attr('aria-hidden', 'true')
-		// 	.attr('title', 'dock to left')
-		// ;
 		this.dockBottomxispec_btn = rightControls.append('i')
 			.attr('class', 'fa fa-window-maximize pointer xispec_dockBottom')
 			.attr('aria-hidden', 'true')
@@ -183,12 +178,9 @@ var QCwrapperView = Backbone.View.extend({
 		$(this.dockQCxispec_btn[0]).hide();
 		$(this.minQCxispec_btn[0]).show();
 		$(this.contentDiv[0]).show();
-		if (this.dock == 'left' || this.dock == 'right'){
+		if (this.dock == 'side'){
 			this.splitHorizontal();
-			if (this.dock == 'left')
-				this.dockLeft();
-			else if (this.dock == 'right')
-				this.dockRight();
+			this.dockRight();
 		}
 		else{
 			this.splitVertical();
@@ -199,10 +191,9 @@ var QCwrapperView = Backbone.View.extend({
 	minView: function(){
 		// this.isVisible = false;
 		xiSPEC.vent.trigger('show:QC', false);
-		if(this.dock == 'left' || this.dock == 'right'){
+		if(this.dock == 'side'){
 			$(this.el).parent().css('flex-direction', 'column');
 			$(this.el).removeClass('xispec_QCdiv-right');
-			$(this.el).removeClass('xispec_QCdiv-left');
 			$(this.contentDiv[0]).css('flex-direction', 'row');
 		}
 		$(this.controlsDiv[0]).hide();
@@ -222,26 +213,12 @@ var QCwrapperView = Backbone.View.extend({
 		xiSPEC.vent.trigger('resize:spectrum');
 	},
 
-// dockLeft breaks splitting
-// 	dockLeft: function(){
-// 		if (this.dock === 'left')
-// 			return;
-// 		this.dock = 'left';
-// 		this.dockSide();
-// 		$(this.el).addClass('left');
-// 		$(this.el).removeClass('right');
-// // 		$('#xispec_spectrumMainPlotDiv').css('order', 5);
-//
-//  		$('.gutter-horizontal').css('order', -1);
-// 	},
-
 	dockRight: function(){
-		this.dock = 'right';
+		this.dock = 'side';
 		$(this.dockBottomxispec_btn[0]).show();
 		$(this.dockRightxispec_btn[0]).hide();
 		this.dockSide();
 		$(this.el).addClass('xispec_QCdiv-right');
-		$(this.el).removeClass('xispec_QCdiv-left');
 // 		$('.gutter-horizontal').css('order', 0);
 	},
 
@@ -251,7 +228,6 @@ var QCwrapperView = Backbone.View.extend({
 		this.title.text("Quality control plots");
 		this.dock = 'bottom';
 		$(this.el).parent().css('flex-direction', 'column');
-		$(this.el).removeClass('xispec_QCdiv-left');
 		$(this.el).removeClass('xispec_QCdiv-right');
 		$(this.contentDiv[0]).css('flex-direction', 'row');
 		this.splitVertical();

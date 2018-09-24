@@ -24,17 +24,27 @@ var CLMSUI = CLMSUI || {};
 
 var SpectrumView = Backbone.View.extend({
 
-	events : {
-	  },
+	events : {},
 
-	initialize: function() {
+	initialize: function(viewOptions) {
+
+		var defaultOptions = {
+			invert: false,
+			hidden: false,
+			xlabel: "m/z",
+			ylabelLeft: "Intensity",
+			ylabelRight: "% of base Peak",
+			butterfly: false,
+		};
+
+		this.options = _.extend(defaultOptions, viewOptions);
+
 		this.spinner = new Spinner({scale: 5});
-		this.svg = d3.select(this.el.getElementsByTagName("svg")[0]);//d3.select(this.el)
-				//~ .append("svg").style("width", "100%").style("height", "100%");
+		// this.svg = d3.select(this.el.getElementsByTagName("svg")[0]);
+		this.svg = d3.select(this.el);
 
 		//create graph
-		var graphOptions = {xlabel:"m/z", ylabelLeft:"Intensity", ylabelRight:"% of base Peak"};
-		this.graph = new Graph (this.svg, this.model, graphOptions);
+		this.graph = new Graph (this.svg, this.model, this.options);
 
 		$(this.el).css('background-color', '#fff');
 
@@ -47,7 +57,9 @@ var SpectrumView = Backbone.View.extend({
 		this.listenTo(this.model, 'change:changedAnnotation', this.changedAnnotation);
 		this.listenTo(this.model, 'change:highlightColor', this.updateHighlightColors);
 		this.listenTo(this.model, 'changed:ColorScheme', this.updateColors);
+		this.listenTo(this.model, 'change:mzRange', this.updateMzRange);
 
+		this.listenTo(xiSPEC.vent, 'butterflyToggle', this.butterflyToggle);
 		this.listenTo(xiSPEC.vent, 'downloadSpectrumSVG', this.downloadSVG);
 		this.listenTo(xiSPEC.vent, 'resize:spectrum', this.resize);
 		this.listenTo(xiSPEC.vent, 'clearSpectrumHighlights', this.clearHighlights);
@@ -62,18 +74,36 @@ var SpectrumView = Backbone.View.extend({
 	},
 
 	render: function() {
-		// if (!this.model.get('changedAnnotation')){
-		// 	this.disableRevertAnnotation();
-		// }
+
 		this.graph.clear();
-		// this.lockZoom();
-		if (this.model.get("JSONdata"))
+
+		if(this.options.hidden){
+			this.graph.hide();
+			return this;
+		}
+		else{
+			this.graph.show();
+		}
+
+		if (this.model.get("JSONdata")){
 			this.graph.setData();
+		}
 		// this.hideSpinner();
+		return this;
 	},
 
 	resetZoom: function(){
 		this.graph.resize(this.model.xminPrimary, this.model.xmaxPrimary, this.model.ymin, this.model.ymaxPrimary);
+	},
+
+	updateMzRange: function(){
+		//resize if the mzRange is not up to date
+		var mzRange = this.model.get('mzRange');
+		if (mzRange === undefined)
+			return;
+		if (mzRange[0] == this.graph.x.domain()[0] && mzRange[1] == this.graph.x.domain()[1])
+			return;
+		this.resize();
 	},
 
 	resize: function(){
@@ -136,6 +166,16 @@ var SpectrumView = Backbone.View.extend({
 		this.graph.measure(this.model.get('measureMode'));
 	},
 
+	butterflyToggle: function(toggle){
+		this.graph.options.butterfly = toggle;
+		if(this.options.invert){
+			this.model.clearStickyHighlights();
+			this.options.hidden = !toggle;
+			this.render();
+		}
+		this.resize();
+	},
+
 	moveLabels: function(){
 
 		var peaks = this.graph.peaks;
@@ -171,7 +211,7 @@ var SpectrumView = Backbone.View.extend({
 	},
 
 	downloadSVG: function(){
-		var svgSel = d3.select(this.el).selectAll("svg");
+		var svgSel = d3.select(this.el.parentNode);
 		var svgArr = svgSel[0];
 		var svgStrings = CLMSUI.svgUtils.capture (svgArr);
 		var svgXML = CLMSUI.svgUtils.makeXMLStr (new XMLSerializer(), svgStrings[0]);
@@ -209,7 +249,7 @@ var SpectrumView = Backbone.View.extend({
 
 	showSpinner: function(){
 		this.graph.clear();
-		this.spinner.spin(d3.select(this.el).node());
+		this.spinner.spin(d3.select(this.el.parentNode).node());
 	},
 
 	hideSpinner: function(){
@@ -218,10 +258,10 @@ var SpectrumView = Backbone.View.extend({
 
 	changedAnnotation: function(){
 		if(this.model.get('changedAnnotation')){
-			$(this.el).css('background-color', 'rgb(210, 224, 255)');
+			$(this.el.parentNode).attr('style', 'background-color:#9abaff;');
 		}
 		else{
-			$(this.el).css('background-color', '#fff');
+			$(this.el.parentNode).attr('style', 'background-color:#fff;');
 		}
 	},
 

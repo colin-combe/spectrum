@@ -56,7 +56,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 	var self = this;
 
 	//svg elements
-	this.g = this.FragKey.g.append('g');
+	this.g = this.FragKey.scaleSvgGroup.append('g');
 
 /*	var group = this.g
 		.on("mouseover", function() {

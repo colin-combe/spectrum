@@ -27,6 +27,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 	events : {
 		'click #lossyChkBx': 'showLossy',
 		'click #absErrChkBx': 'absErrToggle',
+		// 'click #butterflyChkBx': 'butterflyToggle',
 		'change #colorSelector': 'changeColorScheme',
 		'click .settingsTab' : 'changeTab',
 		'click .settingsCancel' : 'cancel',
@@ -49,6 +50,8 @@ var SpectrumSettingsView = Backbone.View.extend({
 		};
 
 		this.options = _.extend(defaultOptions, options);
+
+		this.displayModel = this.options.displayModel;
 
 		SpectrumSettingsView.__super__.initialize.apply (this, arguments);
 		var self = this;
@@ -277,6 +280,9 @@ var SpectrumSettingsView = Backbone.View.extend({
 			.append("input").attr("type", "checkbox").attr("id", "absErrChkBx")
 		;
 
+		// var butterfly = appearanceTab.append("label").text("Butterfly plot with original Spectrum: ")
+		// 	.append("input").attr("type", "checkbox").attr("id", "butterflyChkBx")
+		// ;
 
 		//custom config
 		var customConfigTab = mainDiv.append("div").attr("class", "xispec_settings-tab xispec_flex-column").attr("id", "settings_custom_config").style("display", "none");
@@ -330,8 +336,8 @@ var SpectrumSettingsView = Backbone.View.extend({
 	changeDecimals: function(){
 		var showDecimals = parseInt(this.decimals[0][0].value);
 		this.model.showDecimals = showDecimals;
-		this.model.otherModel.showDecimals = showDecimals; //apply changes directly for now
-		this.model.otherModel.trigger('change'); //necessary for PrecursorInfoView update
+		this.displayModel.showDecimals = showDecimals; //apply changes directly for now
+		this.displayModel.trigger('change'); //necessary for PrecursorInfoView update
 	},
 
 	applyCustomCfg: function(e){
@@ -341,14 +347,14 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 		json.annotation.custom = customConfig;
 		// if ($('#xispec_keepCustomCfg').is(":checked")){
- 	// 		this.model.otherModel.keepCustomConfig = customConfig;
+ 	// 		this.displayModel.keepCustomConfig = customConfig;
 		// }
 		// else {
-		// 	this.model.otherModel.keepCustomConfig = false;
+		// 	this.displayModel.keepCustomConfig = false;
 		// }
 
-		this.model.otherModel.request_annotation(json);
-		this.model.otherModel.set('changedAnnotation', true);
+		xiSPEC.request_annotation(json);
+		this.displayModel.set('changedAnnotation', true);
 
 		// this.render();
 
@@ -386,13 +392,13 @@ var SpectrumSettingsView = Backbone.View.extend({
 			processData: false,
 			success: function (response) {
 				var json = JSON.parse(response);
-// 				json['annotation']['custom'] = self.model.otherModel.customConfig;
-				json['annotation']['custom'] = self.model.otherModel.get("JSONdata").annotation.custom;
-				json['annotation']['precursorMZ'] = self.model.otherModel.precursor.matchMz;
-				json['annotation']['requestID'] = self.model.otherModel.lastRequestedID + Date.now();
-				self.model.otherModel.request_annotation(json);
-				self.model.otherModel.set('changedAnnotation', true);
-				self.model.otherModel.knownModifications = $.extend(true, [], self.model.knownModifications);
+// 				json['annotation']['custom'] = self.displayModel.customConfig;
+				json['annotation']['custom'] = self.displayModel.get("JSONdata").annotation.custom;
+				json['annotation']['precursorMZ'] = self.displayModel.precursor.matchMz;
+				json['annotation']['requestID'] = xiSPEC.lastRequestedID + Date.now();
+				xiSPEC.request_annotation(json);
+				self.displayModel.set('changedAnnotation', true);
+				self.displayModel.knownModifications = $.extend(true, [], self.model.knownModifications);
 				spinner.stop();
 				$('#xispec_settingsForm').show();
 			}
@@ -416,7 +422,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 		}
 
 		//peptideStr
-		var invalidChar = invalidChars(formData['peps'].value, /([^GALMFWKQESPVICYHRNDTa-z:;#0-9(.)\-]+)/);
+		var invalidChar = invalidChars(formData['peps'].value, /([^GALMFWKQESPVICYHRNDTXa-z:;#0-9(.)\-]+)/);
 		if (invalidChar){
 			alert('Invalid character(s) in peptide sequence: ' + invalidChar);
 			return false;
@@ -605,7 +611,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 		this.pepInputView.render();
 
 		// var cc_checked = false;
-		// if(this.model.otherModel.keepCustomConfig !== false){
+		// if(this.displayModel.keepCustomConfig !== false){
 		// 	cc_checked = true
 		// }
 		// $('#xispec_keepCustomCfg').prop("checked", cc_checked);
@@ -625,7 +631,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 		this.peaklist[0][0].value = this.model.peaksToMGF();
 		this.precursorZ[0][0].value  = this.model.precursor.charge;
-		this.toleranceValue[0][0].value  = this.model.MSnTolerance.value;
+		this.toleranceValue[0][0].value  = this.model.MSnTolerance.tolerance;
 		this.toleranceUnit[0][0].value = this.model.MSnTolerance.unit;
 		this.crossLinkerModMass[0][0].value = this.model.crossLinkerModMass;
 		this.decimals[0][0].value = this.model.showDecimals;
@@ -695,7 +701,16 @@ var SpectrumSettingsView = Backbone.View.extend({
 		this.isVisible = false;
 		$(this.wrapper[0]).hide();
 		document.getElementById('highlightColor').jscolor.hide();
-		this.model.resetModel();
+
+		// resetModel: ToDo: move to xiSPEC Wrapper? change to cloning of models?
+		// used to reset SettingsModel
+		if (this.displayModel.get("JSONdata") == null) return;
+		var json_data_copy = jQuery.extend({}, this.displayModel.get("JSONdata"));
+		var json_request_copy =  jQuery.extend({}, this.displayModel.get("JSONrequest"));
+		this.knownModifications = jQuery.extend(true, [], this.displayModel.knownModifications);
+		this.model.set({"JSONdata": json_data_copy, "JSONrequest": json_request_copy});
+		this.model.trigger("change:JSONdata");
+
 	},
 
 	toggleCustomCfgHelp: function(){
@@ -731,11 +746,11 @@ var SpectrumSettingsView = Backbone.View.extend({
 		var color = '#' + event.originalEvent.srcElement.value;
 		//for now change color of model directly
 		//ToDo: Maybe change this also to apply/cancel and/or put in reset to default values
-		this.model.otherModel.set('highlightColor', color);
+		this.displayModel.set('highlightColor', color);
 	},
 
 	changePeakHighlightMode: function(event){
-		var model = this.model.otherModel; //apply changes directly for now
+		var model = this.displayModel; //apply changes directly for now
 		var $target = $(event.target);
 		var selected = $target .is(':checked');
 		model.showAllFragmentsHighlight = !selected;
@@ -757,7 +772,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 	},
 
 	showLossy: function(e) {
-		var model = this.model.otherModel; //apply changes directly for now
+		var model = this.displayModel; //apply changes directly for now
 		var $target = $(e.target);
         var selected = $target .is(':checked');
 		model.lossyShown = selected;
@@ -765,14 +780,19 @@ var SpectrumSettingsView = Backbone.View.extend({
 	},
 
 	absErrToggle: function(e) {
-		var model = this.model.otherModel; //apply changes directly for now
 		var $target = $(e.target);
 		var selected = $target.is(':checked');
 		xiSPEC.vent.trigger('QCabsErr', selected);
 	},
 
+	// butterflyToggle: function(e) {
+	// 	var $target = $(e.target);
+	// 	var selected = $target.is(':checked');
+	// 	xiSPEC.vent.trigger('butterflyToggle', selected);
+	// },
+
 	changeColorScheme: function(e){
-		var model = this.model.otherModel; //apply changes directly for now
+		var model = this.displayModel; //apply changes directly for now
 		model.changeColorScheme(e.target.value);
 	},
 });

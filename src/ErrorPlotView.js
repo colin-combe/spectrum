@@ -174,7 +174,7 @@ var ErrorPlotView = Backbone.View.extend({
 
 		var xmax = d3.max(this.data, function(d) { return d['x']; });
 		// var ymax = d3.max(this.data, function(d) { return d['error']; });
-		var ymax = this.model.MSnTolerance.value;
+		var ymax = this.model.MSnTolerance.tolerance;
 
 		var ymin = this.absolute ? 0 : 0 - ymax;
 

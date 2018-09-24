@@ -204,10 +204,11 @@
     min-height: 150px;
 }
 
-#xispec_spectrumSVG {
+#xispec_Svg {
     width: 100%;
     height: 100%;
     flex-grow: 1;
+    background-color: white;
 }
 
 #xispec_wrapper {

@@ -510,16 +510,14 @@ Peak.prototype.updateY = function(){
 		this.highlightLine
 			.attr("y1", yScale(this.y))
 			.attr("y2", yScale(0));
-		var yStep = 15;
-		var self = this;
+		var yStep = 13;
 
 		for (var i = 0; i < labelCount; i++) {
-			this.labels[i][0].setAttribute("y",  yScale(self.y) - 5 - (yStep * i));
-			this.labelHighlights[i][0].setAttribute("y",  yScale(self.y) - 5 - (yStep * i));
+			var gap = this.graph.options.invert ? -10 - (yStep * i) : 5 + (yStep * i);
+			this.labels[i][0].setAttribute("y",  yScale(this.y) - gap);
+			this.labelHighlights[i][0].setAttribute("y",  yScale(this.y) - gap);
 		}
 
-		//this.labels.attr("y", function(d,i) { return yScale(self.y) - 5 - (yStep * i); });
-		//this.labelHighlights.attr("y", function(d,i) { return yScale(self.y) - 5 - (yStep * i); });
 	}
 }
 

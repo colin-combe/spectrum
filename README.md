@@ -4,7 +4,7 @@ Citation: Lars Kolbowski, Colin Combe, Juri Rappsilber; xiSPEC: web-based visual
 
 ### Note
 
-Annotation of spectra is done per default via xiAnnotator (https://github.com/Rappsilber-Laboratory/xiAnnotator) set up on http://xi3.bio.ed.ac.uk/xiAnnotator/annotate/FULL. Instructions for setting up your own copy of the xiAnnotator can be found here: https://github.com/Rappsilber-Laboratory/xiAnnotator/blob/master/doc/SysV/Readme.md
+Annotation of spectra is done per default via xiAnnotator (https://github.com/Rappsilber-Laboratory/xiAnnotator) set up on https://spectrumviewer.org/xiAnnotator/. Instructions for setting up your own copy of the xiAnnotator can be found here: https://github.com/Rappsilber-Laboratory/xiAnnotator/blob/master/doc/SysV/Readme.md
 
 To change the xiAnnotatorURL use the xiAnnotatorBaseURL option.
 
@@ -34,7 +34,7 @@ You need to include the following files:
 
     <!-- Spectrum viewer .js files -->
     <script type="text/javascript" src="src/Wrapper.js"></script>
-    <script type="text/javascript" src="src/model.js"></script>
+    <script type="text/javascript" src="src/AnnotatedSpectrumModel.js"></script>
     <script type="text/javascript" src="src/SpectrumControlsView.js"></script>
     <script type="text/javascript" src="src/SpectrumView2.js"></script>
     <script type="text/javascript" src="src/FragmentationKeyView.js"></script>
@@ -70,8 +70,8 @@ var options = {
   targetDiv: 'xispec_wrapper'                 // id of your html target div for the spectrum viewer
   showCustomConfig: false,                    // show/hide custom annotation options tab in settings view
   showQualityControl: 'bottom',               // select where to show the quality control plots per default. values: 'bottom', 'side', 'min'
-  baseDir:  './',                             // path to base directory of the spectrum viewer on your website 
-  xiAnnotatorBaseURL: 'https://xi3.bio.ed.ac.uk/xiAnnotator/',    // url of annotator change if you're hosting xiAnnotator yourself
+  baseDir:  './',                             // path to base directory of the spectrum viewer on your website
+  xiAnnotatorBaseURL: 'https://spectrumviewer.org/xiAnnotator/',    // url of annotator change if you're hosting xiAnnotator yourself
   highlightColor: '#FFFF00',                  // initial highlight color (can be changed in settings)
   highlightWidth: 8,                          // highlight width
   peakColor: "#a6a6a6",                       // color for not annotated peaks
@@ -99,7 +99,7 @@ var data = {
       ionTypes: ionTypes,                       // ion types to annotate
       peakList: peakList                        // array of peaks
    }
-   
+
 xiSPEC.setData(data);
 ```
 

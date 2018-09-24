@@ -21,16 +21,25 @@
 var PrecursorInfoView = Backbone.View.extend({
 
 	events : {
-		'click .toggle' : 'toggle',
-	  },
+		'click .toggle' : 'expandToggle',
+	},
 
-	initialize: function() {
+	initialize: function(viewOptions) {
 
-		this.show = true;
+		var defaultOptions = {
+			invert: false,
+			hidden: false,
+		};
 
-		var self = this;
+		this.options = _.extend(defaultOptions, viewOptions);
 
-		this.svg = d3.select(this.el.getElementsByTagName("svg")[0]); //xispec_spectrumSVG
+		this.listenTo(xiSPEC.vent, 'butterflyToggle', this.butterflyToggle);
+		this.listenTo(xiSPEC.vent, 'resize:spectrum', this.render);
+		this.listenTo(window, 'resize', _.debounce(this.render));
+		this.expand = true;
+
+		// this.svg = d3.select(this.el.getElementsByTagName("svg")[0]); //xispec_Svg
+		this.svg = d3.select(this.el);
 
 		//create
 		this.wrapper = this.svg.append('text')
@@ -38,6 +47,22 @@ var PrecursorInfoView = Backbone.View.extend({
 			.attr("x", 10)
 			.attr("y", 13)
 			.attr("font-size", 12);
+
+
+
+
+		this.listenTo(this.model, 'change', this.render);
+	},
+
+	clear: function(){
+		this.wrapper.selectAll("*").remove();
+	},
+
+	render: function() {
+		this.clear();
+
+		if(this.options.hidden)
+			return;
 
 		this.toggle = this.wrapper.append('tspan')
 			.text("[-]")
@@ -54,10 +79,14 @@ var PrecursorInfoView = Backbone.View.extend({
 			.style("cursor", "default");
 
 
-		this.listenTo(this.model, 'change', this.render);
-	},
+		if(this.options.invert){
+			var $el = $(this.el)
+			var parentWidth = $el.width();
+			var parentHeight = $el.height();
+			var top = this.model.isLinear ? parentHeight - 65 : parentHeight - 115;
+			this.wrapper.attr("transform", "translate(0," + top + ")");
+		}
 
-	render: function() {
 		var precursor = this.model.precursor;
 		var content = "";
 
@@ -70,24 +99,34 @@ var PrecursorInfoView = Backbone.View.extend({
 			dataArr.push("calc m/z=" + precursor.calcMz.toFixed(this.model.showDecimals));
 		if (precursor.charge !== undefined)
 			dataArr.push("z=" + precursor.charge);
-		if (precursor.error !== undefined && precursor.error != "")
-			dataArr.push("error=" + precursor.error);
+		if (precursor.error !== undefined)
+			dataArr.push("error=" + precursor.error.tolerance.toFixed(this.model.showDecimals) + ' ' + precursor.error.unit);
 
 		content += dataArr.join("; ");
 		this.content.text(content);
 
 	},
 
-	toggle: function(){
-		var active   = this.show ? false : true,
-		  newOpacity = active ? 1 : 0;
-		// Hide or show the elements
+	expandToggle: function(){
+		this.expand = !this.expand;
+		if(this.options.hidden)
+			return;
+		newOpacity = this.expand ? 1 : 0;
+
 		this.content.style("opacity", newOpacity);
-		if (!active)
+		if (!this.expand)
 			this.toggle.text("[+]")
 		else
 			this.toggle.text("[-]")
-		// Update whether or not the elements are active
-		this.show = active;
-	}
+	},
+
+	butterflyToggle: function(toggle){
+		// this.graph.options.butterfly = toggle;
+		if(this.options.invert){
+			this.options.hidden = !toggle;
+			this.render();
+		}
+		this.render();
+	},
+
 });
