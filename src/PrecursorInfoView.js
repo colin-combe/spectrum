@@ -99,7 +99,7 @@ var PrecursorInfoView = Backbone.View.extend({
 			dataArr.push("calc m/z=" + precursor.calcMz.toFixed(this.model.showDecimals));
 		if (precursor.charge !== undefined)
 			dataArr.push("z=" + precursor.charge);
-		if (precursor.error !== undefined)
+		if (precursor.error)
 			dataArr.push("error=" + precursor.error.tolerance.toFixed(this.model.showDecimals) + ' ' + precursor.error.unit);
 
 		content += dataArr.join("; ");
