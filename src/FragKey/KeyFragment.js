@@ -114,12 +114,19 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 	// # bions; either normal or lossy; have different colors
 	if (fragments.b.length != 0){ // really a, b, or c , see get_fragment_annotation()
 
-		if(fragments.y.length == 0)	//highlight full length of the fragbar
+		// check for Cross-link containing fragment - checking first is sufficient
+		// fragments.b.filter(function(b){return b.type.includes('CrossLink')})
+		var fragLineClass = 'xispec_fragBar';
+		if (this.FragKey.options.accentuateCLcontainingFragments && fragments.b[0].type.includes('CrossLink')){
+			fragLineClass = 'xispec_fragBarThick';
+		}
+
+		if(fragments.y.length == 0)	//highlightPath full length of the fragbar
 			var highlightPath = "M" + this.x+ "," + (y - barHeight)
 								+" L" + this.x+ "," +  y
 								+ " L" + (this.x- tailX) + "," + (y + tailY);
 
-		else ////highlight half length of the fragbar
+		else ////highlightPath half length of the fragbar
 			var highlightPath = "M" + this.x+ "," + (y - barHeight/2)
 								+" L" + this.x+ "," +  y
 								+ " L" + (this.x- tailX) + "," + (y + tailY);
@@ -165,10 +172,10 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 		this.bTail = this.bgroup.append("line")
 			.attr("x1", this.x)
 			.attr("y1", y)
-			.attr("x2", this.x- tailX)
+			.attr("x2", this.x - tailX)
 			.attr("y2", y + tailY)
 			.style("cursor", "pointer")
-			.attr("class", "xispec_fragBar");
+			.attr("class", fragLineClass);
 
 
 		var ion = "";
@@ -234,6 +241,12 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 
 	// # yions; either normal or lossy; have different colors
 	if (fragments.y.length != 0){
+
+		var fragLineClass = 'xispec_fragBar';
+		if (this.FragKey.options.accentuateCLcontainingFragments && fragments.y[0].type.includes('CrossLink')){
+			fragLineClass = 'xispec_fragBarThick';
+		}
+
 		if(fragments.b.length == 0)	//highlight full length of the fragbar
 			var highlightPath = "M" + this.x + "," + y
 								+" L" + this.x + "," +  (y - barHeight)
@@ -288,7 +301,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 			.attr("x2", this.x + tailX)
 			.attr("y2", y - barHeight - tailY)
 			.style("cursor", "pointer")
-			.attr("class", "xispec_fragBar");
+			.attr("class", fragLineClass);
 
 		var ion = "";
 		for (var i = 0; i < fragments.y.length; i++) {

@@ -229,7 +229,11 @@
     font-size:12px;
 }
 .xispec_fragBar{
-    stroke-width:1.3px;
+    stroke-width: 1.3px;
+    stroke-linecap:round;
+}
+.xispec_fragBarThick{
+    stroke-width: 2.6px;
     stroke-linecap:round;
 }
 

@@ -33,6 +33,7 @@ var FragmentationKeyView = Backbone.View.extend({
 			invert: false,
 			hidden: false,
 			disabled: false,
+			accentuateCLcontainingFragments: false,
 		};
 		this.options = _.extend(defaultOptions, viewOptions);
 
@@ -61,6 +62,7 @@ var FragmentationKeyView = Backbone.View.extend({
 		this.listenTo(window, 'resize', _.debounce(this.resize));
 		this.listenTo(xiSPEC.vent, 'resize:spectrum', this.resize);
 		this.listenTo(xiSPEC.vent, 'butterflyToggle', this.butterflyToggle);
+		this.listenTo(xiSPEC.vent, 'AccentuateCrossLinkContainingFragments', this.accentuateCLcontainingToggle);
 
 		this.tooltip = d3.select("body").append("span")
 			.attr("class", "xispec_tooltip")
@@ -102,8 +104,8 @@ var FragmentationKeyView = Backbone.View.extend({
 		for (var i = 0; i < this.peptideStrs.length; i++) {
 			this.peptides[i] = this.peptideStrs[i];
 		};
-			this.pepLetters = [];
-			this.pepLetterHighlights = [];
+		this.pepLetters = [];
+		this.pepLetterHighlights = [];
 		this.modLetters = [];
 		this.modLetterHighlights = [];
 		this.pepoffset = [0,0];
@@ -298,10 +300,10 @@ var FragmentationKeyView = Backbone.View.extend({
 
 	drawFragmentationEvents: function(pepIndex){
 		for (var i = 0; i < this.annotations[pepIndex].length; i++){
-			var frag = this.annotations[pepIndex][i];
-			if (frag.b.length != 0 || frag.y.length != 0) {
+			var frags = this.annotations[pepIndex][i];
+			if (frags.b.length != 0 || frags.y.length != 0) {
 				//var x = (this.xStep * i) + (this.xStep / 2);
-				this.fraglines.push(new KeyFragment(frag, i, this.pepoffset[pepIndex], pepIndex, this));
+				this.fraglines.push(new KeyFragment(frags, i, this.pepoffset[pepIndex], pepIndex, this));
 			}
 		}
 	},
@@ -855,6 +857,11 @@ var FragmentationKeyView = Backbone.View.extend({
 			this.render();
 		}
 		this.resize();
+	},
+
+	accentuateCLcontainingToggle: function(toggle){
+		this.options.accentuateCLcontainingFragments = toggle;
+		this.render();
 	},
 
 	hide: function(){

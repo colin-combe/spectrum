@@ -246,13 +246,19 @@ function Peak (id, graph){
 				var mouseY = coords[1];
 				var r = Math.sqrt((mouseX * mouseX) + ((mouseY-startY) * (mouseY-startY) ));
 				if (r > 15){
-						filteredLabelLines
-							.attr("opacity", 1)
-							.attr("x1", 0)
-							.attr("x2", mouseX)
-							.attr("y1", startY)
-							.attr("y2", mouseY)
-						;
+					var deltaY = (mouseY - startY > 0 ? -8 : 2);
+					var deltaX = 0;
+					if(Math.abs(mouseX) > 20){
+						deltaX = (mouseX > 0 ? -8 : 8)	
+					}
+					console.log(mouseX);
+					filteredLabelLines
+						.attr("opacity", 1)
+						.attr("x1", 0)
+						.attr("x2", mouseX + deltaX)
+						.attr("y1", startY)
+						.attr("y2", mouseY + deltaY)
+					;
 				}
 				else
 					filteredLabelLines.attr("opacity", 0);
@@ -287,7 +293,7 @@ function Peak (id, graph){
 
 				labelLines.enter()
 					.append("line")
-					.attr("stroke-width", 1)
+					// .attr("stroke-width", 1)
 					.attr("stroke", "Black")
 					.attr("class", "xispec_labelLine")
 					.style("stroke-dasharray", ("3, 3"));
@@ -358,6 +364,11 @@ function Peak (id, graph){
 					.attr("x", 0)
 					.attr("text-anchor", "middle")
 					.style("font-size", "0.8em")
+					.attr("font-weight", function(d){
+						if (self.graph.options.accentuateCLcontainingFragments && d.type.includes('CrossLink'))
+							return '900';
+						return 'normal';
+					})
 					.attr("class", function(d){
 						var pepIndex = d.peptideId+1;
 						return "xispec_peakAnnot pep" + pepIndex + " " + partition.colourClass;
@@ -382,8 +393,13 @@ function Peak (id, graph){
 
 	}
 
+	var peakStrokeWidth = 1;
+	if (this.graph.options.accentuateCLcontainingFragments && this.fragments.filter(function(f){return f.type.includes('CrossLink')}).length > 0){
+		peakStrokeWidth = 2;
+	}
+
 	this.line = this.lineGroup.append('line')
-					.attr("stroke-width","1")
+					.attr("stroke-width", peakStrokeWidth)
 					.attr("x1", 0)
 					.attr("x2", 0);
 
@@ -526,7 +542,7 @@ Peak.prototype.removeLabels = function(){
 	if(labelCount){
 		this.labels.attr("display", "none");
 		this.labelHighlights.attr("display", "none");
-		this.labelLines.attr("opacity", 0);
+// 		this.labelLines.attr("opacity", 0);
 	}
 }
 
@@ -541,7 +557,7 @@ Peak.prototype.showLabels = function(lossyOverride){
 		};
 		this.labels.filter(ffunc).attr("display", "inline");
 		this.labelHighlights.filter(ffunc).attr("display", "inline");
-		this.labelLines.filter(ffunc).attr("opacity", 1);
+// 		this.labelLines.filter(ffunc).attr("opacity", 1);
 	}
 }
 

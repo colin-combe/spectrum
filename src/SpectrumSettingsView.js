@@ -27,6 +27,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 	events : {
 		'click #lossyChkBx': 'showLossy',
 		'click #absErrChkBx': 'absErrToggle',
+		'click #accentuateCLcontainingChkBx': 'accentuateCLcontainingToggle',
 		// 'click #butterflyChkBx': 'butterflyToggle',
 		'change #colorSelector': 'changeColorScheme',
 		'click .settingsTab' : 'changeTab',
@@ -278,6 +279,10 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 		this.absoluteError = appearanceTab.append("label").text("Absolute error values (QC): ")
 			.append("input").attr("type", "checkbox").attr("id", "absErrChkBx")
+		;
+
+		this.accentuateCrossLinkContaining = appearanceTab.append("label").text("accentuate cross-link containing fragments: ")
+			.append("input").attr("type", "checkbox").attr("id", "accentuateCLcontainingChkBx")
 		;
 
 		// var butterfly = appearanceTab.append("label").text("Butterfly plot with original Spectrum: ")
@@ -783,6 +788,12 @@ var SpectrumSettingsView = Backbone.View.extend({
 		var $target = $(e.target);
 		var selected = $target.is(':checked');
 		xiSPEC.vent.trigger('QCabsErr', selected);
+	},
+
+	accentuateCLcontainingToggle: function(e) {
+		var $target = $(e.target);
+		var selected = $target.is(':checked');
+		xiSPEC.vent.trigger('AccentuateCrossLinkContainingFragments', selected);
 	},
 
 	// butterflyToggle: function(e) {
