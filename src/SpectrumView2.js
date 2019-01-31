@@ -52,7 +52,6 @@ var SpectrumView = Backbone.View.extend({
 		this.listenTo(window, 'resize', _.debounce(this.resize));
 
 		this.listenTo(this.model, 'change:JSONdata', this.render);
-		this.listenTo(this.model, 'change:lockZoom', this.lockZoom);
 		this.listenTo(this.model, 'change:measureMode', this.measuringTool);
 		this.listenTo(this.model, 'change:moveLabels', this.moveLabels);
 		this.listenTo(this.model, 'change:changedAnnotation', this.changedAnnotation);
@@ -61,10 +60,12 @@ var SpectrumView = Backbone.View.extend({
 		this.listenTo(this.model, 'change:mzRange', this.updateMzRange);
 
 		this.listenTo(xiSPEC.vent, 'butterflyToggle', this.butterflyToggle);
+		this.listenTo(xiSPEC.vent, 'butterflySwap', this.butterflySwap);
 		this.listenTo(xiSPEC.vent, 'AccentuateCrossLinkContainingFragments', this.accentuateCLcontainingToggle);
 		this.listenTo(xiSPEC.vent, 'downloadSpectrumSVG', this.downloadSVG);
 		this.listenTo(xiSPEC.vent, 'resize:spectrum', this.resize);
 		this.listenTo(xiSPEC.vent, 'clearSpectrumHighlights', this.clearHighlights);
+		this.listenTo(xiSPEC.vent, 'lockZoomToggle', this.lockZoom);
 
 		this.listenTo(this.model, 'resetZoom', this.resetZoom);
 		this.listenTo(this.model, 'changed:Highlights', this.updateHighlights);
@@ -122,7 +123,7 @@ var SpectrumView = Backbone.View.extend({
 
 	lockZoom: function(){
 
-		if(this.model.get('lockZoom')){
+		if(xiSPEC.lockZoom){
 			this.graph.disableZoom();
 		}
 		else{
@@ -176,6 +177,11 @@ var SpectrumView = Backbone.View.extend({
 			this.render();
 		}
 		this.resize();
+	},
+
+	butterflySwap: function(){
+		this.options.invert = !this.options.invert;
+		this.render();
 	},
 
 	accentuateCLcontainingToggle: function(toggle){

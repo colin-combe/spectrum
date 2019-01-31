@@ -59,6 +59,7 @@ xiSPEC.init = function(options) {
 	this.originalSpectrumModel = new AnnotatedSpectrumModel(model_options);
 
 	//ToDo: make extra spectrum controls model with mzRange, moveLabels, measureMode?
+	this.lockZoom = false;
 	//sync moveLabels and measureMode
 	this.originalSpectrumModel.listenTo(
 		this.SpectrumModel,
@@ -94,7 +95,7 @@ xiSPEC.init = function(options) {
 		+"<div class='xispec_dynDiv' id='xispec_settingsWrapper'>"
 		+"	<div class='xispec_dynDiv_moveParentDiv'>"
 		+"		<span class='xispec_dynTitle'>Spectrum settings</span>"
-		+"		<i class='fa fa-times-circle settingsCancel' id='closeSettings'></i>"
+		+"		<i class='fa fa-times-circle xispec_settingsCancel' id='closeSettings'></i>"
 		+"	</div>"
 		+"	<div class='xispec_dynDiv_resizeDiv_tl draggableCorner'></div>"
 		+"	<div class='xispec_dynDiv_resizeDiv_tr draggableCorner'></div>"
@@ -266,6 +267,7 @@ xiSPEC.request_annotation = function(json_request, isOriginalMatchRequest){
 
 				if(isOriginalMatchRequest){
 					self.originalSpectrumModel.set({"JSONdata": data, "JSONrequest": json_request});
+					self.originalMatchRequest = $.extend(true, {}, json_request);
 				}
 
 				self.SpectrumModel.set({"JSONdata": data, "JSONrequest": json_request});
@@ -359,9 +361,10 @@ xiSPEC.convert_to_json_request = function (data) {
 	annotationRequest.annotation = {};
 
 	var ionTypes = data.ionTypes.split(";");
-	var ionTypeCount = ionTypes.length;
+	//remove empty strings from list
+	ionTypes = ionTypes.filter(Boolean);
 	var ions = [];
-	for (var it = 0; it < ionTypeCount; it++) {
+	for (var it = 0; it < ionTypes.length; it++) {
 		var ionType = ionTypes[it];
 		ions.push({"type": (ionType.charAt(0).toUpperCase() + ionType.slice(1) + "Ion")});
 	}

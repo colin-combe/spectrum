@@ -162,6 +162,17 @@
     margin-right: -3px;
 }
 
+#xispec_butterflyControls{
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+    margin-bottom: 0px;
+}
+
+#xispec_spectrumControls #xispec_butterflySwapBtn{
+    transform: rotate(90deg);
+    margin-right: -11px;
+}
+
 #xispec_spectrumControls label {
     display: inline-block;
     padding-left: 0.4em;

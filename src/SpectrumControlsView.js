@@ -36,6 +36,7 @@ var SpectrumControlsView = Backbone.View.extend({
 		'click #xispec_revertAnnotation' : 'revertAnnotation',
 		'click #xispec_toggleSpecList' : 'toggleSpecList',
 		'click #xispec_butterflyChkbx': 'butterflyToggle',
+		'click #xispec_butterflySwapBtn': 'butterflySwap',
 	},
 
 	initialize: function() {
@@ -149,18 +150,30 @@ var SpectrumControlsView = Backbone.View.extend({
 			.attr('title', 'revert to original annotation')
 		;
 
-		this.butterflyToggleLabel = this.wrapper.append('label')
-			.attr('class', 'xispec_btn')
-			.attr('title', 'Display original annotation as butterfly plot')
+		this.butterflyControls = this.wrapper.append('div')
+			.attr('id', 'xispec_butterflyControls')
 			.attr('style', 'display:none;')
-			.text("Butterfly plot")
 		;
 
-		var butterflyCheckbox = this.butterflyToggleLabel.append('input')
+		this.butterflySwapBtn = this.butterflyControls.append('i')
+			.attr('class', 'xispec_btn xispec_btn-topNav fa fa-exchange xispec_disabled')
+			.attr('aria-hidden', 'true')
+			.attr('id', 'xispec_butterflySwapBtn')
+			.attr('title', 'swap position of original and re-annotated spectrum')
+		;
+
+		var butterflyToggleLabel = this.butterflyControls.append('label')
+			.attr('class', 'xispec_btn')
+			.attr('title', 'Display original annotation as butterfly plot')
+			.text("Butterfly")
+		;
+
+		var butterflyCheckbox = butterflyToggleLabel.append('input')
 			.attr('class', 'pointer')
 			.attr('id', 'xispec_butterflyChkbx')
 			.attr('type', 'checkbox')
 		;
+
 
 		var extra_controls_after = this.wrapper.append('span')
 			.attr("id", "xispec_extra_spectrumControls_after")
@@ -170,7 +183,7 @@ var SpectrumControlsView = Backbone.View.extend({
 			.attr('href', 'http://spectrumviewer.org/help.php')
 			.attr('target', '_blank')
 		;
-		var helpButton = this.wrapper.append('i')
+		var helpButton = helpLink.append('i')
 			.attr('class', 'xispec_btn xispec_btn-1a xispec_btn-topNav fa fa-question')
 			.attr('aria-hidden', 'true')
 			.attr('title', 'Help')
@@ -192,19 +205,21 @@ var SpectrumControlsView = Backbone.View.extend({
 	},
 
 	lockZoom: function(){
+
 		if ($('#xispec_lockZoom').is(':checked')) {
 			$('#xispec_lock')[0].innerHTML = "&#128274";
 			$('#xispec_mzRangeSubmit').prop('disabled', true);
 			$('#xispec_xleft').prop('disabled', true);
 			$('#xispec_xright').prop('disabled', true);
-			this.model.set('lockZoom', true);
+			xiSPEC.lockZoom = true;
 		} else {
 			$('#xispec_lock')[0].innerHTML = "&#128275";
 			$('#xispec_mzRangeSubmit').prop('disabled', false);
 			$('#xispec_xleft').prop('disabled', false);
 			$('#xispec_xright').prop('disabled', false);
-			this.model.set('lockZoom', false);
+			xiSPEC.lockZoom = false;
 		}
+		xiSPEC.vent.trigger('lockZoomToggle');
 	},
 
 	toggleMeasuringMode: function(e){
@@ -256,12 +271,12 @@ var SpectrumControlsView = Backbone.View.extend({
 
 	changedAnnotation: function(){
 		if(this.model.get('changedAnnotation')){
-			this.butterflyToggleLabel.attr('style', 'display:inline;');
+			this.butterflyControls.attr('style', 'display:-webkit-inline-box;');
 			$('#xispec_revertAnnotation').addClass('xispec_btn-1a');
 			$('#xispec_revertAnnotation').removeClass('xispec_disabled');
 		}
 		else{
-			this.butterflyToggleLabel.attr('style', 'display:none;');
+			this.butterflyControls.attr('style', 'display:none;');
 			$('#xispec_revertAnnotation').removeClass('xispec_btn-1a');
 			$('#xispec_revertAnnotation').addClass('xispec_disabled');
 		}
@@ -271,6 +286,17 @@ var SpectrumControlsView = Backbone.View.extend({
 		var $target = $(e.target);
 		var selected = $target.is(':checked');
 		xiSPEC.vent.trigger('butterflyToggle', selected);
+		if(selected){
+			$('#xispec_butterflySwapBtn').removeClass('xispec_disabled');
+		}else{
+			$('#xispec_butterflySwapBtn').addClass('xispec_disabled');
+		}
+
+	},
+
+	butterflySwap: function(e) {
+		if($('#xispec_butterflyChkbx').is(':checked'))
+			xiSPEC.vent.trigger('butterflySwap');
 	},
 
 });

@@ -37,11 +37,12 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 
 		var self = this;
 
-		if(this.get('knownModificationsURL') !== false){
+		if(this.get('knownModificationsURL') !== false && !("cachedKnownModifications" in AnnotatedSpectrumModel.prototype)) {    // in tells difference between variable existing and having the undefined value and it not being defined at all
 			this.getKnownModifications(this.get('knownModificationsURL'));
+            AnnotatedSpectrumModel.prototype.cachedKnownModifications = this.knownModifications;
 		}
 		else{
-			this.knownModifications = this.get('knownModifications');
+			this.knownModifications = AnnotatedSpectrumModel.prototype.cachedKnownModifications || this.get('knownModifications');
 		}
 
 		this.showDecimals = 2;
@@ -124,20 +125,16 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		this.highlights = Array();
 		var JSONdata = this.get("JSONdata");
 
-		// if (JSONdata.annotation.fragementTolerance !== undefined){
-		// 	this.MSnTolerance = {
-		// 		"value": parseFloat(JSONdata.annotation.fragementTolerance.split(" ")[0]),
-		// 		"unit": JSONdata.annotation.fragementTolerance.split(" ")[1]
-		// 	};
-		// }
-		this.MSnTolerance = JSONdata.annotation.fragmentTolerance;
+		if(JSONdata.annotation){
+			this.MSnTolerance = JSONdata.annotation.fragmentTolerance;
+			this.fragmentIons = JSONdata.annotation.ions;
+			this.customConfig = JSONdata.annotation.custom;
+			var crossLinker = JSONdata.annotation.crosslinker;
+			if (JSONdata.annotation.crosslinker)
+				this.crossLinkerModMass = crossLinker.modMass;
+		}
 
-		this.fragmentIons = JSONdata.annotation.ions || [];
-		this.customConfig = JSONdata.annotation.custom || [];
 		this.peakList = JSONdata.peaks || [];
-		var crossLinker = JSONdata.annotation.crosslinker;
-		if (JSONdata.annotation.crosslinker !== undefined)
-			this.crossLinkerModMass = crossLinker.modMass;
 
 		this.pepStrs = [];
 		this.pepStrsMods = [];
@@ -157,18 +154,20 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		if (JSONdata.fragments !== undefined){
 			this.fragments = [];
 			for (var i = 0; i < JSONdata.fragments.length; i++) {
-				this.fragments[i] = JSONdata.fragments[i];
+				this.fragments[i] = new Fragment(JSONdata.fragments[i]);
 				this.fragments[i].id = i;
 			};
 		};
 
 		if (JSONdata.annotation){
 			this.precursor.charge = JSONdata.annotation.precursorCharge;
-			this.precursor.matchMz = JSONdata.annotation.precursorMZ;
+			this.precursor.expMz = JSONdata.annotation.precursorMZ;
 			this.precursor.error = JSONdata.annotation.precursorError;
 
 			this.precursor.calcMz = JSONdata.annotation.calculatedMZ;
 			// this.calcPrecursorMass();
+
+			this.losses = JSONdata.annotation.losses;
 		}
 
 		this.trigger("changed:data");
@@ -223,7 +222,7 @@ var AnnotatedSpectrumModel = Backbone.Model.extend({
 		//this.ymaxPrimary = ymax / 0.9;
 		this.ymaxPrimary = ymax;
 
-		if (!this.get('lockZoom')){
+		if (!xiSPEC.lockZoom){
 			this.set('mzRange', [this.xminPrimary, this.xmaxPrimary]);
 			this.ymax = this.ymaxPrimary;
 			this.ymin = 0;

@@ -25,21 +25,24 @@ var CLMSUI = CLMSUI || {};
 var SpectrumSettingsView = Backbone.View.extend({
 
 	events : {
-		'click #lossyChkBx': 'showLossy',
-		'click #absErrChkBx': 'absErrToggle',
-		'click #accentuateCLcontainingChkBx': 'accentuateCLcontainingToggle',
+		'click #xispec_toggleModifications' : 'toggleModTable',
+		'click #xispec_toggleLosses' : 'toggleLossTable',
+		'click #xispec_addNewLoss': 'addNewLoss',
+		'click #xispec_lossyChkBx': 'showLossy',
+		'click #xispec_absErrChkBx': 'absErrToggle',
+		'click #xispec_accentuateCLcontainingChkBx': 'accentuateCLcontainingToggle',
 		// 'click #butterflyChkBx': 'butterflyToggle',
-		'change #colorSelector': 'changeColorScheme',
-		'click .settingsTab' : 'changeTab',
-		'click .settingsCancel' : 'cancel',
-		'change #settingsDecimals' : 'changeDecimals',
+		'change #xispec_colorSelector': 'changeColorScheme',
+		'click .xispec_settingsTab' : 'changeTab',
+		'click .xispec_settingsCancel' : 'cancel',
+		'change #xispec_settingsDecimals' : 'changeDecimals',
 		'change #highlightColor' : 'updateJScolor',
-		'change #peakHighlightMode' : 'changePeakHighlightMode',
+		'change #xispec_peakHighlightMode' : 'changePeakHighlightMode',
 		'click #xispec_toggleCustomCfgHelp' : 'toggleCustomCfgHelp',
 		'click #xispec_settingsCustomCfgApply' : 'applyCustomCfg',
 		'submit #xispec_settingsForm' : 'applyData',
 		// 'keyup .stepInput' : 'updateStepSizeKeyUp',
-		'change .ionSelectChkbox': 'updateIons'
+		'change .xispec_ionSelectChkbox': 'updateIons',
 	},
 
 	identifier: "Spectrum Settings",
@@ -78,7 +81,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 			var zIndex = 20 - i;
 			var b_id = b.replace(" ", "_").toLowerCase();
 			self.menu.append("button")
-				.attr("class", "settingsTab xispec_btn xispec_btn-1a")
+				.attr("class", "xispec_settingsTab xispec_btn xispec_btn-1a")
 				.attr("data-tab", b_id)
 				.attr("id", b_id)
 				.attr("style", "z-index: " + zIndex)
@@ -109,7 +112,8 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 		// var dataFlexColumn = dataForm.append("div").attr("class", "xispec_flex-column");
 
-		var peptideLabel = dataForm.append("label").attr("class", "xispec_flex-row").text("Peptide Sequence: ")
+		var topDataDiv = dataForm.append('div').attr('class', 'xispec_topDataDiv');
+		var peptideLabel = topDataDiv.append("label").attr("class", "xispec_flex-row").text("Peptide Sequence: ");
 		this.peptideViewEl = peptideLabel.append('div').attr('class', 'xispec_flex-grow').append("input")
 			.attr("type", "text")
 			.attr("required", "")
@@ -120,7 +124,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 		;
 		this.pepInputView = new PepInputView({model: this.model, el: this.peptideViewEl[0] });
 
-		var dataFlexRow = dataForm.append("div").attr("class", "xispec_flex-row xispec_midDataDiv");
+		var dataFlexRow = topDataDiv.append("div").attr("class", "xispec_flex-row xispec_splitDataDiv");
 
 		var leftDiv = dataFlexRow.append("div").attr("class", "xispec_settingsDataLeft");
 
@@ -159,7 +163,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 			.enter()
 			.append("li").append("label")
 			.append("input")
-				.attr("class", "ionSelectChkbox")
+				.attr("class", "xispec_ionSelectChkbox")
 				.attr("type", "checkbox")
 				.attr("name", "ions[]")
 				.attr("id", function(d) { return d.text.replace(" ", ""); })
@@ -210,11 +214,44 @@ var SpectrumSettingsView = Backbone.View.extend({
 		;
 
 		//modTable
-		var modTableWrapper = dataForm.append("div").attr("class", "xispec_form-control dataTables_wrapper").attr("id", "xispec_modificationTable_wrapperOuter");
-		var modTable = modTableWrapper.append("table").attr("id", "xispec_modificationTable").attr("style", "width: 100%");
-		this.initializeModTable();
+		var modToggle = dataForm.append('div')
+			.attr('id', 'xispec_toggleModifications')
+			.attr('class', 'pointer')
+		;
+		modToggle.append('i').attr("class", "fa fa-minus-square").attr("aria-hidden", "true")
+		modToggle.append('span').text(' Modifications:');
 
+		this.modTableWrapper = dataForm.append("div")
+			.attr("class", "xispec_settingsTable_wrapper xispec_form-control dataTables_wrapper")
+		;
+		var modTable = this.modTableWrapper.append("table")
+			.attr("id", "xispec_modificationTable")
+			.attr("class", "xispec_settingsTable")
+			.attr("style", "width: 100%")
+		;
+		this.initializeModTable();
 		//end modTable
+
+		//lossTable
+		var lossToggle = dataForm.append('div')
+			.attr('id', 'xispec_toggleLosses')
+			.attr('class', 'pointer')
+		;
+		lossToggle.append('i').attr("class", "fa fa-plus-square pointer").attr("aria-hidden", "true");
+		lossToggle.append('span').text(' Losses:').append('span');
+
+		this.lossTableWrapper = dataForm.append("div")
+			.attr("class", "xispec_settingsTable_wrapper xispec_form-control dataTables_wrapper")
+			.style('display', 'none')
+		;
+		var lossTable = this.lossTableWrapper.append("table")
+			.attr("id", "xispec_lossTable")
+			.attr("class", "xispec_settingsTable")
+			.attr("style", "width: 100%")
+		;
+		this.initializeLossTable();
+		//end lossTable
+
 		var dataBottom = dataForm.append("div").attr("class", "xispec_settings-bottom");
 
 		var applyxispec_btn = dataBottom.append("input")
@@ -224,9 +261,9 @@ var SpectrumSettingsView = Backbone.View.extend({
 			.attr("type", "submit")
 		;
 		var cancelxispec_btn = dataBottom.append("input")
-			.attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control settingsCancel")
+			.attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
 			.attr("value", "Cancel")
-			.attr("id", "settingsCancel")
+			.attr("id", "xispec_settingsCancel")
 			.attr("type", "button")
 		;
 
@@ -238,7 +275,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 		;
 
 		var colorSchemeSelector = appearanceTab.append("label").text("Color scheme: ")
-			.append("select").attr("id", 'colorSelector').attr("class", 'xispec_form-control pointer')
+			.append("select").attr("id", 'xispec_colorSelector').attr("class", 'xispec_form-control pointer')
 		;
 		var colOptions = [
 			{value: "RdBu", text: "Red (& Blue)"},
@@ -248,7 +285,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 			{value: "PuOr", text: "Orange (& Purple)"},
 		];
 
-		d3.select("#colorSelector").selectAll("option").data(colOptions)
+		d3.select("#xispec_colorSelector").selectAll("option").data(colOptions)
 			.enter()
 			.append("option")
 			.attr ("value", function(d) { return d.value; })
@@ -266,23 +303,23 @@ var SpectrumSettingsView = Backbone.View.extend({
 		jscolor.installByClassName("jscolor");
 
 		var highlightingModeChkBx = appearanceTab.append("label").text("Hide not selected fragments: ")
-			.append("input").attr("type", "checkbox").attr("id", "peakHighlightMode")
+			.append("input").attr("type", "checkbox").attr("id", "xispec_peakHighlightMode")
 		;
 
 		var lossyChkBx = appearanceTab.append("label").text("Show neutral loss labels: ")
-			.append("input").attr("type", "checkbox").attr("id", "lossyChkBx")
+			.append("input").attr("type", "checkbox").attr("id", "xispec_lossyChkBx")
 		;
 
 		this.decimals = appearanceTab.append("label").text("Number of decimals to display: ")
-			.append("input").attr("type", "number").attr("id", "settingsDecimals").attr("min", "1").attr("max", "10").attr("autocomplete", "off")
+			.append("input").attr("type", "number").attr("id", "xispec_settingsDecimals").attr("min", "1").attr("max", "10").attr("autocomplete", "off")
 		;
 
 		this.absoluteError = appearanceTab.append("label").text("Absolute error values (QC): ")
-			.append("input").attr("type", "checkbox").attr("id", "absErrChkBx")
+			.append("input").attr("type", "checkbox").attr("id", "xispec_absErrChkBx")
 		;
 
 		this.accentuateCrossLinkContaining = appearanceTab.append("label").text("accentuate cross-link containing fragments: ")
-			.append("input").attr("type", "checkbox").attr("id", "accentuateCLcontainingChkBx")
+			.append("input").attr("type", "checkbox").attr("id", "xispec_accentuateCLcontainingChkBx")
 		;
 
 		// var butterfly = appearanceTab.append("label").text("Butterfly plot with original Spectrum: ")
@@ -291,7 +328,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 		//custom config
 		var customConfigTab = mainDiv.append("div").attr("class", "xispec_settings-tab xispec_flex-column").attr("id", "settings_custom_config").style("display", "none");
-		customConfigTab.append('div')
+		var customConfigHelpToggle = customConfigTab.append('div')
 			.attr('id', 'xispec_toggleCustomCfgHelp')
 			.attr('class', 'pointer')
 			.text('Help ')
@@ -316,9 +353,9 @@ var SpectrumSettingsView = Backbone.View.extend({
 		var customConfigSubmit = customConfigBottom.append("input").attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control").attr("value", "Apply").attr("id", "xispec_settingsCustomCfgApply").attr("type", "submit");
 
 		var customConfigCancel = customConfigBottom.append("input")
-			.attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control settingsCancel")
+			.attr("class", "xispec_btn xispec_btn-1 xispec_btn-1a network-control xispec_settingsCancel")
 			.attr("value", "Cancel")
-			.attr("id", "settingsCancel")
+			.attr("id", "xispec_settingsCancel")
 			.attr("type", "button")
 		;
 
@@ -399,7 +436,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 				var json = JSON.parse(response);
 // 				json['annotation']['custom'] = self.displayModel.customConfig;
 				json['annotation']['custom'] = self.displayModel.get("JSONdata").annotation.custom;
-				json['annotation']['precursorMZ'] = self.displayModel.precursor.matchMz;
+				json['annotation']['precursorMZ'] = self.displayModel.precursor.expMz;
 				json['annotation']['requestID'] = xiSPEC.lastRequestedID + Date.now();
 				xiSPEC.request_annotation(json);
 				self.displayModel.set('changedAnnotation', true);
@@ -503,7 +540,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 	initializeModTable: function(){
 		var self = this;
-		var modTableVars = {
+		var tableVars = {
 			"scrollCollapse": true,
 			"paging":   false,
 			"ordering": false,
@@ -577,7 +614,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 			]
 		};
 
-	    this.modTable = $('#xispec_modificationTable').DataTable( modTableVars );
+	    this.modTable = $('#xispec_modificationTable').DataTable( tableVars );
 
 	    //ToDo: change to BB event handling
 		$('#xispec_modificationTable').on('input', 'input', function() {
@@ -606,6 +643,115 @@ var SpectrumSettingsView = Backbone.View.extend({
 			self.renderModTable();
 		});
 
+	},
+
+	initializeLossTable: function(){
+		var self = this;
+		var tableVars = {
+			"scrollCollapse": true,
+			"paging":   false,
+			"ordering": false,
+			"info":     false,
+			"searching":false,
+			"data": this.model.losses,
+			"columns": [
+				{},
+				{
+					"title": 'Neutral Loss <i id="xispec_addNewLoss" class="fa fa-plus-circle" aria-hidden="true" title="add new neutral loss"></i>' ,
+					"className": "dt-center"
+				},
+				{ "title": "Mass", "className": "dt-center" },
+				{ "title": "Specificity", "className": "dt-center" },
+			],
+			"columnDefs": [
+				{
+					"render": function ( data, type, row, meta ) {
+						return '<i class="fa fa-trash xispec_deleteLoss" title="delete neutral loss" aria-hidden="true">';
+					},
+					"targets": 0,
+				},
+				{
+					"render": function ( data, type, row, meta ) {
+						return '<input class="xispec_form-control" style="width:100px" id="lossName_'+meta.row+'" title="neutral loss name" name="losses[]" type="text" value='+data+'>';
+					},
+					"targets": 1,
+				},
+				// {
+				// 	"render": function ( data, type, row, meta ) {
+				// 		return row[0]+'<i class="fa fa-undo xispec_resetMod" title="reset modification to default" aria-hidden="true"></i></span>';
+				// 	},
+				// 	"targets": 1,
+				// },
+				{
+					"render": function ( data, type, row, meta ) {
+						// data = 0;
+						//
+						// var rowNode = self.lossTable.rows( meta.row ).nodes().to$();
+						//
+						// for (var i = 0; i < self.model.losses.length; i++) {
+						// 	if(self.model.losses[i].id == row[1]){
+						// 		data = self.model.losses[i].mass;
+						// 		if (self.model.losses[i].changed){
+						// 			displayModified(rowNode);
+						// 		}
+						// 	}
+						// }
+						// data = parseFloat(parseFloat(data).toFixed(10).toString()); // limit to 10 decimal places and get rid of tailing zeroes
+						// if(data.toString().indexOf('.') !== -1)
+						// 	var stepSize = '0.'+'0'.repeat(data.toString().split('.')[1].length - 1) + 1;
+						// else
+						// 	var stepSize = 1;
+						return '<input class="xispec_form-control stepInput" style="width:120px" id="lossMass_'+meta.row+'" row="'+meta.row+'" title="neutral loss mass" name="lossMasses[]" type="text" required value='+data+' autocomplete=off>';
+					},
+					"targets": 2,
+				},
+				{
+					"render": function ( data, type, row, meta ) {
+						data = data.join(", ");
+						return '<input class="xispec_form-control" id="lossSpec_'+meta.row+'" row="'+meta.row+'" title="neutral loss specificity" name="lossSpecificities[]" type="text" required value="'+data+'" autocomplete=off>'
+					},
+					"targets": 3,
+				}
+			]
+		};
+
+	    this.lossTable = $('#xispec_lossTable').DataTable( tableVars );
+
+	    //ToDo: change to BB event handling
+		// $('#xispec_lossTable').on('input', 'input', function() {
+		//
+		// 	var row = this.getAttribute("row");
+		// 	var modName = $('#modName_'+row).val();
+		// 	var modMass = parseFloat($('#modMass_'+row).val());
+		// 	var modSpec = $('#modSpec_'+row).val();
+		//
+		// 	var mod = {'id': modName, 'mass': modMass, 'aminoAcids': modSpec.split('')};
+		//
+		// 	var updatedMod = self.model.updateModification(mod);
+		// 	if (!updatedMod.userMod)
+		// 		displayModified($(this).closest("tr"));
+		//
+		//  });
+		//
+		// var displayModified = function (row){
+		// 	row.addClass('userModified');
+		// 	row.find(".xispec_resetMod").css("visibility", "visible");
+		// }
+
+		$('#xispec_lossTable ').on('click', '.xispec_deleteLoss', function() {
+			// console.log(this);
+			self.lossTable
+				.row( $(this).parents('tr') )
+		        .remove()
+		        .draw();
+		});
+
+		// ToDO:
+		// $('#xispec_lossTable').on('click', '.xispec_resetLoss', function() {
+		// 	var id = $(this).parent()[0].innerText;
+		// 	self.model.resetLoss(id);
+		// 	self.renderLossTable();
+		// });
 
 	},
 
@@ -622,14 +768,15 @@ var SpectrumSettingsView = Backbone.View.extend({
 		// $('#xispec_keepCustomCfg').prop("checked", cc_checked);
 
 		this.renderModTable();
+		this.renderLossTable();
 
 		//ions
-		$('.ionSelectChkbox:checkbox').prop('checked', false);
+		$('.xispec_ionSelectChkbox:checkbox').prop('checked', false);
 		this.model.fragmentIons.forEach(function(ion){
 			$('#'+ion.type).prop('checked', true);
 		});
 		var ionSelectionArr = new Array();
-		$('.ionSelectChkbox:checkbox:checked').each(function(){
+		$('.xispec_ionSelectChkbox:checkbox:checked').each(function(){
 		    ionSelectionArr.push($(this).val());
 		});
 		$('#xispec_ionSelection').val(ionSelectionArr.join(", "));
@@ -689,14 +836,76 @@ var SpectrumSettingsView = Backbone.View.extend({
 
 		if(modifications.length == 0) {
 			this.modTable.draw( false );
+			this.hideModTable();
 		}
 		else{
+			this.showModTable();
 			modifications.forEach(function(mod){
 				self.modTable.row.add( [
 					mod.id,
 					mod.id,
 					0,
 					mod.aminoAcids,
+				] ).draw( false );
+			});
+		}
+	},
+
+	hideModTable: function(){
+		$('#xispec_toggleModifications').find(".fa-minus-square").removeClass("fa-minus-square").addClass("fa-plus-square");
+		$(this.modTableWrapper.node()).hide();
+	},
+
+	showModTable: function(){
+		$('#xispec_toggleModifications').find(".fa-plus-square").removeClass("fa-plus-square").addClass("fa-minus-square");
+		$(this.modTableWrapper.node()).show();
+	},
+
+	toggleModTable: function(){
+		if($(this.modTableWrapper.node()).is(":visible")){
+			$('#xispec_toggleModifications').find(".fa-minus-square").removeClass("fa-minus-square").addClass("fa-plus-square");
+		}
+		else{
+			$('#xispec_toggleModifications').find(".fa-plus-square").removeClass("fa-plus-square").addClass("fa-minus-square");
+		}
+		$(this.modTableWrapper.node()).toggle();
+	},
+
+	addNewLoss: function(){
+		console.log('new loss');
+		this.lossTable.row.add( [
+			'',
+			'',
+			0,
+			[],
+		] ).draw( false );
+	},
+
+	toggleLossTable: function(){
+		if($(this.lossTableWrapper.node()).is(":visible")){
+			$('#xispec_toggleLosses').find(".fa-minus-square").removeClass("fa-minus-square").addClass("fa-plus-square");
+		}
+		else{
+			$('#xispec_toggleLosses').find(".fa-plus-square").removeClass("fa-plus-square").addClass("fa-minus-square");
+		}
+		$(this.lossTableWrapper.node()).toggle();
+	},
+
+	renderLossTable: function(){
+		var self = this;
+		var losses = this.model.losses;
+		this.lossTable.clear();
+
+		if(losses.length == 0) {
+			this.lossTable.draw( false );
+		}
+		else{
+			losses.forEach(function(loss){
+				self.lossTable.row.add( [
+					'',
+					loss.id,
+					loss.mass,
+					loss.specificity,
 				] ).draw( false );
 			});
 		}
@@ -765,7 +974,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 	updateIons: function(event){
 
 		var ionSelectionArr = new Array();
-		$('.ionSelectChkbox:checkbox:checked').each(function(){
+		$('.xispec_ionSelectChkbox:checkbox:checked').each(function(){
 			ionSelectionArr.push($(this).val());
 		});
 

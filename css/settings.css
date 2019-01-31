@@ -4,9 +4,9 @@
     right: 5%;
     top: 10%;
     width: 550px;
-    height: 500px;
-    min-width: 500px;
-    min-height: 490px;
+    height: 520px;
+    min-width: 550px;
+    min-height: 400px;
     font-size: 10pt;
     border: 1px solid #333;
 }
@@ -56,7 +56,11 @@
     width: 100%;
 }
 
-#xispec_settings_main .xispec_midDataDiv{
+#xispec_topDataDiv{
+  min-height: 210px;
+}
+
+#xispec_settings_main .xispec_splitDataDiv{
   flex-grow: 1;
 }
 
@@ -139,11 +143,12 @@
     display: inline;
     margin-right: 2%;
     flex-grow: 5;
-    flex-basis: 340px;
+    flex-basis: 250px;
 }
 
 .xispec_settingsDataRight{
     flex-grow: 1;
+    flex-basis: 300px;
 }
 
 #xispec_modificationTable .xispec_form-control{
@@ -151,15 +156,11 @@
     font-size: 1em;
 }
 
-#xispec_modificationTable_wrapper{
+.xispec_settingsTable_wrapper{
   width: 100%;
   height: auto;
-}
-
-#xispec_modificationTable_wrapperOuter{
-  width: 100%;
-  height: auto;
-  margin-top: 15px;
+  margin: 5px 0px;
+  min-height: 85px;
 }
 
 #xispec_settingsCustomCfg-input{
@@ -216,7 +217,7 @@
 
 
 /*tables*/
-#xispec_modificationTable {
+.xispec_settingsTable {
     width:100%;
     font-size: 0.9em;
     left: auto;
@@ -228,41 +229,33 @@
     text-align: left;
     border-collapse: separate;
 }
-#xispec_modificationTable thead{
+
+#xispec_modificationTable thead, #xispec_lossTable thead{
     margin-top:10px;
     margin-bottom:10px;
 }
-#xispec_modificationTable th{
+#xispec_modificationTable th, #xispec_lossTable th{
     padding-left:5px;
     padding-right:5px;
     vertical-align: middle;
     height: 30px;
 }
-#xispec_modificationTable td{
+#xispec_modificationTable td, #xispec_lossTable td{
     padding-left:5px;
     padding-right:5px;
     vertical-align: middle;
 }
-#xispec_modificationTable th:first-child{
+#xispec_modificationTable th:first-child, #xispec_lossTable th:first-child{
     padding-left:10px;
 }
-#xispec_modificationTable th:last-child{
+#xispec_modificationTable th:last-child, #xispec_lossTable th:last-child{
     padding-right:10px;
 }
-#xispec_modificationTable td:first-child{
+#xispec_modificationTable td:first-child, #xispec_lossTable td:first-child{
     padding-left:10px;
 }
-#xispec_modificationTable td:last-child{
+#xispec_modificationTable td:last-child, #xispec_lossTable td:last-child{
     padding-right:10px;
-}
-#xispec_modificationTable tbody tr:hover td, tbody tr:hover td a, .spectrumShown{
-    color: #fff;
-    background-color: #091D42;
-    -webkit-transition: all 200ms ease;
-    -moz-transition: all 200ms ease;
-    -ms-transition: all 200ms ease;
-    -o-transition: all 200ms ease;
-    transition: all 200ms ease;
 }
 #settingsDataApply{
     display: inline;

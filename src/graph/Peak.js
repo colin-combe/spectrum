@@ -249,7 +249,7 @@ function Peak (id, graph){
 					var deltaY = (mouseY - startY > 0 ? -8 : 2);
 					var deltaX = 0;
 					if(Math.abs(mouseX) > 20){
-						deltaX = (mouseX > 0 ? -8 : 8)	
+						deltaX = (mouseX > 0 ? -8 : 8)
 					}
 					console.log(mouseX);
 					filteredLabelLines
@@ -365,7 +365,7 @@ function Peak (id, graph){
 					.attr("text-anchor", "middle")
 					.style("font-size", "0.8em")
 					.attr("font-weight", function(d){
-						if (self.graph.options.accentuateCLcontainingFragments && d.type.includes('CrossLink'))
+						if (self.graph.options.accentuateCLcontainingFragments && d.crossLinkContaining)
 							return '900';
 						return 'normal';
 					})
@@ -394,7 +394,7 @@ function Peak (id, graph){
 	}
 
 	var peakStrokeWidth = 1;
-	if (this.graph.options.accentuateCLcontainingFragments && this.fragments.filter(function(f){return f.type.includes('CrossLink')}).length > 0){
+	if (this.graph.options.accentuateCLcontainingFragments && this.fragments.filter(function(f){return f.crossLinkContaining}).length > 0){
 		peakStrokeWidth = 2;
 	}
 

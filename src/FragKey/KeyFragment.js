@@ -115,9 +115,9 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 	if (fragments.b.length != 0){ // really a, b, or c , see get_fragment_annotation()
 
 		// check for Cross-link containing fragment - checking first is sufficient
-		// fragments.b.filter(function(b){return b.type.includes('CrossLink')})
+		// fragments.b.filter(function(b){return b.type.crossLinkContaining})
 		var fragLineClass = 'xispec_fragBar';
-		if (this.FragKey.options.accentuateCLcontainingFragments && fragments.b[0].type.includes('CrossLink')){
+		if (this.FragKey.options.accentuateCLcontainingFragments && fragments.b[0].crossLinkContaining){
 			fragLineClass = 'xispec_fragBarThick';
 		}
 
@@ -243,7 +243,7 @@ function KeyFragment (fragments, index, offset, peptideId, FragKey) {
 	if (fragments.y.length != 0){
 
 		var fragLineClass = 'xispec_fragBar';
-		if (this.FragKey.options.accentuateCLcontainingFragments && fragments.y[0].type.includes('CrossLink')){
+		if (this.FragKey.options.accentuateCLcontainingFragments && fragments.y[0].crossLinkContaining){
 			fragLineClass = 'xispec_fragBarThick';
 		}
 

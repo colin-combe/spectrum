@@ -1,6 +1,6 @@
 //		a spectrum viewer
 //
-//      Copyright  2015 Rappsilber Laboratory, Edinburgh University
+//	  Copyright  2015 Rappsilber Laboratory, Edinburgh University
 //
 // 		Licensed under the Apache License, Version 2.0 (the "License");
 // 		you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ var FragmentationKeyView = Backbone.View.extend({
 		this.options = _.extend(defaultOptions, viewOptions);
 
 		this.margin = {
-			"top":    25,
+			"top":	25,
 			"right":  25,
 			// "bottom": 40,
 			"left":   25
@@ -62,6 +62,7 @@ var FragmentationKeyView = Backbone.View.extend({
 		this.listenTo(window, 'resize', _.debounce(this.resize));
 		this.listenTo(xiSPEC.vent, 'resize:spectrum', this.resize);
 		this.listenTo(xiSPEC.vent, 'butterflyToggle', this.butterflyToggle);
+		this.listenTo(xiSPEC.vent, 'butterflySwap', this.butterflySwap);
 		this.listenTo(xiSPEC.vent, 'AccentuateCrossLinkContainingFragments', this.accentuateCLcontainingToggle);
 
 		this.tooltip = d3.select("body").append("span")
@@ -98,7 +99,7 @@ var FragmentationKeyView = Backbone.View.extend({
 		this.changeMod = false;
 		this.pepModsArray = [];
 		this.peptideStrs = self.model.pepStrs;	//contains the aa sequences of the peptides in string form without modifications
-		var fragments = self.model.get("JSONdata").fragments;
+		var fragments = self.model.fragments;
 		this.annotations = [];
 		this.peptides = [];
 		for (var i = 0; i < this.peptideStrs.length; i++) {
@@ -133,11 +134,10 @@ var FragmentationKeyView = Backbone.View.extend({
 
 		this.align_peptides_to_CL();
 
-
 		/*
-			#==========================================================================
-			#  FRAGMENTATION KEY STARTS HERE
-			#==========================================================================
+		#==========================================================================
+		#  FRAGMENTATION KEY STARTS HERE
+		#==========================================================================
 		*/
 		this.fraglines = new Array();
 		var self = this;
@@ -152,7 +152,6 @@ var FragmentationKeyView = Backbone.View.extend({
 						this.annotations[pepId][fragments[i].range[r].to].b.push(fragments[i]);
 				}
 			};
-// 			console.log(this.annotations);
 
 			this.drawFragmentationEvents(0);
 			if(this.peptides[1])
@@ -161,10 +160,6 @@ var FragmentationKeyView = Backbone.View.extend({
 
 		// the letters
 		this.drawPeptides();
-		// this.drawPeptide( 0, 20, 5);
-		// if(this.peptides[1])
-		//this.drawPeptide( 1, 71, 83);
-
 
 		//CL line svg elements
 		if(this.linkPos.length > 0){
@@ -172,8 +167,8 @@ var FragmentationKeyView = Backbone.View.extend({
 			if (this.linkPos[1].linkSite > this.linkPos[0].linkSite)
 				CLpos = this.linkPos[1].linkSite+1;
 
-			// this.CL = this.scaleSvgGroup.append("g");
 			this.CL = this.scaleSvgGroup.append("g");
+
 			//highlight
 			this.CLlineHighlight = this.CL.append("line")
 				.attr("x1", this.xStep * (CLpos - 1))
@@ -184,6 +179,7 @@ var FragmentationKeyView = Backbone.View.extend({
 				.attr("stroke-width", 10)
 				.attr("opacity", 0)
 				.style("cursor", this.cursor);
+
 			// the the link line
 			this.CLline = this.CL.append("line")
 				.attr("x1", this.xStep * (CLpos - 1))
@@ -231,10 +227,10 @@ var FragmentationKeyView = Backbone.View.extend({
 					return;
 				self.tooltip.text("Now click on an amino acid to complete");
 				self.tooltip.transition()
-						.duration(200)
-						.style("opacity", .9);
+					.duration(200)
+					.style("opacity", .9);
 				self.tooltip.style("left", (d3.event.pageX + 15) + "px")
-						.style("top", (d3.event.pageY) + "px");
+					.style("top", (d3.event.pageY) + "px");
 				if (!self.changeMod){
 					self.tooltip.style("opacity", 0);
 					self.CLlineHighlight.attr("opacity", 1);
@@ -267,33 +263,35 @@ var FragmentationKeyView = Backbone.View.extend({
 
 	align_peptides_to_CL: function(){
 		if (this.linkPos.length > 0){
+
 			function arrayOfHashes(n){
 				var arr = [];
 				for (var a = 0; a < n; a++) {arr.push("#")}
 				return arr;
 			}
-				// #==========================================================================
-				// #    account for crosslink shift
-				// #    this alings the peptide sequences at the cross-link site
-				// #==========================================================================
-				var shift = this.linkPos[0].linkSite - this.linkPos[1].linkSite;
-				var spaceArray = arrayOfHashes(Math.abs(shift));
-				if  (shift <= 0) {
-						this.peptides[0] = Array(Math.abs(shift) + 1).join("#") + this.peptideStrs[0];
-						this.pepoffset[0] = Math.abs(shift) - 0;
-				}
-				else {
-						this.peptides[1] = Array(shift + 1).join("#") + this.peptideStrs[1];
-						this.pepoffset[1] = shift - 0;
+
+			// #==========================================================================
+			// #	account for crosslink shift
+			// #	this alings the peptide sequences at the cross-link site
+			// #==========================================================================
+			var shift = this.linkPos[0].linkSite - this.linkPos[1].linkSite;
+			var spaceArray = arrayOfHashes(Math.abs(shift));
+			if  (shift <= 0) {
+				this.peptides[0] = Array(Math.abs(shift) + 1).join("#") + this.peptideStrs[0];
+				this.pepoffset[0] = Math.abs(shift) - 0;
+			}
+			else {
+				this.peptides[1] = Array(shift + 1).join("#") + this.peptideStrs[1];
+				this.pepoffset[1] = shift - 0;
 			}
 
-				var diff = this.peptideStrs[0].length - this.peptideStrs[1].length;
-				spaceArray = arrayOfHashes(Math.abs(diff));
-				if (diff <= 0) {
-						this.peptides[0] = this.peptides[0] + Array(Math.abs(diff) + 1).join("#");
+			var diff = this.peptideStrs[0].length - this.peptideStrs[1].length;
+			spaceArray = arrayOfHashes(Math.abs(diff));
+			if (diff <= 0) {
+				this.peptides[0] = this.peptides[0] + Array(Math.abs(diff) + 1).join("#");
 			}
-				else {
-						this.peptides[1] = this.peptides[1] + Array(diff + 1).join("#");
+			else {
+				this.peptides[1] = this.peptides[1] + Array(diff + 1).join("#");
 			}
 		}
 	},
@@ -302,7 +300,6 @@ var FragmentationKeyView = Backbone.View.extend({
 		for (var i = 0; i < this.annotations[pepIndex].length; i++){
 			var frags = this.annotations[pepIndex][i];
 			if (frags.b.length != 0 || frags.y.length != 0) {
-				//var x = (this.xStep * i) + (this.xStep / 2);
 				this.fraglines.push(new KeyFragment(frags, i, this.pepoffset[pepIndex], pepIndex, this));
 			}
 		}
@@ -316,7 +313,6 @@ var FragmentationKeyView = Backbone.View.extend({
 		var pep1SvgGroup = self.scaleSvgGroup
 			.append('g')
 			.attr('class', 'peptide')
-			// .attr('id', 'xispec_fragKeyPep1')
 		;
 
 		var peptides = [{
@@ -330,18 +326,18 @@ var FragmentationKeyView = Backbone.View.extend({
 			var pep2SvgGroup = self.scaleSvgGroup
 				.append('g')
 				.attr('class', 'peptide')
-				// .attr('id', 'xispec_fragKeyPep2')
 			;
+
 			peptides.push({
 				sequence: this.peptides[1],
 				color: this.model.p2color,
 				y: [71, 83],
 				group: pep2SvgGroup
-			})
+			});
 		}
+
 		var pepIndex = 0;
 		peptides.forEach(function(pep){
-
 			var pep_data = []
 			var pos = 0;
 			for (var i = 0; i < pep.sequence.length; i++) {
@@ -360,7 +356,6 @@ var FragmentationKeyView = Backbone.View.extend({
 						self.tooltip.transition()
 							.duration(500)
 							.style("opacity", 0);
-// 						changeCrossLink(d);
 						self.model.changeLinkPos(self.changeCL);
 					}
 					//change the mod if changeMod is active and it's a valid modification for this aa
@@ -423,11 +418,6 @@ var FragmentationKeyView = Backbone.View.extend({
 						return d.aminoAcid;
 				})
 			;
-
-// 			function changeCrossLink(d){
-// 				var newlinkpos = new Array(self.linkPos[0].linkSite+1, self.linkPos[1].linkSite+1);
-// 				self.model.changeLinkPos(newlinkpos);
-// 			};
 
 			function changeMod(d){
 				var offset = self.pepoffset[self.changeMod.pepIndex];
@@ -857,6 +847,11 @@ var FragmentationKeyView = Backbone.View.extend({
 			this.render();
 		}
 		this.resize();
+	},
+
+	butterflySwap: function(){
+		this.options.invert = !this.options.invert;
+		this.render();
 	},
 
 	accentuateCLcontainingToggle: function(toggle){

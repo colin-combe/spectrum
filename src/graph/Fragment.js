@@ -1,11 +1,11 @@
 //		a spectrum viewer
 //
 //      Copyright  2015 Rappsilber Laboratory, Edinburgh University
-// 
+//
 // 		Licensed under the Apache License, Version 2.0 (the "License");
 // 		you may not use this file except in compliance with the License.
 // 		You may obtain a copy of the License at
-// 
+//
 // 		http://www.apache.org/licenses/LICENSE-2.0
 //
 //   	Unless required by applicable law or agreed to in writing, software
@@ -14,30 +14,46 @@
 //   	See the License for the specific language governing permissions and
 //   	limitations under the License.
 //
-//		author: Colin Combe
-//		
+//		author: Colin Combe, Lars Kolbowski
+//
 //		graph/Fragment.js
 
 function Fragment (fragment){
+	this.class = fragment.class;
+	this.clusterIds = fragment.clusterIds;
+	this.clusterInfo = fragment.clusterInfo;
+	this.id = fragment.id;
+	this.isMonoisotopic = fragment.isMonoisotopic;
+	this.mass = fragment.mass;
 	this.name = fragment.name.trim();
 	this.peptideId = fragment.peptideId;
-	this.sequence = fragment.sequence;
 	this.range = fragment.range;
-	this.class = fragment.class;
-	
+	this.sequence = fragment.sequence;
+	this.type = fragment.type;
+
 	var ion = this.name.split('')[0];
 	if (ion == 'a' || ion == 'b' || ion == 'c') {
-		this.ionType = 'b';
+		this.byType = 'bLike';
 	} else {
-		this.ionType = 'y';
+		this.byType = 'yLike';
 	}
-	
-	var fragRegex = /(.(\d*))/g;
+
+	var fragRegex = /[abcxyz]([0-9]+)/g;
 	var regexMatch = fragRegex.exec(this.name);
-	this.ionNumber = regexMatch[2] - 0;
-    
+	if(regexMatch)
+		this.ionNumber = regexMatch[2] - 0;
+	else
+		this.ionNumber = null;
+
     this.lossy = false;
-    if (this.name.indexOf("_") != -1){
-		this.lossy =true;
+    if (this.class == "lossy"){
+		this.lossy = true;
 	}
+
+	var crossLinkContainingRegex = /CrossLink\(.*n\|PeptideIon\)/g;
+
+	this.crossLinkContaining = false;
+	if(crossLinkContainingRegex.test(this.type))
+		this.crossLinkContaining = true;
+
 }
