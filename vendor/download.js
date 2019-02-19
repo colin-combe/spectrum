@@ -15,7 +15,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with CLMS-UI.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 function downloadMatches(){
 	var csv = getMatchesCSV();
 	download(csv, 'text/csv', 'matches.csv');//+s.keys().toString());
@@ -36,10 +36,10 @@ function downloadSpectrumSVG(){
 	var svg = spectrumViewer.getSVG();
 	download(svg, 'application/svg', 'spectrum.svg');//+s.keys().toString());
 }
-					
+
 function download(content, contentType, fileName) {
-	
-	var b64svg = window.btoa(content);
+
+	var b64svg = window.btoa(unescape(encodeURIComponent(content)));
 	var path = "./php/download.php";
 	var method = method || "post"; // Set method to post by default if not specified.
 
@@ -79,8 +79,8 @@ function getMatchesCSV () {
 		var match = matches[i];
 		var result = filterModel.filter(match);
 		if (result === true){
-			csv += '"' + match.id + '","' + match.protein1 + '","' +match.pepPos1 + '","' 
-				+ match.pepSeq1 + '","' + match.linkPos1 + '","' 
+			csv += '"' + match.id + '","' + match.protein1 + '","' +match.pepPos1 + '","'
+				+ match.pepSeq1 + '","' + match.linkPos1 + '","'
 				+ match.protein2 + '","' + match.pepPos2 + '","'
 				+ match.pepSeq2 + '","' + match.linkPos2 + '","'
 				+ match.score + '","' + match.group + '"\r\n';
@@ -91,7 +91,7 @@ function getMatchesCSV () {
 
 function getLinksCSV(){
 	var csv = '"Protein1","LinkPos1","LinkedRes1","Protein2","LinkPos2","LinkedRes2","HighestScore"';
-	
+
 	var searchIds = [];
 	var i = 0;
 	for (var name in CLMSUI.searchesShown) {
@@ -99,21 +99,21 @@ function getLinksCSV(){
 		searchIds[i] = name;
 		i++;
 	}
-	
+
 	csv += '\r\n';
 
 	var crossLinks = CLMSUI.compositeModelInst.get("clmsModel").get("crossLinks").values();
 	for (residueLink of crossLinks){
 		var filteredMatches = residueLink.getFilteredMatches();
 		if (filteredMatches.length > 0){
-			csv += '"' + residueLink.fromProtein.readableId() + '","' 
+			csv += '"' + residueLink.fromProtein.readableId() + '","'
 				+ residueLink.fromResidue + '","' + residueLink.fromProtein.sequence[residueLink.fromResidue - 1] + '","'
 				+ residueLink.toProtein.readableId() + '","'
 				+ residueLink.toResidue + '","';
 			if (residueLink.toProtein && residueLink.toResidue) {
 				csv += residueLink.toProtein.sequence[residueLink.toResidue - 1];
 			}
-			
+
 			var highestScore = null;
 			var searchesFound = new Array (searchIds.length);
 			var filteredMatchCount = filteredMatches.length;
@@ -127,13 +127,13 @@ function getLinksCSV(){
 			}
 			csv += '","' + highestScore;
 			console.log(searchesFound);
-			for (var s = 0; s < searchIds.length; s++){					
+			for (var s = 0; s < searchIds.length; s++){
 				csv +=  '","';
-				if (searchesFound[s] === "X") csv += "X";				
+				if (searchesFound[s] === "X") csv += "X";
 			}
 			csv += '"\r\n';
 		}
-	}		  		
+	}
 	return csv;
 }
 
@@ -151,7 +151,7 @@ function getResidueCount() {
 		//~ var resLinkCount = resLinks.length;
 		//~ for (var rl =0; rl < resLinkCount; rl ++) {
 			//~ var residueLink = resLinks[rl];
-			
+
 	var crossLinks = CLMSUI.compositeModelInst.get("clmsModel").get("crossLinks").values();
 	for (residueLink of crossLinks){
 		var filteredMatches = residueLink.getFilteredMatches();

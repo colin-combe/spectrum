@@ -31,6 +31,7 @@ var SpectrumSettingsView = Backbone.View.extend({
 		'click #xispec_lossyChkBx': 'showLossy',
 		'click #xispec_absErrChkBx': 'absErrToggle',
 		'click #xispec_accentuateCLcontainingChkBx': 'accentuateCLcontainingToggle',
+		'click #xispec_labelFragmentCharge': 'chargeLabelToggle',
 		// 'click #butterflyChkBx': 'butterflyToggle',
 		'change #xispec_colorSelector': 'changeColorScheme',
 		'click .xispec_settingsTab' : 'changeTab',
@@ -321,6 +322,9 @@ var SpectrumSettingsView = Backbone.View.extend({
 		this.accentuateCrossLinkContaining = appearanceTab.append("label").text("accentuate cross-link containing fragments: ")
 			.append("input").attr("type", "checkbox").attr("id", "xispec_accentuateCLcontainingChkBx")
 		;
+
+		this.labelFragmentCharge = appearanceTab.append("label").text("label fragment charge: ")
+			.append("input").attr("type", "checkbox").attr("id", "xispec_labelFragmentCharge")
 
 		// var butterfly = appearanceTab.append("label").text("Butterfly plot with original Spectrum: ")
 		// 	.append("input").attr("type", "checkbox").attr("id", "butterflyChkBx")
@@ -1005,11 +1009,11 @@ var SpectrumSettingsView = Backbone.View.extend({
 		xiSPEC.vent.trigger('AccentuateCrossLinkContainingFragments', selected);
 	},
 
-	// butterflyToggle: function(e) {
-	// 	var $target = $(e.target);
-	// 	var selected = $target.is(':checked');
-	// 	xiSPEC.vent.trigger('butterflyToggle', selected);
-	// },
+	chargeLabelToggle: function(e) {
+		var $target = $(e.target);
+		var selected = $target.is(':checked');
+		xiSPEC.vent.trigger('labelFragmentCharge', selected);
+	},
 
 	changeColorScheme: function(e){
 		var model = this.displayModel; //apply changes directly for now

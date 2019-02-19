@@ -18,10 +18,14 @@
 //
 //		graph/Fragment.js
 
-function Fragment (fragment){
+function Fragment (fragment, all_clusters){
 	this.class = fragment.class;
 	this.clusterIds = fragment.clusterIds;
 	this.clusterInfo = fragment.clusterInfo;
+	this.clusters = [];
+	for (var i = 0; i < this.clusterIds.length; i++) {
+		this.clusters.push(all_clusters[this.clusterIds[i]]);
+	}
 	this.id = fragment.id;
 	this.isMonoisotopic = fragment.isMonoisotopic;
 	this.mass = fragment.mass;
@@ -38,7 +42,7 @@ function Fragment (fragment){
 		this.byType = 'yLike';
 	}
 
-	var fragRegex = /[abcxyz]([0-9]+)/g;
+	var fragRegex = /[abcxyz]([0-9]+)(?:_.*)?/g;
 	var regexMatch = fragRegex.exec(this.name);
 	if(regexMatch)
 		this.ionNumber = regexMatch[2] - 0;
@@ -56,4 +60,12 @@ function Fragment (fragment){
 	if(crossLinkContainingRegex.test(this.type))
 		this.crossLinkContaining = true;
 
+}
+
+Fragment.prototype.get_charge = function(peak_id){
+	// returns the charge state of this fragment for a given peak_id
+	var cluster = this.clusters.filter(
+		function(c){ if (c.firstPeakId == peak_id) return true;});
+
+	return cluster[0].charge;
 }

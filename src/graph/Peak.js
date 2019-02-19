@@ -63,7 +63,9 @@ function Peak (id, graph){
 			}
 		}
 	};
+}
 
+Peak.prototype.draw = function(){
 	//svg elements
 	this.lineLabelGroup = this.graph.peaksSVG.append('g');
 	this.lineGroup = this.lineLabelGroup.append('g');
@@ -130,20 +132,16 @@ function Peak (id, graph){
 			var fragCount = fragments.length;
 			for (var f = 0; f < fragCount; f++){
 					//get right cluster for peak
-// 					var index = 0;
 					for (var i = 0; i < self.clusterIds.length; i++) {
 						if(fragments[f].clusterIds.indexOf(self.clusterIds[i]) != -1){
-							var index = fragments[f].clusterIds.indexOf(self.clusterIds[i])
-							var cluster = graph.model.get("JSONdata").clusters[self.clusterIds[i]]
+							var index = fragments[f].clusterIds.indexOf(self.clusterIds[i]);
+							var cluster = self.graph.model.get("JSONdata").clusters[self.clusterIds[i]];
 						}
 					}
 					var matchedMissingMonoIsotopic = fragments[f].clusterInfo[index].matchedMissingMonoIsotopic;
 					var charge = cluster.charge;
 					var error = fragments[f].clusterInfo[index].error.toFixed(self.graph.model.showDecimals)+" "+fragments[f].clusterInfo[index].errorUnit;
-					var chargeStr = "";
-					for (var i = 0; i < charge; i++){
-						chargeStr += "+";
-					}
+					var chargeStr = "+".repeat(charge);
 					header.push(fragments[f].name + chargeStr);
 
 					var fragName = fragments[f].name + " (" + fragments[f].sequence + ")";
@@ -154,36 +152,33 @@ function Peak (id, graph){
 					contents.push(fragmentBodyText);
 			};
 
-
-		//Tooltip
-		if (CLMSUI.compositeModelInst !== undefined){
-			self.graph.tooltip.set("contents", contents )
-				.set("header", header.join(" "))
-				.set("location", {pageX: x, pageY: y});
-				//.set("location", {pageX: d3.event.pageX, pageY: d3.event.pageY})
-		}
-		else{
-			var html = header.join("; ");
-			for (var i = contents.length - 1; i >= 0; i--) {
-				html += "</br>";
-				html += contents[i].join(": ");
+			//Tooltip
+			if (CLMSUI.compositeModelInst !== undefined){
+				self.graph.tooltip.set("contents", contents )
+					.set("header", header.join(" "))
+					.set("location", {pageX: x, pageY: y});
+					//.set("location", {pageX: d3.event.pageX, pageY: d3.event.pageY})
 			}
-			self.graph.tooltip.html(html);
-			self.graph.tooltip.transition()
-				.duration(200)
-				.style("opacity", .9);
+			else{
+				var html = header.join("; ");
+				for (var i = contents.length - 1; i >= 0; i--) {
+					html += "</br>";
+					html += contents[i].join(": ");
+				}
+				self.graph.tooltip.html(html);
+				self.graph.tooltip.transition()
+					.duration(200)
+					.style("opacity", .9);
 
-			//if cursor is too close to left window edge change tooltip to other side
-			if (window.innerWidth - x < 250){
-				var x = x - 250;
-				var y = y + 20;
+				//if cursor is too close to left window edge change tooltip to other side
+				if (window.innerWidth - x < 250){
+					var x = x - 250;
+					var y = y + 20;
+				}
+
+				self.graph.tooltip.style("left", (x + 15) + "px")
+					.style("top", y + "px");
 			}
-
-			self.graph.tooltip.style("left", (x + 15) + "px")
-				.style("top", y + "px");
-		}
-
-
 		};
 
 		function hideTooltip(){
@@ -251,7 +246,7 @@ function Peak (id, graph){
 					if(Math.abs(mouseX) > 20){
 						deltaX = (mouseX > 0 ? -8 : 8)
 					}
-					console.log(mouseX);
+// 					console.log(mouseX);
 					filteredLabelLines
 						.attr("opacity", 1)
 						.attr("x1", 0)
@@ -348,10 +343,14 @@ function Peak (id, graph){
 							var evt = d3.event;
 							stickyHighlight(evt.ctrlKey, d.id);
 						})
-			   		;
+					;
 
-			   	label.append("text")
-					.text(function(d) {return d.name;})
+				label.append("text")
+					.text(function(d) {
+						if (self.graph.options.labelFragmentCharge)
+							return d.name + '+'.repeat(d.get_charge(self.id));
+						return d.name;
+					})
 					.attr("x", 0)
 					.attr("text-anchor", "middle")
 					.style("stroke-width", "6px")
@@ -360,7 +359,11 @@ function Peak (id, graph){
 					.attr("stroke", this.graph.model.get('highlightColor'));
 
 				label.append("text")
-					.text(function(d) {return d.name;})
+					.text(function(d) {
+						if (self.graph.options.labelFragmentCharge)
+							return d.name + '+'.repeat(d.get_charge(self.id));
+						return d.name;
+					})
 					.attr("x", 0)
 					.attr("text-anchor", "middle")
 					.style("font-size", "0.8em")
